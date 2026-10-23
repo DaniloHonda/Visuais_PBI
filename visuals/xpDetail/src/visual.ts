@@ -134,6 +134,8 @@ export class Visual implements IVisual {
             this.present[r] = idx[r] >= 0;
         }
         const extraIdx = table.columns.map((c, i) => (c.roles && c.roles["extras"] ? i : -1)).filter(i => i >= 0);
+        // Candidato aceita 1 ou 2 colunas (ex.: first_name + last_name), juntadas com espaço na ordem do poço.
+        const nameIdx = table.columns.map((c, i) => (c.roles && c.roles["candidato"] ? i : -1)).filter(i => i >= 0);
         this.extraNames = extraIdx.map(i => clean(table.columns[i].displayName));
 
         // Contexto: igual em todas as linhas ("aba=…||modo=…||Etapa: …||…"). Pega o primeiro preenchido.
@@ -151,7 +153,7 @@ export class Visual implements IVisual {
             const res = (p[0] || "").trim();
             const dias = num(p[4]);
             const v: Partial<Record<Key, string | number | null>> = {
-                candidato: asText(r[idx.candidato]), vaga: asText(r[idx.vaga]), recrutador: asText(r[idx.recrutador]),
+                candidato: nameIdx.map(j => asText(r[j])).filter(Boolean).join(" "), vaga: asText(r[idx.vaga]), recrutador: asText(r[idx.recrutador]),
                 resultado: res, etapa: (p[1] || "").trim(), entrada: (p[2] || "").trim(), saida: (p[3] || "").trim(),
                 dias, candidatura: (p[5] || "").trim(), motivo: p.slice(6).join("|").trim()
             };

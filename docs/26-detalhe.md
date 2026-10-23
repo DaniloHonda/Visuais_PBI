@@ -2,7 +2,7 @@
 
 Página **Detalhe**: clique direito em um ponto de um gráfico → **Detalhar → Detalhe** abre a lista das aplicações por trás daquele número, com link do Greenhouse, busca, exportar CSV, "Mostrar mais" e linha do tempo.
 
-Prévia: `docs/26-detalhe-preview.png` (dados fictícios). Pacote: `dist/XP - Detalhe nominal 1.0.0.pbiviz`.
+Prévia: `docs/26-detalhe-preview.png` (dados fictícios). Pacote: `dist/XP - Detalhe nominal 1.0.1.pbiviz`.
 
 ## 1. Medidas (4 novas)
 Arquivo `docs/26-detalhe.dax`: colar na **Exibição de consulta DAX** → **Executar** → conferir a tabela do fim → **Atualizar modelo com alterações**.
@@ -31,14 +31,14 @@ Arquivo `docs/26-detalhe.dax`: colar na **Exibição de consulta DAX** → **Exe
    - **Manter todos os filtros: Ativado** (leva período, barra de filtros e o botão de indicação).
    - Entre relatórios: Desativado.
    - O Power BI cria sozinho o botão **← Voltar** no canto superior esquerdo (pode mover para X 40 · Y 40).
-3. **Importar o visual**: Visualizações → ⋯ → Importar um visual de um arquivo → `XP - Detalhe nominal 1.0.0.pbiviz`.
+3. **Importar o visual**: Visualizações → ⋯ → Importar um visual de um arquivo → `XP - Detalhe nominal 1.0.1.pbiviz`.
 4. **Inserir o visual** → posição **X 40 · Y 110 · L 1820 · A 900** (ajustar a altura à página). Formatar → Geral: desligar Título e Plano de fundo (o fundo branco vem do SVG).
 5. **Campos do visual** (os mesmos da Base nominal nos 4 primeiros):
 
 | Campo | O que colocar |
 |---|---|
 | Link (1ª coluna) | a mesma coluna de link da Base nominal (`link_application`) |
-| Candidato | a mesma coluna de nome da Base nominal |
+| Candidato | 1 ou 2 colunas: `first_name` e `last_name` (juntadas com espaço) |
 | Vaga | `job_name` (ou a mesma da Base nominal) |
 | Recrutador | `recruiter_name` |
 | Colunas extras | opcional, até 4 (praça, sourcer…) |
