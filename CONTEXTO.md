@@ -312,16 +312,35 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 ---
 
 ## 11. Pendências (ordem sugerida)
-1. **Esteira para pools e vagas sem esteira:** descobrir a fonte do de-para persona → esteira (Services é a fonte da verdade); criar `esteira_dash` (esteira da vaga, ou o de-para); definir a esteira da persona "Geral"; decidir sobre vagas de teste.
-2. **Pool:** obter a tabela `job_stages` (`job_stage_id` → `job_id`) para separar **tempo no pool** de **tempo na vaga**, criar a origem "Direto / Via pool" e o funil do pool por esteira. Mostrar imagens antes.
-3. Aplicar a correção das **etapas duplicadas** e da **linha do tempo** da Nominal.
-4. Conferir se `data_contratacao` usa `closed_at_opening` e reavaliar o **SLA mediano baixo**.
-5. **Nominal 1.2.0:** bases "Marcadas no período" e "Na agenda" contando entrevistas, com Organizer Name e Interviewers (imagem antes).
-6. Visual "Entrevistas marcadas por quem marcou" (Barras com composição + `organizer_name`); falta lugar no fundo.
-7. Página Conceitos: incluir Talent Pool, etapas puladas, UTC e pool sem esteira (`tools/gen_conceitos_svg.py` regera o SVG).
-8. Sugestões de uso das tabelas nominais: escolher colunas na tela, linha do tempo na tabela de Offer, drill do Report para a Nominal, CSV com nome descritivo, lembrar a ordenação.
-9. Visual de **filtros aplicados** abaixo da barra (imagens antes) e botões de navegação para a Nominal (sem ação por enquanto).
-10. Apagar as medidas antigas depois de conferir dependências: `Entrevistas Criadas`, `Entrevistas Agendadas` (+ trio mês/YTD), `Contratados por Data`, `Nominal Próxima Entrevista`, `Período Hoje`, `Contagem da Base`, `Mostrar na Base`, tabela `dBase`.
+
+### 11.1 Pendências do modelo (a fazer pelo Danilo)
+| # | O que fazer | Por quê |
+|---|---|---|
+| 1 | **Capturar os valores de setembro/2026**: rodar `docs/25-valores-referencia.dax` e preencher a tabela da seção 14 | a conversa não guardou esses números |
+| 2 | **Conferir `data_contratacao` na 13**: deve usar `closed_at_opening` (não `resolved_at`); depois reavaliar o **SLA mediano baixo** (11 d) | principal suspeita do SLA baixo |
+| 3 | **Rodar `docs/24-medidas-finais.dax`** (F5) e só então gravar | o arquivo ainda não foi executado no Power BI |
+| 4 | **Esteira dos pools e das vagas sem esteira**: localizar o de-para **persona → esteira** (Services é a fonte da verdade; tabela no banco ou regra na engenharia?); definir a esteira da persona "Geral"; criar `esteira_dash` = esteira da vaga ou o de-para | sem isso, ao filtrar uma esteira só ~37% das aplicações aparecem (75 mil sem esteira: 62.535 em pool, 9.361 em vaga, 3.816 fora da Jobs) |
+| 5 | **Obter `job_stages`** (`job_stage_id` → `job_id`) | separar tempo no pool × na vaga, origem "Direto / Via pool" e funil do pool por esteira |
+| 6 | **Decidir sobre vagas de teste/cópia/template** ("[TESTE TESTANDO]" com 5.146 aplicações; "Cópia de…"; "[Template…]") | excluir do dash inteiro, se confirmado |
+| 7 | **Perguntar à engenharia a origem da tabela 13** e as **etapas duplicadas** (3% das aplicações; exemplo: aplicação 281242063002) | origem não documentada; duplicidade afeta tempo e linha do tempo |
+| 8 | **Relação `dFiltroIndicacao → 13`**: deixar a direção **Única** | na captura parecia nos dois sentidos |
+| 9 | **Apagar as medidas antigas** e a tabela `dBase` (lista no item 10 de 11.2), depois de rodar a consulta de dependências | limpeza |
+| 10 | **Trocar o fundo da Conceitos** (1900 × 5095) e conferir os fundos de Resumo e Report | os subtítulos antigos ainda dizem "no período" sem a régua nova |
+| 11 | Investigar a diferença **119.397 × 117.477** (`application_id` distintos na 13 × aplicações com `data_aplicacao`) | não explicada |
+
+**Concluído:** instalação dos visuais novos (Período 2.2, Tabela nominal 1.1, Organograma 1.0, Base nominal 1.1); token do GitHub apagado; repositório publicado em `DaniloHonda/Visuais_PBI` (privado).
+
+### 11.2 Pendências de desenvolvimento (Claude)
+1. Preencher a tabela de setembro (seção 14) quando o Danilo trouxer o resultado.
+2. **Pool**: com `job_stages`, criar tempo no pool × na vaga, origem "Direto / Via pool" e funil do pool por esteira (**mostrar imagens antes**).
+3. Aplicar a correção das **etapas duplicadas** (`docs/23`) e da **linha do tempo** da Nominal, depois da decisão sobre o pool.
+4. **Nominal 1.2.0:** bases "Marcadas no período" e "Na agenda" contando entrevistas, com Organizer Name e Interviewers (imagem antes).
+5. Visual "Entrevistas marcadas por quem marcou" (Barras com composição + `organizer_name`); falta lugar no fundo.
+6. Página Conceitos: incluir Talent Pool, etapas puladas, UTC e pool sem esteira (`tools/gen_conceitos_svg.py` regera o SVG).
+7. Sugestões de uso das tabelas nominais: escolher colunas na tela, linha do tempo na tabela de Offer, drill do Report para a Nominal, CSV com nome descritivo, lembrar a ordenação.
+8. Visual de **filtros aplicados** abaixo da barra (imagens antes) e botões de navegação para a Nominal (sem ação por enquanto).
+9. Aviso discreto nos cards quando o período tem menos de 45 dias.
+10. Apagar as medidas antigas: `Entrevistas Criadas`, `Entrevistas Agendadas` (+ trio mês/YTD), `Contratados por Data`, `Nominal Próxima Entrevista`, `Período Hoje`, `Contagem da Base`, `Mostrar na Base`, tabela `dBase`.
 
 ---
 
@@ -337,7 +356,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 | `docs/21-roteiro-apresentacao.md` | roteiro de apresentação (20 min) |
 | `docs/22-organograma-e-filtros.md` | organograma, persona/especialidade e período 2.2 |
 | `docs/23-etapas-duplicadas.dax` | correção das etapas duplicadas (em espera) |
-| `docs/24-medidas-finais.dax` | **todas as medidas em uso**, num arquivo só (104 medidas) |
+| `docs/24-medidas-finais.dax` (+ `.csx` para o Tabular Editor) | **todas as medidas em uso**, num arquivo só (104 medidas) |
 | `docs/25-valores-referencia.dax` | consulta que devolve os números de referência de um período |
 | `backgrounds/` | fundos SVG: Conceitos (1900 × 5095), Resumo, Report e Nominal |
 | `tools/` | `gen_conceitos.py` (medidas da régua nova), `gen_conceitos_svg.py` (página Conceitos), `build_medidas_finais.py` (gera o `24-medidas-finais.dax` a partir dos guias) |
