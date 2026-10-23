@@ -136,7 +136,7 @@ RETURN MEDIANX(Contratacoes, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias])
 Esteira | Meta SLA = 45
 ```
 
-Valide antes: `resolved_at` da `03_APPLICATIONS_GH` precisa ser a data em que a aplicação foi marcada como contratada. Se o tipo de `application_id` for diferente entre as tabelas, o `LOOKUPVALUE` dá erro.
+Valide antes: `closed_at_opening` precisa estar preenchido para as aplicações com status `hired` (é a data de fechamento da opening, usada como data de contratação).
 
 ## 4. Montar os 6 cards
 
