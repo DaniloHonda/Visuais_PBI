@@ -1,0 +1,24 @@
+// Valores de referência por período — rodar na Exibição de consulta DAX e anotar a DATA DA CAPTURA.
+// Os números da coorte mudam com o tempo (aplicações em andamento viram contratadas/rejeitadas).
+// Para outro período, troque as datas em Ini e Fim.
+EVALUATE
+VAR Ini = DATE( 2026, 9, 1 )
+VAR Fim = DATE( 2026, 9, 30 )
+VAR Per = DATESBETWEEN( '_dCALENDARIO'[Data], Ini, Fim )
+RETURN
+ROW(
+    "Captura",                TODAY(),
+    "Aplicações",             CALCULATE( [Esteira | Candidatos], Per ),
+    "Contratadas",            CALCULATE( [Esteira | Contratados], Per ),
+    "Rejeitadas (total)",     CALCULATE( [Esteira | Rejeitados no Processo], Per ),
+    "  das quais declinaram", CALCULATE( [Esteira | Declinados (Offer)], Per ),
+    "Em andamento",           CALCULATE( [Esteira | Ativos Agora], Per ),
+    "Paradas > 45 d",         CALCULATE( [Esteira | Ativos Acima de 45 Dias], Per ),
+    "Conversão da esteira",   CALCULATE( [Esteira | Conversão Esteira %], Per ),
+    "SLA mediano (dias)",     CALCULATE( [Esteira | SLA da Esteira (Mediana)], Per ),
+    "Check coorte (≈0)",      CALCULATE( [Esteira | Check Coorte], Per ),
+    "Entrevistas marcadas",   CALCULATE( [Esteira | Entrevistas Marcadas], Per ),
+    "Entrevistas na agenda",  CALCULATE( [Esteira | Entrevistas na Agenda], Per ),
+    "  realizadas",           CALCULATE( [Esteira | Entrevistas Realizadas], Per ),
+    "  a realizar",           CALCULATE( [Esteira | Entrevistas a Realizar], Per )
+)

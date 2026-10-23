@@ -16,6 +16,10 @@ Documento de referência para retomar o trabalho em qualquer conversa. Cole este
 10. [Achados nos dados (homologação)](#10-achados-nos-dados-homologação)
 11. [Pendências](#11-pendências)
 12. [Arquivos do repositório](#12-arquivos-do-repositório)
+13. [DAX final das medidas em uso](#13-dax-final-das-medidas-em-uso)
+14. [Valores de referência](#14-valores-de-referência)
+15. [Relações do modelo](#15-relações-do-modelo-cardinalidade-e-direção)
+16. [Origem das tabelas e colunas calculadas](#16-origem-das-tabelas-e-colunas-calculadas)
 
 ---
 
@@ -333,7 +337,156 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 | `docs/21-roteiro-apresentacao.md` | roteiro de apresentação (20 min) |
 | `docs/22-organograma-e-filtros.md` | organograma, persona/especialidade e período 2.2 |
 | `docs/23-etapas-duplicadas.dax` | correção das etapas duplicadas (em espera) |
+| `docs/24-medidas-finais.dax` | **todas as medidas em uso**, num arquivo só (104 medidas) |
+| `docs/25-valores-referencia.dax` | consulta que devolve os números de referência de um período |
 | `backgrounds/` | fundos SVG: Conceitos (1900 × 5095), Resumo, Report e Nominal |
-| `tools/` | `gen_conceitos.py` (medidas) e `gen_conceitos_svg.py` (página Conceitos) |
+| `tools/` | `gen_conceitos.py` (medidas da régua nova), `gen_conceitos_svg.py` (página Conceitos), `build_medidas_finais.py` (gera o `24-medidas-finais.dax` a partir dos guias) |
 | `dist/` | pacotes `.pbiviz` prontos |
 | `visuals/` | código-fonte |
+
+---
+
+## 13. DAX final das medidas em uso
+**Arquivo único: [`docs/24-medidas-finais.dax`](docs/24-medidas-finais.dax)** (104 medidas `Esteira | …`, tabela `_Medidas`).
+- Formato `DEFINE MEASURE … EVALUATE`: colar na **Exibição de consulta DAX** → Executar → "Atualizar modelo com alterações" (cria ou substitui).
+- Consolidado por `tools/build_medidas_finais.py`: vale a **última definição** dos guias 00 a 17, sobrescrita pela régua nova (guia 18) e pelo botão de indicação (guia 19). Parênteses e colchetes foram conferidos por script; **o arquivo inteiro ainda não foi executado no Power BI**: rodar e conferir antes de gravar.
+- **Fora do arquivo, de propósito:** (a) medidas aposentadas (`Entrevistas Criadas`, `Entrevistas Agendadas` e trio mês/YTD, `Contratados por Data`, `Nominal Próxima Entrevista`, `Período Hoje`, `Contagem da Base`, `Mostrar na Base`); (b) a correção das etapas duplicadas (`docs/23`, em espera); (c) `Esteira | Data Referência` (placeholder: o modelo não tem a tabela de última atualização; as medidas de comparação usam `TODAY()`).
+- Pastas de exibição: `01` volume · `02` conversão e funil · `03` entrevistas · `04` tempo e SLA · `05` evolução · `06` comparações · `07` textos e destaques · `08` nominal · `99` validação (todas sob `98. ESTEIRAS\`).
+- Medidas de conferência: `Check Coorte` (aplicações − contratadas − rejeitadas − em andamento ≈ 0), `Check Funil`, `Check Agenda` (= 0), `Check Fechamento`.
+- Medidas de **evolução** (`Aprovados por Data`, `Rejeitados por Data`) ficam: usam a data do evento, não a coorte.
+
+---
+
+## 14. Valores de referência
+Os números da coorte **mudam com o tempo** (aplicações em andamento viram contratadas ou rejeitadas). Sempre anotar a **data da captura**. Consulta para capturar qualquer período: [`docs/25-valores-referencia.dax`](docs/25-valores-referencia.dax).
+
+### Setembro/2026 (candidatura de 01/09 a 30/09) — **a capturar**
+Esta conversa **não registrou** os valores de setembro, então a tabela abaixo está em branco de propósito (nada foi estimado). Rodar `docs/25-valores-referencia.dax` (já está com 01/09–30/09) e preencher:
+
+| Métrica | Valor | Data da captura |
+|---|---|---|
+| Aplicações | _a preencher_ | |
+| Contratadas | _a preencher_ | |
+| Rejeitadas (total) / das quais declinaram | _a preencher_ | |
+| Em andamento (paradas > 45 d) | _a preencher_ | |
+| Conversão da esteira | _a preencher_ | |
+| SLA mediano (dias) | _a preencher_ | |
+| Check coorte (≈ 0) | _a preencher_ | |
+
+Relação esperada: Aplicações = Contratadas + Rejeitadas + Em andamento; Conversão = Contratadas ÷ (Contratadas + Rejeitadas).
+
+### Valores já observados no modelo (conferidos nas capturas de tela)
+| Recorte | Aplicações | Contratadas | Rejeitadas | Em andamento | Conversão | SLA mediano | Captura |
+|---|---|---|---|---|---|---|---|
+| **Desde 01/07/2026** (sem filtro de período) | 117.477 | 603 | 65.002 | 51.872 | 0,9% | 11 d | ~19/10/2026, após aplicar a régua nova |
+| **01/10 a 19/10/2026** | 12.260 | 39 | 3.346 | 8.875 | 1,2% (39 de 3.385 decididos) | 4 d | ~19/10/2026 |
+
+Outros valores de conferência:
+- Sem filtro de período: Check Coorte = 0; Check Funil = 422; entrevistas marcadas = na agenda = 7.857 (7.743 realizadas + 114 a realizar; Check Agenda = 0).
+- Outubro (01–19): entrevistas marcadas 1.106; 1.328 acontecem no período; aplicações por contratação 314; Declinaram 0; "paradas há mais de 45 dias" 0 (esperado: o período tem 19 dias).
+- Dos 12.260 de outubro, a Nominal "Todas" mostrava 12.820 antes de preencher o campo "No período" (efeito das aplicações de antes do período com entrevista no período).
+- Validação por recrutador: Rejeitadas + Declinaram (Nominal) = Rejeitados (Report) e Contratadas (Nominal) = Contratados (Report), linha a linha. Sem recrutador: 8.979 rejeitadas e 45 contratadas.
+- Por tipo de vaga (aplicações): Pool 62.547 (62.535 sem esteira) · vaga 53.034 (9.369 sem esteira) · vaga fora da Jobs 3.816 = 119.397 `application_id` distintos na 13. Os 117.477 de "Aplicações" são os que têm `data_aplicacao` (a diferença não foi investigada).
+- Os valores de outubro são de período recente: conversão e SLA baixos são esperados (o processo não terminou).
+
+---
+
+## 15. Relações do modelo (cardinalidade e direção)
+Reconstruído das capturas da tela "Gerenciar relações" e das relações criadas nesta conversa. `*` = muitos, `1` = um. Direção: **Única** = filtra do lado 1 para o lado `*`; **Ambas** = filtra nos dois sentidos.
+
+### Ativas
+| De (lado `*`) | Para (lado `1`) | Card. | Direção | Observação |
+|---|---|---|---|---|
+| `13_ETAPA_RECRUTAMENTO[stage_name]` | `dEtapa[stage_name]` | *:1 | Única | única ligação da 13 com etapas |
+| `13_ETAPA_RECRUTAMENTO[job_id]` | `dOrganograma[job_id]` | *:1 | Única | criada nesta conversa; conferida na tela |
+| `dFiltroIndicacao[indicacao]` | `13_ETAPA_RECRUTAMENTO[indicacao]` | *:* | **Única recomendada** (dFiltroIndicacao → 13) | na captura o ícone aparece nos dois sentidos: **conferir e deixar única** |
+| `02_JOBS_GH[chave_bk_data_ref]` | `12_GE[chave_bk_data_ref]` | *:1 | Ambas | vaga → cadeira (base do organograma) |
+| `02_JOBS_GH[closed_at_join]` | `_dCALENDARIO[Data]` | *:1 | Única | calendário filtra a vaga pela data de fechamento |
+| `03_APPLICATIONS_GH[job_id]` | `02_JOBS_GH[job_id]` | *:1 | Ambas | |
+| `03_APPLICATIONS_GH[candidate_id]` | `04_CANDIDATES_GH[candidate_id]` | *:1 | Ambas | |
+| `03_APPLICATIONS_GH[org_ch…]` | `01_ORG[chave_data_ref_key]` | *:1 | Ambas | |
+| `05_OFFERS_GH[application_id]` | `03_APPLICATIONS_GH[application_id]` | *:1 | Ambas | |
+
+### Inativas (existem, mas **não** devem ser ativadas)
+| De | Para | Por que não ativar |
+|---|---|---|
+| `13_ETAPA_RECRUTAMENTO[application_id]` | `03_APPLICATIONS_GH[application_id]` | ligaria a 13 à Jobs e ao calendário por data de fechamento: o período passaria a filtrar a 13 por essa data e **todas as medidas mudariam de régua** |
+| `14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS[application_id]` | `03_APPLICATIONS_GH[application_id]` | as medidas de entrevista usam `TREATAS` sobre a lista de aplicações da 13 |
+| várias datas → `_dCALENDARIO[Data]` | `01_ORG[Data_Referência, primeira_entrada]`, `02_JOBS_GH[closed_at_opening, opened_at_join, opened_at_open, data_envio_previ…, data_fechament…]`, `03_APPLICATIONS_GH[resolved_at, starts_at]`, `05_OFFERS_GH[resolved_at, starts_at]` | só uma relação com o calendário pode ser ativa |
+| `01_ORG[greenhouse_applicat…]` | `03_APPLICATIONS_GH[applica…]` | |
+| `05_OFFERS_GH[candidate_id]` | `04_CANDIDATES_GH[candidate_id]` | |
+
+### Sem relação (uso por `TREATAS`, `LOOKUPVALUE` ou independente)
+`_dCALENDARIO` ↔ 13 (as medidas usam `MIN/MAX` da data) · `dFunil` · `dFaixaDias` · `dEsteiraEtapa` · `_Medidas`.
+
+### Regras de ouro
+1. A 13 só é filtrada por `dEtapa`, `dFiltroIndicacao` e `dOrganograma`. Todo filtro da barra precisa vir da 13 ou de tabela ligada a ela.
+2. Nunca ativar 13 → 03 nem 13 → 02_JOBS_GH. Nunca ligar `dOrganograma` à Jobs em "Ambos".
+3. `application_id` e `job_id` são **texto** na 13 (usar aspas nas consultas; os dois lados de uma relação precisam do mesmo tipo).
+
+---
+
+## 16. Origem das tabelas e colunas calculadas
+
+### 16.1 Origem das tabelas
+| Tabela | Origem | Observações |
+|---|---|---|
+| `03_APPLICATIONS_GH` | Greenhouse, camada **Gold** | já traz `credited_to_id` e `credited_to_name` (a **Silver** é a usada no código do programa de indicação) |
+| `04_CANDIDATES_GH` | Greenhouse | `referred_by` preenchido = indicação confirmada |
+| `02_JOBS_GH` | Greenhouse | `position_type`; `especialidade` vem do **Services (fonte da verdade)** |
+| `05_OFFERS_GH` | Greenhouse | ofertas, por `application_id` |
+| `12_GE` | Gestão de Estruturas (cadeiras da empresa) | colunas `N1…Nn` e `N2_email…`; ligada à Jobs por `chave_bk_data_ref`; nem toda vaga tem cadeira |
+| `14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS` | Greenhouse (agendamentos) | filtrada no Power Query para `created_at` ou `start_at` ≥ 01/07/2026; "Número Participação" é coluna de organização da engenharia |
+| `13_ETAPA_RECRUTAMENTO` | **construída pela engenharia** a partir do histórico de etapas | **a origem exata não está documentada nesta conversa** (perguntar à engenharia); traz `esteira`, `persona`, `especialidade`, `link_application`, `status`, `days_in_stage` já prontos |
+| `01_ORG` | tabela de organização com chaves de data de referência | ligada ao modelo, mas **não usada pelas medidas do dash** |
+| `_dCALENDARIO` | tabela de datas do modelo | |
+| `dEtapa`, `dFunil`, `dFaixaDias`, `dFiltroIndicacao`, `dEsteiraEtapa`, `dOrganograma` | **tabelas DAX** do modelo | DAX abaixo |
+
+**Cadeia de classificação das vagas:** `especialidade` (Jobs, vinda do Services) → **persona** (de-para de especialidades) → **esteira** (definida pela persona). O de-para persona → esteira ainda não foi localizado (pendência 1).
+**Regra dos pools:** `02_JOBS_GH[position_type] = "Pool"`.
+
+### 16.2 Colunas calculadas
+**`13_ETAPA_RECRUTAMENTO`**
+```DAX
+eh_etapa_ativa =   -- em processo, na última etapa em que entrou (empate no dia: maior ordem)
+VAR UltimaEntrada = CALCULATE( MAX([data_entrada_stage]), ALLEXCEPT('13_ETAPA_RECRUTAMENTO', [application_id]) )
+VAR MaiorOrdemNoDia = CALCULATE( MAX([sort_order]), ALLEXCEPT('13_ETAPA_RECRUTAMENTO', [application_id]), [data_entrada_stage] = UltimaEntrada )
+RETURN [status] = "in_process" && [data_entrada_stage] = UltimaEntrada && [sort_order] = MaiorOrdemNoDia
+
+resultado_etapa = SWITCH( TRUE(), [saiu_na_etapa] = TRUE(), "Rejeitado", [eh_etapa_ativa], "Em andamento", "Aprovado" )
+
+data_contratacao = IF( [status] = "hired", [closed_at_opening] )        -- ver ressalva abaixo
+sla_esteira_dias = IF( NOT ISBLANK([data_contratacao]), ([data_contratacao] - [data_aplicacao]) * 1.0 )
+ordem_etapa      = LOOKUPVALUE( dEtapa[ordem], dEtapa[stage_name], [stage_name] )
+indicacao        = VAR R = LOOKUPVALUE( '03_APPLICATIONS_GH'[indicacao], '03_APPLICATIONS_GH'[application_id], [application_id] )
+                   RETURN IF( R IN { "Pela aplicação", "Pelo candidato" }, "Indicação", "Sem indicação" )
+```
+**Ressalva (SLA):** existem **duas definições** de `data_contratacao` nos guias: `closed_at_opening` (guia 00, marcada "⚠️ validar") e `LOOKUPVALUE` de `03_APPLICATIONS_GH[resolved_at]` (guia 01). Verificar qual está no modelo: é a principal suspeita do **SLA mediano baixo** (11 dias). `saiu_na_etapa`, `sort_order`, `closed_at_opening`, `days_in_stage` e `data_aplicacao` vêm da tabela de origem (não são calculadas no modelo).
+
+**`03_APPLICATIONS_GH`**
+```DAX
+indicacao =
+VAR Cand = [candidate_id]
+VAR RegraApp  = [source_public_name] = "Referral" && NOT ISBLANK( [credited_to_id] )
+VAR RegraCand = CALCULATE( COUNTROWS('04_CANDIDATES_GH'), REMOVEFILTERS('03_APPLICATIONS_GH'), '04_CANDIDATES_GH'[candidate_id] = Cand, '04_CANDIDATES_GH'[referred_by] <> "" ) > 0
+RETURN SWITCH( TRUE(), RegraApp, "Pela aplicação", RegraCand, "Pelo candidato", "Sem indicação" )
+```
+**`14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS`**
+```DAX
+etapa_entrevista    = etapa da 13 com a maior data_entrada_stage <= start_at da entrevista (TOPN 1 por application_id)
+resultado_entrevista = resultado_etapa dessa mesma linha da 13
+```
+(DAX completo no guia `docs/00`, seção 0.1.)
+
+### 16.3 Tabelas DAX
+```DAX
+dEtapa     = DATATABLE( "stage_name",STRING,"ordem",INTEGER,"grupo",STRING,"ordem_grupo",INTEGER, { … 29 etapas em 5 grupos: Triagem, Avaliações, Entrevistas, Checagens, Offer … } )   -- lista completa: docs/00
+dFunil     = UNION( SELECTCOLUMNS(dEtapa,"passo",[stage_name],"ordem_passo",[ordem],"grupo",[grupo]), ROW("passo","Contratadas","ordem_passo",999,"grupo","Contratação") )
+dFaixaDias = DATATABLE( "faixa",STRING,"ordem",INTEGER,"de",INTEGER,"ate",INTEGER, { {"0–2 d",1,0,2},{"3–7 d",2,3,7},{"8–15 d",3,8,15},{"16–30 d",4,16,30},{"31–45 d",5,31,45},{"> 45 d",6,46,99999} } )
+dFiltroIndicacao = DATATABLE( "opcao",STRING,"ordem",INTEGER,"indicacao",STRING, { {"Todas",1,"Indicação"},{"Todas",1,"Sem indicação"},{"Só indicações",2,"Indicação"} } )
+dEsteiraEtapa    = SUMMARIZE( '13_ETAPA_RECRUTAMENTO', [esteira], dEtapa[stage_name], dEtapa[ordem] )
+dOrganograma     = SELECTCOLUMNS( '02_JOBS_GH',
+                       "job_id", [job_id], "tipo_vaga", [position_type], "eh_pool", IF([position_type]="Pool","Pool","Vaga"),
+                       "N2", COALESCE(RELATED('12_GE'[N2_email]),"-"), "N3", COALESCE(RELATED('12_GE'[N3_email]),"-"), … "N7", COALESCE(RELATED('12_GE'[N7_email]),"-") )
+```
+Classificações: `dEtapa[stage_name]` por `ordem`; `dEtapa[grupo]` por `ordem_grupo`; `dFunil[passo]` por `ordem_passo`; `dFaixaDias[faixa]` por `ordem`; `dFiltroIndicacao[opcao]` por `ordem`.
