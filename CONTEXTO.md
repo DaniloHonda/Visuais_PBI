@@ -306,7 +306,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 - **Transferência de pool**: a aplicação mantém o `application_id` e muda de vaga; a 13 guarda só a vaga atual. Em 48 aplicações (0,04%) a `data_aplicacao` virou a data da transferência (régua mantida).
 - **Aplicações sem esteira** (~75 mil de ~119 mil): Pool 62.535 · vaga 9.361 · vaga fora da Jobs 3.816. **Todas têm persona**: especialidade → persona funciona; quebra em **persona → esteira** (as esteiras têm "sobrenome", ex.: Atacado - Técnico, e parecem depender de persona + especialidade). A persona "Geral" concentra 16.495 aplicações em pools. Ao filtrar uma esteira, só ~37% das aplicações aparecem.
 - Vaga **"[TESTE TESTANDO]"** com 5.146 aplicações; também há "Cópia de…" e "[Template…]": avaliar exclusão.
-- **SLA mediano baixo** (11 dias no geral): ainda sem causa confirmada; investigar `closed_at_opening`.
+- **SLA mediano baixo** (11 dias no geral): ainda sem causa confirmada. A data de contratação correta é `closed_at_opening`: conferir se o modelo usa essa coluna e, depois, reavaliar o número.
 - 422 aplicações não aparecem no primeiro passo do funil (`Esteira | Check Funil`).
 
 ---
@@ -315,7 +315,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 1. **Esteira para pools e vagas sem esteira:** descobrir a fonte do de-para persona → esteira (Services é a fonte da verdade); criar `esteira_dash` (esteira da vaga, ou o de-para); definir a esteira da persona "Geral"; decidir sobre vagas de teste.
 2. **Pool:** obter a tabela `job_stages` (`job_stage_id` → `job_id`) para separar **tempo no pool** de **tempo na vaga**, criar a origem "Direto / Via pool" e o funil do pool por esteira. Mostrar imagens antes.
 3. Aplicar a correção das **etapas duplicadas** e da **linha do tempo** da Nominal.
-4. Investigar o **SLA mediano baixo**.
+4. Conferir se `data_contratacao` usa `closed_at_opening` e reavaliar o **SLA mediano baixo**.
 5. **Nominal 1.2.0:** bases "Marcadas no período" e "Na agenda" contando entrevistas, com Organizer Name e Interviewers (imagem antes).
 6. Visual "Entrevistas marcadas por quem marcou" (Barras com composição + `organizer_name`); falta lugar no fundo.
 7. Página Conceitos: incluir Talent Pool, etapas puladas, UTC e pool sem esteira (`tools/gen_conceitos_svg.py` regera o SVG).
@@ -461,7 +461,7 @@ ordem_etapa      = LOOKUPVALUE( dEtapa[ordem], dEtapa[stage_name], [stage_name] 
 indicacao        = VAR R = LOOKUPVALUE( '03_APPLICATIONS_GH'[indicacao], '03_APPLICATIONS_GH'[application_id], [application_id] )
                    RETURN IF( R IN { "Pela aplicação", "Pelo candidato" }, "Indicação", "Sem indicação" )
 ```
-**Ressalva (SLA):** existem **duas definições** de `data_contratacao` nos guias: `closed_at_opening` (guia 00, marcada "⚠️ validar") e `LOOKUPVALUE` de `03_APPLICATIONS_GH[resolved_at]` (guia 01). Verificar qual está no modelo: é a principal suspeita do **SLA mediano baixo** (11 dias). `saiu_na_etapa`, `sort_order`, `closed_at_opening`, `days_in_stage` e `data_aplicacao` vêm da tabela de origem (não são calculadas no modelo).
+**Decisão (SLA):** a data de contratação é **`closed_at_opening`** (fechamento da opening da vaga), e **não** `resolved_at` da `03_APPLICATIONS_GH` (definição antiga do guia 01, já corrigida). Se o modelo ainda usar `resolved_at`, trocar a coluna `data_contratacao` da 13. O **SLA mediano baixo** (11 dias) continua sem causa confirmada: reavaliar depois de conferir essa coluna. `saiu_na_etapa`, `sort_order`, `closed_at_opening`, `days_in_stage` e `data_aplicacao` vêm da tabela de origem (não são calculadas no modelo).
 
 **`03_APPLICATIONS_GH`**
 ```DAX

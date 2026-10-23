@@ -107,13 +107,10 @@ Selo: **Formatar → Períodos → Estilo do selo**: *Destaque* (teal) quando o 
 Precisa da data de contratação. Duas colunas calculadas na `13_ETAPA_RECRUTAMENTO`:
 
 ```DAX
-data_contratacao =
+data_contratacao =   -- fechamento da opening (closed_at_opening); NÃO usar resolved_at
 IF(
     '13_ETAPA_RECRUTAMENTO'[status] = "hired",
-    LOOKUPVALUE(
-        '03_APPLICATIONS_GH'[resolved_at],
-        '03_APPLICATIONS_GH'[application_id], '13_ETAPA_RECRUTAMENTO'[application_id]
-    )
+    '13_ETAPA_RECRUTAMENTO'[closed_at_opening]
 )
 
 sla_esteira_dias =
