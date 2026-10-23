@@ -26,7 +26,7 @@ VAR Etapas =
         NOT ISFILTERED( dEtapa ) || {T14}[etapa_entrevista] IN VALUES( dEtapa[stage_name] ) )
 RETURN
 CALCULATE(
-    DISTINCTCOUNT( {T14}[scheduled_interview_id] ),
+    DISTINCTCOUNT( {T14}[scheduled_interviews_id] ),
     REMOVEFILTERS( '_dCALENDARIO' ),
     KEEPFILTERS( {T14}[status] <> "to_be_scheduled" ),
     KEEPFILTERS( {T14}[{col}] >= Ini ),

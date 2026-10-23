@@ -39,7 +39,7 @@ Na agenda, entram os status scheduled, awaiting feedback e complete. "to be sche
 
 ### Passo 1 · Conferir duas colunas da tabela 14 (2 min)
 1. Abra a 14 na exibição de dados.
-2. Confira o nome da coluna do ID da entrevista. O script usa `scheduled_interview_id`. Se for outro, troque no script (Ctrl+H) antes de rodar.
+2. Confira o nome da coluna do ID da entrevista. O script usa `scheduled_interviews_id`. Se for outro, troque no script (Ctrl+H) antes de rodar.
 3. Confira o texto exato do status "to be scheduled". O script usa `to_be_scheduled`.
 4. Confira se Created At é a data em que a entrevista foi marcada (veja a consulta no fim deste guia).
 
@@ -457,7 +457,7 @@ VAR Etapas =
         NOT ISFILTERED( dEtapa ) || '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] IN VALUES( dEtapa[stage_name] ) )
 RETURN
 CALCULATE(
-    DISTINCTCOUNT( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interview_id] ),
+    DISTINCTCOUNT( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interviews_id] ),
     REMOVEFILTERS( '_dCALENDARIO' ),
     KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" ),
     KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] >= Ini ),
@@ -480,7 +480,7 @@ VAR Etapas =
         NOT ISFILTERED( dEtapa ) || '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] IN VALUES( dEtapa[stage_name] ) )
 RETURN
 CALCULATE(
-    DISTINCTCOUNT( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interview_id] ),
+    DISTINCTCOUNT( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interviews_id] ),
     REMOVEFILTERS( '_dCALENDARIO' ),
     KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" ),
     KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] >= Ini ),

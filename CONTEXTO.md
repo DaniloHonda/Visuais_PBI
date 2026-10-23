@@ -140,7 +140,7 @@ Só entram casos **já decididos**, para não penalizar quem ainda está em anda
 | **YTD** | Acumulado do ano até hoje; começa em 01/07/2026 |
 
 ### 4.5 Entrevistas (exceção: atividade do time)
-Contam **entrevistas** (`scheduled_interview_id`), não aplicações. Uma pessoa com 3 entrevistas conta 3. O status `to_be_scheduled` **não** entra (ainda não foi marcada). Status existentes: scheduled, awaiting feedback, complete, to be scheduled.
+Contam **entrevistas** (`scheduled_interviews_id`), não aplicações. Uma pessoa com 3 entrevistas conta 3. O status `to_be_scheduled` **não** entra (ainda não foi marcada). Status existentes: scheduled, awaiting feedback, complete, to be scheduled.
 | Métrica | O que é | Data |
 |---|---|---|
 | **Entrevistas marcadas** | Entrevistas que o time colocou na agenda no período: mede a produtividade de quem agenda | `created_at` |
@@ -231,7 +231,7 @@ Barra única (Y 225), com sincronização entre as páginas: **Período · Organ
 | Tabela | Grão | Observações |
 |---|---|---|
 | `13_ETAPA_RECRUTAMENTO` | aplicação × etapa | **Base de todas as medidas.** application_id (texto), job_id, job_stage_id, job_name, candidate_id, stage_name, data_entrada_stage, data_saida_stage, days_in_stage, status (hired/rejected/in_process), rejection_reason_name, data_aplicacao, rejected_at, recruiter_name, esteira, persona, especialidade, link_application… |
-| `14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS` | entrevista | scheduled_interview_id, application_id, status, start_at, end_at, created_at, interview_name, organizer_name, interviewers |
+| `14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS` | entrevista | scheduled_interviews_id, application_id, status, start_at, end_at, created_at, interview_name, organizer_name, interviewers |
 | `03_APPLICATIONS_GH` | aplicação | Gold: source_public_name, credited_to_id, credited_to_name, candidate_id, job_id, status |
 | `04_CANDIDATES_GH` | candidato | referred_by |
 | `02_JOBS_GH` | vaga | job_id, position_type, chave_bk_data_ref |
