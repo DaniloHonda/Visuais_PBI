@@ -274,6 +274,7 @@ Código em `visuals/`, pacotes em `dist/`, guias em `docs/`. Build: `cd visuals/
 | Tabela nominal | 1.1.0 | Report (Pré Offer e Offer) | até 30 colunas, "Mostrar mais", exportar CSV; campo Dias = **medida** `Dias na Etapa Atual` |
 | Base nominal | 1.1.0 | Nominal | campo "No período" = `Nominal No Período`; filtro do visual `Nominal Na Base` = 1 |
 | Organograma | 1.0.0 | barra de filtros | árvore N2→N3→…; Níveis = `dOrganograma[N2…N7]` |
+| Detalhe nominal | 1.0.0 | Detalhe (drillthrough) | lista do ponto clicado: chips dos filtros recebidos, abas por resultado, link, busca, CSV, Mostrar mais, linha do tempo; guia `docs/26-detalhe.md`, medidas `docs/26-detalhe.dax` |
 
 Detalhes técnicos: o nome do card de settings não pode ser `cards` (conflita com `Model.cards`); o `valueFormatter` cai em en-US, então números usam `Intl` pt-BR; exportação exige o privilégio `ExportContent` e "downloads de visuais personalizados" liberado no tenant; testes eram feitos extraindo js/css do `.pbiviz` e simulando o host no Chromium.
 
@@ -331,6 +332,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 **Concluído:** instalação dos visuais novos (Período 2.2, Tabela nominal 1.1, Organograma 1.0, Base nominal 1.1); repositório publicado em `DaniloHonda/Visuais_PBI` (privado).
 
 ### 11.2 Pendências de desenvolvimento (Claude)
+0. **Detalhe nominal 1.0 (em teste):** página Detalhe por drillthrough a partir de Etapa e motivos; depois estender aos outros gráficos, Funil, botão "Ver aplicações" e modo Entrevistas (1.1). Ver `docs/26-detalhe.md`.
 1. ~~Preencher a tabela de setembro~~ (feito). Atualizar a seção 14 quando houver novas capturas.
 2. **Pool**: com `job_stages`, criar tempo no pool × na vaga, origem "Direto / Via pool" e funil do pool por esteira (**mostrar imagens antes**).
 3. Aplicar a correção das **etapas duplicadas** (`docs/23`) e da **linha do tempo** da Nominal, depois da decisão sobre o pool.

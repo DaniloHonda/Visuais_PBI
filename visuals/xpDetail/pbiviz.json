@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpDetail",
+        "displayName": "XP · Detalhe nominal",
+        "guid": "xpDetailDD1F078C94144BBFA70FCA527DB82601",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Lista nominal aberta por Detalhar (drillthrough) a partir dos gráficos: mostra os filtros recebidos, separa por resultado (aprovadas, rejeitadas, declinaram, em andamento, contratadas), link do Greenhouse, busca, exportar CSV, Mostrar mais e linha do tempo. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

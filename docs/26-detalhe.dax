@@ -1,0 +1,132 @@
+// =====================================================================
+// Detalhe nominal 1.0 · 4 medidas novas (pasta 98. ESTEIRAS\08)
+// Colar na Exibição de consulta DAX → Executar (confere) → "Atualizar modelo com alterações" (grava).
+// A consulta no fim compara o gráfico com a lista na etapa de maior perda: as duas colunas devem ser iguais.
+// =====================================================================
+DEFINE
+
+    // pasta 98. ESTEIRAS\08 · guia 26
+    // Uma linha da lista: resultado|etapa|entrada|saída|dias|candidatura|motivo
+    // Olhando uma etapa (veio de dEtapa, stage_name ou faixa de dias): a passagem da aplicação NESSA etapa.
+    // Sem etapa: a situação atual da aplicação (mesma régua da Base nominal).
+    // Régua: aplicações com candidatura no período; só passagens com data de entrada (etapas puladas não contam).
+    MEASURE '_Medidas'[Esteira | Detalhe Linha] =
+        VAR Ini = MIN( '_dCALENDARIO'[Data] )
+        VAR Fim = MAX( '_dCALENDARIO'[Data] ) + 1
+        VAR TemFaixa = ISFILTERED( dFaixaDias )
+        VAR PorEtapa = ISFILTERED( dEtapa ) || ISFILTERED( '13_ETAPA_RECRUTAMENTO'[stage_name] ) || TemFaixa
+        VAR De  = MIN( dFaixaDias[de] )
+        VAR Ate = MAX( dFaixaDias[ate] ) + 1
+        VAR Passagens =
+            FILTER(
+                CALCULATETABLE(
+                    SUMMARIZE( '13_ETAPA_RECRUTAMENTO',
+                        '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+                        '13_ETAPA_RECRUTAMENTO'[data_saida_stage], '13_ETAPA_RECRUTAMENTO'[resultado_etapa],
+                        '13_ETAPA_RECRUTAMENTO'[rejection_reason_name], '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                    KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ),
+                    KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+                ),
+                NOT TemFaixa
+                    || ( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento"
+                         && '13_ETAPA_RECRUTAMENTO'[days_in_stage] >= De
+                         && '13_ETAPA_RECRUTAMENTO'[days_in_stage] <  Ate )
+            )
+        VAR Ult = TOPN( 1, Passagens, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], DESC )
+        VAR R = MAXX( Ult, '13_ETAPA_RECRUTAMENTO'[resultado_etapa] )
+        VAR M = MAXX( Ult, '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] )
+        VAR Res =
+            IF( PorEtapa,
+                SWITCH( TRUE(),
+                    ISEMPTY( Passagens ), BLANK(),
+                    R = "Rejeitado" && LEFT( M, 7 ) = "[Offer]", "Declinou",
+                    R = "Rejeitado", "Rejeitada",
+                    R = "Em andamento", "Em andamento",
+                    "Aprovada" ),
+                [Esteira | Nominal Situação] )
+        VAR Etapa = MAXX( Ult, '13_ETAPA_RECRUTAMENTO'[stage_name] )
+        VAR Ent   = MAXX( Ult, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
+        VAR Sai   = IF( PorEtapa, MAXX( Ult, '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), [Esteira | Nominal Data de Saída] )
+        VAR Dias  = MAXX( Ult, '13_ETAPA_RECRUTAMENTO'[days_in_stage] )
+        VAR Cand  = MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] )
+        VAR Mot   = IF( Res IN { "Rejeitada", "Declinou" }, IF( PorEtapa, M, [Esteira | Nominal Motivo] ) )
+        VAR F = "yyyy-mm-dd"
+        RETURN
+        IF( NOT ISBLANK( Res ),
+            Res & "|" & Etapa
+                & "|" & IF( ISBLANK( Ent ), "", FORMAT( Ent, F ) )
+                & "|" & IF( ISBLANK( Sai ), "", FORMAT( Sai, F ) )
+                & "|" & IF( ISBLANK( Dias ), "", FORMAT( Dias, "0" ) )
+                & "|" & IF( ISBLANK( Cand ), "", FORMAT( Cand, F ) )
+                & "|" & Mot )
+
+    // pasta 98. ESTEIRAS\08 · guia 26
+    // Linha do tempo completa da aplicação (tira os filtros de etapa, motivo e faixa que vieram do Detalhar)
+    MEASURE '_Medidas'[Esteira | Detalhe Jornada] =
+        IF( NOT ISBLANK( [Esteira | Detalhe Linha] ),
+            CALCULATE( [Esteira | Nominal Jornada],
+                REMOVEFILTERS( dEtapa ), REMOVEFILTERS( dFaixaDias ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ) ) )
+
+    // pasta 98. ESTEIRAS\08 · guia 26
+    MEASURE '_Medidas'[Esteira | Detalhe Seguintes] =
+        IF( NOT ISBLANK( [Esteira | Detalhe Linha] ),
+            CALCULATE( [Esteira | Nominal Etapas Seguintes],
+                REMOVEFILTERS( dEtapa ), REMOVEFILTERS( dFaixaDias ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ) ) )
+
+    // pasta 98. ESTEIRAS\08 · guia 26
+    // Filtros recebidos pelo Detalhar (viram os chips) + aba inicial + modo.
+    // ALLSELECTED ignora as colunas da própria tabela (recrutador, candidato…) e lê só os filtros de fora.
+    MEASURE '_Medidas'[Esteira | Detalhe Contexto] =
+        IF( NOT ISBLANK( [Esteira | Detalhe Linha] ),
+            CALCULATE(
+                VAR Ini = MIN( '_dCALENDARIO'[Data] )
+                VAR Fim = MAX( '_dCALENDARIO'[Data] )
+                VAR Et = IF( ISFILTERED( dEtapa[stage_name] ),
+                    CONCATENATEX( FILTERS( dEtapa[stage_name] ), dEtapa[stage_name], ", " ) )
+                VAR Mo = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ),
+                    CONCATENATEX( FILTERS( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ), '13_ETAPA_RECRUTAMENTO'[rejection_reason_name], ", " ) )
+                VAR Rc = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[recruiter_name] ),
+                    CONCATENATEX( FILTERS( '13_ETAPA_RECRUTAMENTO'[recruiter_name] ), '13_ETAPA_RECRUTAMENTO'[recruiter_name], ", " ) )
+                VAR Fx = IF( ISFILTERED( dFaixaDias[faixa] ),
+                    CONCATENATEX( FILTERS( dFaixaDias[faixa] ), dFaixaDias[faixa], ", " ) )
+                VAR PorEtapa = ISFILTERED( dEtapa ) || ISFILTERED( '13_ETAPA_RECRUTAMENTO'[stage_name] ) || ISFILTERED( dFaixaDias )
+                VAR Aba = SWITCH( TRUE(),
+                    NOT ISBLANK( Mo ) && LEFT( Mo, 7 ) = "[Offer]", "declinaram",
+                    NOT ISBLANK( Mo ), "rejeitadas",
+                    NOT ISBLANK( Fx ), "andamento",
+                    "todas" )
+                RETURN
+                "aba=" & Aba & "||modo=" & IF( PorEtapa, "etapa", "aplicacao" )
+                    & "||Período: " & FORMAT( Ini, "dd/mm/yyyy" ) & " – " & FORMAT( Fim, "dd/mm/yyyy" )
+                    & IF( NOT ISBLANK( Et ), "||Etapa: " & Et )
+                    & IF( NOT ISBLANK( Mo ), "||Motivo: " & Mo )
+                    & IF( NOT ISBLANK( Rc ), "||Recrutador: " & Rc )
+                    & IF( NOT ISBLANK( Fx ), "||Dias parado: " & Fx ),
+                ALLSELECTED( '13_ETAPA_RECRUTAMENTO' )
+            ) )
+
+// Conferência: rejeitadas do gráfico × rejeitadas + declinaram da lista, na etapa de maior perda (todo o período)
+EVALUATE
+VAR Et = [Esteira | Etapa Maior Perda]
+RETURN
+ROW(
+    "Etapa", Et,
+    "Rejeitados (gráfico)", CALCULATE( [Esteira | Rejeitados], TREATAS( { Et }, dEtapa[stage_name] ) ),
+    "Rejeitadas + declinaram (lista)",
+        CALCULATE(
+            COUNTROWS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                VAR L = [Esteira | Detalhe Linha]
+                RETURN LEFT( L, 9 ) = "Rejeitada" || LEFT( L, 8 ) = "Declinou" ) ),
+            TREATAS( { Et }, dEtapa[stage_name] ) ),
+    "Participantes (gráfico)", CALCULATE( [Esteira | Participantes], TREATAS( { Et }, dEtapa[stage_name] ) ),
+    "Linhas na lista",
+        CALCULATE(
+            COUNTROWS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), NOT ISBLANK( [Esteira | Detalhe Linha] ) ) ),
+            TREATAS( { Et }, dEtapa[stage_name] ) )
+)

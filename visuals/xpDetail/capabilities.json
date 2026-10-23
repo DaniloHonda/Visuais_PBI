@@ -1,0 +1,203 @@
+{
+  "dataRoles": [
+    {
+      "name": "link",
+      "kind": "Grouping",
+      "displayName": "Link (1ª coluna)",
+      "description": "URL do Greenhouse ou ID (com o modelo do link)"
+    },
+    {
+      "name": "candidato",
+      "kind": "Grouping",
+      "displayName": "Candidato",
+      "description": "nome do candidato"
+    },
+    {
+      "name": "vaga",
+      "kind": "Grouping",
+      "displayName": "Vaga",
+      "description": "nome da vaga"
+    },
+    {
+      "name": "recrutador",
+      "kind": "Grouping",
+      "displayName": "Recrutador",
+      "description": "coluna de recrutador"
+    },
+    {
+      "name": "extras",
+      "kind": "Grouping",
+      "displayName": "Colunas extras",
+      "description": "até 4 (ex.: praça, sourcer)"
+    },
+    {
+      "name": "linha",
+      "kind": "Measure",
+      "displayName": "Detalhe da linha",
+      "description": "Esteira | Detalhe Linha"
+    },
+    {
+      "name": "jornada",
+      "kind": "Measure",
+      "displayName": "Linha do tempo",
+      "description": "Esteira | Detalhe Jornada"
+    },
+    {
+      "name": "seguintes",
+      "kind": "Measure",
+      "displayName": "Etapas seguintes",
+      "description": "Esteira | Detalhe Seguintes"
+    },
+    {
+      "name": "contexto",
+      "kind": "Measure",
+      "displayName": "Contexto (filtros recebidos)",
+      "description": "Esteira | Detalhe Contexto"
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "conditions": [
+        {
+          "link": {
+            "max": 1
+          },
+          "candidato": {
+            "max": 1
+          },
+          "vaga": {
+            "max": 1
+          },
+          "recrutador": {
+            "max": 1
+          },
+          "extras": {
+            "max": 4
+          },
+          "linha": {
+            "max": 1
+          },
+          "jornada": {
+            "max": 1
+          },
+          "seguintes": {
+            "max": 1
+          },
+          "contexto": {
+            "max": 1
+          }
+        }
+      ],
+      "table": {
+        "rows": {
+          "select": [
+            {
+              "for": {
+                "in": "link"
+              }
+            },
+            {
+              "for": {
+                "in": "candidato"
+              }
+            },
+            {
+              "for": {
+                "in": "vaga"
+              }
+            },
+            {
+              "for": {
+                "in": "recrutador"
+              }
+            },
+            {
+              "for": {
+                "in": "extras"
+              }
+            },
+            {
+              "bind": {
+                "to": "linha"
+              }
+            },
+            {
+              "bind": {
+                "to": "jornada"
+              }
+            },
+            {
+              "bind": {
+                "to": "seguintes"
+              }
+            },
+            {
+              "bind": {
+                "to": "contexto"
+              }
+            }
+          ],
+          "dataReductionAlgorithm": {
+            "window": {
+              "count": 10000
+            }
+          }
+        }
+      }
+    }
+  ],
+  "objects": {
+    "textos": {
+      "properties": {
+        "busca": {
+          "type": {
+            "text": true
+          }
+        },
+        "link": {
+          "type": {
+            "text": true
+          }
+        }
+      }
+    },
+    "link": {
+      "properties": {
+        "modelo": {
+          "type": {
+            "text": true
+          }
+        }
+      }
+    },
+    "comportamento": {
+      "properties": {
+        "linhasTela": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "maxLinhas": {
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    },
+    "dias": {
+      "properties": {
+        "alerta": {
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    }
+  },
+  "privileges": [
+    {
+      "name": "ExportContent",
+      "essential": false
+    }
+  ]
+}
