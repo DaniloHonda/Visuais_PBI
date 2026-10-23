@@ -1,0 +1,322 @@
+// Dash de Esteiras · padronização de conceitos
+// 1) Executar (F5): confere se as fórmulas funcionam e mostra os números de conferência.
+// 2) Botão "Atualizar modelo com alterações" (acima do DEFINE): grava as medidas no modelo.
+DEFINE
+    // A · Etapas: passam a ser só das aplicações do período
+    MEASURE '_Medidas'[Esteira | Participantes] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            DISTINCTCOUNT('13_ETAPA_RECRUTAMENTO'[application_id]),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_entrada_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    // B · Tempo na etapa e SLA: aplicações do período
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Média)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            AVERAGE('13_ETAPA_RECRUTAMENTO'[days_in_stage]),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Mediana)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            MEDIAN('13_ETAPA_RECRUTAMENTO'[days_in_stage]),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (P90)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            PERCENTILE.INC('13_ETAPA_RECRUTAMENTO'[days_in_stage], 0.9),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    MEASURE '_Medidas'[Esteira | Base SLA] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            COUNTROWS('13_ETAPA_RECRUTAMENTO'),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    MEASURE '_Medidas'[Esteira | SLA da Esteira (Mediana)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR Contratacoes =
+            CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[sla_esteira_dias]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        RETURN MEDIANX( Contratacoes, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] )
+    MEASURE '_Medidas'[Esteira | SLA da Esteira (Média)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR Contratacoes =
+            CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[sla_esteira_dias]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        RETURN AVERAGEX( Contratacoes, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] )
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Contratações)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR Contratadas =
+            CALCULATETABLE(
+                VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                REMOVEFILTERS( dEtapa ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_contratacao]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        VAR Dias =
+            CALCULATE(
+                SUMX(
+                    SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                    '13_ETAPA_RECRUTAMENTO'[days_in_stage]
+                ),
+                TREATAS( Contratadas, '13_ETAPA_RECRUTAMENTO'[application_id] )
+            )
+        RETURN DIVIDE( Dias, COUNTROWS( Contratadas ) )
+    // C · Em andamento: só as aplicações do período que seguem em processo
+    MEASURE '_Medidas'[Esteira | Ativos Agora] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            DISTINCTCOUNT('13_ETAPA_RECRUTAMENTO'[application_id]),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    MEASURE '_Medidas'[Esteira | Ativos Acima de 45 Dias] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            DISTINCTCOUNT('13_ETAPA_RECRUTAMENTO'[application_id]),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[days_in_stage] > 45 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    MEASURE '_Medidas'[Esteira | Ativos na Faixa] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR De  = MIN( dFaixaDias[de] )
+        VAR Ate = MAX( dFaixaDias[ate] ) + 1
+        RETURN
+        CALCULATE(
+            DISTINCTCOUNT('13_ETAPA_RECRUTAMENTO'[application_id]),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[days_in_stage] >= De ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[days_in_stage] <  Ate ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    MEASURE '_Medidas'[Esteira | Ativos Acima da Mediana] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        SUMX(
+            VALUES('13_ETAPA_RECRUTAMENTO'[stage_name]),
+            VAR Med = CALCULATE( [Esteira | Dias na Etapa (Mediana)], REMOVEFILTERS('_dCALENDARIO') )
+            RETURN
+                CALCULATE(
+                    DISTINCTCOUNT('13_ETAPA_RECRUTAMENTO'[application_id]),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[days_in_stage] > Med ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+                )
+        )
+    MEASURE '_Medidas'[Esteira | Acima do P90 Hoje] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        SUMX(
+            VALUES( dEtapa[stage_name] ),
+            VAR P = [Esteira | Dias na Etapa (P90)]
+            RETURN
+                IF(
+                    NOT ISBLANK( P ),
+                    CALCULATE(
+                        DISTINCTCOUNT('13_ETAPA_RECRUTAMENTO'[application_id]),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[days_in_stage] > P ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+                    )
+                )
+        )
+    MEASURE '_Medidas'[Esteira | Dias na Etapa Atual] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            MAX('13_ETAPA_RECRUTAMENTO'[days_in_stage]),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+    MEASURE '_Medidas'[Esteira | Aplicações Ativas] =
+        [Esteira | Ativos Agora]
+    // D · Agenda: a exceção (atividade do time, conta entrevistas)
+    MEASURE '_Medidas'[Esteira | Entrevistas Marcadas] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR Apps =
+            CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), REMOVEFILTERS( '_dCALENDARIO' ), REMOVEFILTERS( dEtapa ) )
+        VAR Etapas =
+            FILTER( ALL( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] ),
+                NOT ISFILTERED( dEtapa ) || '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] IN VALUES( dEtapa[stage_name] ) )
+        RETURN
+        CALCULATE(
+            DISTINCTCOUNT( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interview_id] ),
+            REMOVEFILTERS( '_dCALENDARIO' ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] >= Ini ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] <  Fim ),
+            TREATAS( Apps, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id] ),
+            Etapas
+        )
+    MEASURE '_Medidas'[Esteira | Entrevistas na Agenda] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR Apps =
+            CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), REMOVEFILTERS( '_dCALENDARIO' ), REMOVEFILTERS( dEtapa ) )
+        VAR Etapas =
+            FILTER( ALL( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] ),
+                NOT ISFILTERED( dEtapa ) || '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] IN VALUES( dEtapa[stage_name] ) )
+        RETURN
+        CALCULATE(
+            DISTINCTCOUNT( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interview_id] ),
+            REMOVEFILTERS( '_dCALENDARIO' ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] >= Ini ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] <  Fim ),
+            TREATAS( Apps, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id] ),
+            Etapas
+        )
+    MEASURE '_Medidas'[Esteira | Entrevistas Realizadas] =
+        CALCULATE( [Esteira | Entrevistas na Agenda], KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] < NOW() ) )
+    MEASURE '_Medidas'[Esteira | Entrevistas a Realizar] =
+        COALESCE( [Esteira | Entrevistas na Agenda], 0 ) - COALESCE( [Esteira | Entrevistas Realizadas], 0 )
+    MEASURE '_Medidas'[Esteira | Marcadas Já Realizadas] =
+        CALCULATE( [Esteira | Entrevistas Marcadas], KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] < NOW() ) )
+    MEASURE '_Medidas'[Esteira | Marcadas a Realizar] =
+        COALESCE( [Esteira | Entrevistas Marcadas], 0 ) - COALESCE( [Esteira | Marcadas Já Realizadas], 0 )
+    MEASURE '_Medidas'[Esteira | Entrevistas Aprovados] =
+        CALCULATE( [Esteira | Entrevistas Realizadas], KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[resultado_entrevista] = "Aprovado" ) )
+    MEASURE '_Medidas'[Esteira | Entrevistas Rejeitados] =
+        CALCULATE( [Esteira | Entrevistas Realizadas], KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[resultado_entrevista] = "Rejeitado" ) )
+    MEASURE '_Medidas'[Esteira | Entrevistas Marcadas (mês atual)] =
+        VAR Hoje = TODAY()
+        RETURN CALCULATE( [Esteira | Entrevistas Marcadas], DATESBETWEEN('_dCALENDARIO'[Data], DATE(YEAR(Hoje), MONTH(Hoje), 1), Hoje) )
+    MEASURE '_Medidas'[Esteira | Entrevistas Marcadas (mês anterior)] =
+        VAR Hoje = TODAY()
+        RETURN CALCULATE( [Esteira | Entrevistas Marcadas], DATESBETWEEN('_dCALENDARIO'[Data], EDATE(DATE(YEAR(Hoje), MONTH(Hoje), 1), -1), EDATE(Hoje, -1)) )
+    MEASURE '_Medidas'[Esteira | Entrevistas Marcadas (YTD)] =
+        VAR Hoje = TODAY()
+        RETURN CALCULATE( [Esteira | Entrevistas Marcadas], DATESBETWEEN('_dCALENDARIO'[Data], DATE(YEAR(Hoje), 1, 1), Hoje) )
+    // E · Textos e destaques
+    MEASURE '_Medidas'[Esteira | Texto Contratados] =
+        "Das aplicações com candidatura no período"
+    MEASURE '_Medidas'[Esteira | Texto SLA] =
+        "Mediana da candidatura à contratação, aplicações do período"
+    MEASURE '_Medidas'[Esteira | Texto Em Andamento] =
+        FORMAT( COALESCE([Esteira | Ativos Acima de 45 Dias], 0), "#,0" ) & " paradas há mais de 45 dias"
+    MEASURE '_Medidas'[Esteira | Texto Entrevistas] =
+        VAR A = COALESCE( [Esteira | Entrevistas na Agenda], 0 )
+        VAR R = COALESCE( [Esteira | Entrevistas Realizadas], 0 )
+        RETURN
+        FORMAT( A, "#,0" ) & " acontecem no período: "
+            & FORMAT( R, "#,0" ) & " realizadas, " & FORMAT( A - R, "#,0" ) & " a realizar"
+    MEASURE '_Medidas'[Esteira | Destaque Entrevistas] =
+        VAR M = [Esteira | Entrevistas Marcadas]
+        VAR A = COALESCE( [Esteira | Entrevistas na Agenda], 0 )
+        VAR Cv = [Esteira | Conversão Entrevista %]
+        VAR Atual = COALESCE( [Esteira | Entrevistas Marcadas (mês atual)], 0 )
+        VAR Ant = COALESCE( [Esteira | Entrevistas Marcadas (mês anterior)], 0 )
+        RETURN
+        IF(
+            M > 0 || A > 0,
+            FORMAT( M, "#,0" ) & " || Entrevistas marcadas no período || "
+                & FORMAT( A, "#,0" ) & " acontecem no período. "
+                & IF( NOT ISBLANK( Cv ), FORMAT( Cv, "0%" ) & " de aprovação nas realizadas. ", "" )
+                & "Marcadas no mês: " & FORMAT( Atual, "#,0" ) & " contra " & FORMAT( Ant, "#,0" )
+                & " no mesmo intervalo do mês anterior. || info"
+        )
+    // F · Página Nominal (até a versão 1.2.0 do visual)
+    MEASURE '_Medidas'[Esteira | Nominal Situação] =
+        VAR NoPer = NOT ISBLANK( [Esteira | Candidatos] )
+        VAR Ativo = NOT ISBLANK( [Esteira | Ativos Agora] )
+        VAR St    = LOWER( MAX( '13_ETAPA_RECRUTAMENTO'[status] ) )
+        VAR Dec   = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), KEEPFILTERS( LEFT( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name], 7 ) = "[Offer]" ) )
+        RETURN
+        SWITCH( TRUE(),
+            NOT NoPer, BLANK(),
+            Ativo, "Em andamento",
+            St = "hired", "Contratada",
+            St = "rejected" && Dec > 0, "Declinou",
+            St = "rejected", "Rejeitada",
+            "Outro" )
+    MEASURE '_Medidas'[Esteira | Nominal Entrevista no Período] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            MIN( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] ),
+            REMOVEFILTERS( '_dCALENDARIO' ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] >= Ini ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] <  Fim ),
+            TREATAS( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id] )
+        )
+    // G · Conferência
+    MEASURE '_Medidas'[Esteira | Check Coorte] =
+        [Esteira | Candidatos] - [Esteira | Contratados] - [Esteira | Rejeitados no Processo] - COALESCE( [Esteira | Ativos Agora], 0 )
+    MEASURE '_Medidas'[Esteira | Check Funil] =
+        [Esteira | Candidatos] - CALCULATE( [Esteira | Funil Aplicações], TREATAS( { 1 }, dFunil[ordem_passo] ) )
+    MEASURE '_Medidas'[Esteira | Check Agenda] =
+        [Esteira | Entrevistas na Agenda] - [Esteira | Entrevistas Realizadas] - [Esteira | Entrevistas a Realizar]
+
+EVALUATE
+ROW(
+    "Aplicações",            [Esteira | Candidatos],
+    "Contratadas",           [Esteira | Contratados],
+    "Rejeitadas",            [Esteira | Rejeitados no Processo],
+    "Em andamento",          [Esteira | Ativos Agora],
+    "Check Coorte (≈0)",     [Esteira | Check Coorte],
+    "Check Funil (≈0)",      [Esteira | Check Funil],
+    "Entrevistas marcadas",  [Esteira | Entrevistas Marcadas],
+    "Entrevistas na agenda", [Esteira | Entrevistas na Agenda],
+    "Realizadas",            [Esteira | Entrevistas Realizadas],
+    "A realizar",            [Esteira | Entrevistas a Realizar],
+    "Check Agenda (=0)",     [Esteira | Check Agenda],
+    "SLA mediano",           [Esteira | SLA da Esteira (Mediana)]
+)

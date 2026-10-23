@@ -1,0 +1,165 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Lista (esquerda)",
+            "name": "grupo",
+            "kind": "Grouping",
+            "description": "Ex.: dEtapa[stage_name]"
+        },
+        {
+            "displayName": "Itens (direita)",
+            "name": "item",
+            "kind": "Grouping",
+            "description": "Ex.: 13_ETAPA_RECRUTAMENTO[rejection_reason_name]"
+        },
+        {
+            "displayName": "Valor",
+            "name": "valor",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Rejeitados"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "grupo": {
+                        "max": 1
+                    },
+                    "item": {
+                        "max": 1
+                    },
+                    "valor": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "grupo"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "item"
+                            }
+                        }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 30000
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "valor"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "textos": {
+            "properties": {
+                "unidade": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "busca": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "vazio": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "nota": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "item": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "itens": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "top": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "ordem": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "filtrarGrupo": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "destaque": {
+            "properties": {
+                "prefixo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "cor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "barra": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "selecao": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "privileges": []
+}

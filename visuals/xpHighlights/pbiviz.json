@@ -1,0 +1,26 @@
+{
+  "visual": {
+    "name": "xpHighlights",
+    "displayName": "XP · Lista de destaques",
+    "guid": "xpHighlights7099AF6E201A4947BD380B1B207F8A1D",
+    "visualClassName": "Visual",
+    "version": "1.0.0.0",
+    "description": "Destaques em faixas com número grande, título, texto e cor por status (ruim, atenção, bom, info). Cada destaque vem de uma medida de texto. Padrão visual XP.",
+    "supportUrl": "https://github.com/",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "5.11.1",
+  "author": {
+    "name": "Time de People Analytics",
+    "email": "people-analytics@example.com"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": null,
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": null,
+  "stringResources": [],
+  "version": "1.0.0.0"
+}

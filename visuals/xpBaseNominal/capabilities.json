@@ -1,0 +1,359 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Link (1ª coluna)",
+            "name": "link",
+            "kind": "Grouping",
+            "description": "URL do Greenhouse ou ID (com o modelo do link)"
+        },
+        {
+            "displayName": "Candidato",
+            "name": "candidato",
+            "kind": "Grouping",
+            "description": "Nome do candidato"
+        },
+        {
+            "displayName": "Vaga",
+            "name": "vaga",
+            "kind": "Grouping",
+            "description": "Nome da vaga"
+        },
+        {
+            "displayName": "Recrutador",
+            "name": "recrutador",
+            "kind": "Grouping",
+            "description": "Coluna de recrutador"
+        },
+        {
+            "displayName": "Colunas extras",
+            "name": "extras",
+            "kind": "Grouping",
+            "description": "Aparecem em todas as bases, depois das fixas (ex.: praça, sourcer, e-mail)"
+        },
+        {
+            "displayName": "Situação",
+            "name": "situacao",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Situação (Em andamento / Contratada / Rejeitada / Declinou)"
+        },
+        {
+            "displayName": "Etapa atual / onde parou",
+            "name": "etapa",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Etapa Atual"
+        },
+        {
+            "displayName": "Dias na etapa",
+            "name": "dias",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Dias na Etapa"
+        },
+        {
+            "displayName": "Motivo",
+            "name": "motivo",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Motivo"
+        },
+        {
+            "displayName": "Data da candidatura",
+            "name": "candidatura",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Candidatura"
+        },
+        {
+            "displayName": "Data de saída",
+            "name": "saida",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Data de Saída (rejeição, recusa ou contratação)"
+        },
+        {
+            "displayName": "SLA (dias)",
+            "name": "sla",
+            "kind": "Measure",
+            "description": "Esteira | Nominal SLA"
+        },
+        {
+            "displayName": "Próxima entrevista",
+            "name": "entrevista",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Próxima Entrevista"
+        },
+        {
+            "displayName": "Etapa da entrevista",
+            "name": "etapaEntrevista",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Etapa da Entrevista"
+        },
+        {
+            "displayName": "Jornada",
+            "name": "jornada",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Jornada"
+        },
+        {
+            "displayName": "Etapas seguintes",
+            "name": "seguintes",
+            "kind": "Measure",
+            "description": "Esteira | Nominal Etapas Seguintes"
+        },
+        {
+            "displayName": "No período (1/vazio)",
+            "name": "noPeriodo",
+            "kind": "Measure",
+            "description": "Esteira | Nominal No Período: 1 quando a candidatura está no período. Define o card Todas."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "link": {
+                        "max": 1
+                    },
+                    "candidato": {
+                        "max": 1
+                    },
+                    "vaga": {
+                        "max": 1
+                    },
+                    "recrutador": {
+                        "max": 1
+                    },
+                    "extras": {
+                        "max": 4
+                    },
+                    "situacao": {
+                        "max": 1
+                    },
+                    "etapa": {
+                        "max": 1
+                    },
+                    "dias": {
+                        "max": 1
+                    },
+                    "motivo": {
+                        "max": 1
+                    },
+                    "candidatura": {
+                        "max": 1
+                    },
+                    "saida": {
+                        "max": 1
+                    },
+                    "sla": {
+                        "max": 1
+                    },
+                    "entrevista": {
+                        "max": 1
+                    },
+                    "etapaEntrevista": {
+                        "max": 1
+                    },
+                    "jornada": {
+                        "max": 1
+                    },
+                    "seguintes": {
+                        "max": 1
+                    },
+                    "noPeriodo": {
+                        "max": 1
+                    }
+                }
+            ],
+            "table": {
+                "rows": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "link"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "candidato"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "vaga"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "recrutador"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "extras"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "situacao"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "etapa"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "dias"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "motivo"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "candidatura"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "saida"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "sla"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "entrevista"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "etapaEntrevista"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "jornada"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "seguintes"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "noPeriodo"
+                            }
+                        }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "window": {
+                            "count": 10000
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "objects": {
+        "cards": {
+            "properties": {
+                "andamento": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "agendadas": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "contratadas": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rejeitadas": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "declinaram": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "todas": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "dica": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "textos": {
+            "properties": {
+                "busca": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "link": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "link": {
+            "properties": {
+                "modelo": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "baseInicial": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "linhasTela": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "maxLinhas": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "dias": {
+            "properties": {
+                "alerta": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        }
+    },
+    "privileges": [
+        {
+            "name": "ExportContent",
+            "essential": false
+        }
+    ]
+}

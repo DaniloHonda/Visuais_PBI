@@ -1,0 +1,287 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Etapas",
+            "name": "etapa",
+            "kind": "Grouping",
+            "description": "Uma linha por etapa do funil, na ordem da coluna (use Classificar por coluna)."
+        },
+        {
+            "displayName": "Grupo (cor e legenda)",
+            "name": "grupo",
+            "kind": "Grouping",
+            "description": "Opcional. Colore as barras por grupo e mostra a legenda. Ex.: Triagem, Entrevistas."
+        },
+        {
+            "displayName": "Valor",
+            "name": "valor",
+            "kind": "Measure",
+            "description": "Quantidade em cada etapa."
+        },
+        {
+            "displayName": "Base do % (opcional)",
+            "name": "base",
+            "kind": "Measure",
+            "description": "Denominador do \"% do total\". Se vazio, usa o valor da primeira etapa."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "etapa": {
+                        "max": 1
+                    },
+                    "valor": {
+                        "max": 1
+                    },
+                    "base": {
+                        "max": 1
+                    },
+                    "grupo": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "etapa"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "grupo"
+                            }
+                        }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 200
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "valor"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "base"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "barras": {
+            "properties": {
+                "formato": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "cor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "destacarUltima": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "corUltima": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "etapaDestaque": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "corDestaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "altura": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "espacamento": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "modoCor": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "corInicio": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "corFim": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "rotulos": {
+            "properties": {
+                "largura": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "tamanho": {
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "cor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "percentuais": {
+            "properties": {
+                "mostrarTotal": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textoTotal": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "mostrarAnterior": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textoAnterior": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "textoBase": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "cor1": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor2": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor3": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor4": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor5": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor6": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "mostrarLegenda": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        }
+    },
+    "sorting": {
+        "default": {}
+    },
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "privileges": []
+}

@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpTrend",
+        "displayName": "XP · Evolução",
+        "guid": "xpTrend5D2A7C61E94B4F0E8A3B19C2D7F04E61",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Linhas no tempo com troca de série e de granularidade (dia, semana, mês, trimestre, ano), período parcial, datas futuras tracejadas e dica ao passar o mouse. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

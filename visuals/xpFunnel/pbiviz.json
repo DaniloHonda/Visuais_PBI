@@ -1,0 +1,26 @@
+{
+  "visual": {
+    "name": "xpFunnel",
+    "displayName": "XP · Funil",
+    "guid": "xpFunnelEA64EB04471A40D882D4147426A76E42",
+    "visualClassName": "Visual",
+    "version": "1.2.0.0",
+    "description": "Funil de etapas com número, % sobre o total e % sobre a etapa anterior. Padrão visual XP.",
+    "supportUrl": "https://github.com/",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "5.11.1",
+  "author": {
+    "name": "Time de People Analytics",
+    "email": "people-analytics@example.com"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": null,
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": null,
+  "stringResources": [],
+  "version": "1.2.0.0"
+}

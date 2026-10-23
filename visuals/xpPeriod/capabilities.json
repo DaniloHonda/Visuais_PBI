@@ -1,0 +1,170 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Data",
+            "name": "data",
+            "kind": "Grouping",
+            "description": "Coluna de data do calendário (ex.: _dCALENDARIO[Data])."
+        },
+        {
+            "displayName": "Data de referência (opcional)",
+            "name": "referencia",
+            "kind": "Measure",
+            "description": "Data de 'hoje' para os atalhos (ex.: última atualização). Se vazio, usa hoje. Não limita o calendário."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "data": {
+                        "max": 1
+                    },
+                    "referencia": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "data"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 10000
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "referencia"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "general": {
+            "properties": {
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                }
+            }
+        },
+        "caixa": {
+            "properties": {
+                "titulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloTudo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "altura": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "atalhos": {
+            "properties": {
+                "mes": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "mesAnterior": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "trimestre": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "ultimos30": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "ano": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "tudo": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "proximos30": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "trimestreAnterior": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "destaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borda": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fundo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "calendario": {
+            "properties": {
+                "futuro": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        }
+    },
+    "supportsSynchronizingFilterState": true,
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "suppressDefaultTitle": true,
+    "privileges": []
+}

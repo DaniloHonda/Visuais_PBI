@@ -1,0 +1,194 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Itens",
+            "name": "item",
+            "kind": "Grouping",
+            "description": "Ex.: etapas, na ordem do processo (Classificar por coluna)."
+        },
+        {
+            "displayName": "Peso de cada item",
+            "name": "peso",
+            "kind": "Measure",
+            "description": "Quanto cada item consome (ex.: dias médios na etapa). O total é repartido por esses pesos."
+        },
+        {
+            "displayName": "Total realizado",
+            "name": "total",
+            "kind": "Measure",
+            "description": "Número grande e tamanho da régua (ex.: SLA mediano). Precisa ignorar o item da linha."
+        },
+        {
+            "displayName": "Total alternativo (opcional)",
+            "name": "total2",
+            "kind": "Measure",
+            "description": "Se preenchido, aparece um botão para alternar o número grande e a régua (ex.: Mediana | Média)."
+        },
+        {
+            "displayName": "Meta",
+            "name": "meta",
+            "kind": "Measure",
+            "description": "Fim da régua (ex.: 45 dias)."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "item": {
+                        "max": 1
+                    },
+                    "peso": {
+                        "max": 1
+                    },
+                    "total": {
+                        "max": 1
+                    },
+                    "meta": {
+                        "max": 1
+                    },
+                    "total2": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "item"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 300
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "peso"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "total"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "total2"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "meta"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "textos": {
+            "properties": {
+                "unidade": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "unidadeCurta": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "realizado": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "partePor": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloTotal": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloTotal2": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "inicio": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fim": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "dentro": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "acima": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "lista": {
+            "properties": {
+                "ordemInicial": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "mostrarZerados": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "altura": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        }
+    },
+    "sorting": {
+        "default": {}
+    },
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "privileges": []
+}

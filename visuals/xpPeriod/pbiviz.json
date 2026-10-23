@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpPeriod",
+        "displayName": "XP · Período",
+        "guid": "xpPeriodEAC800C5AABA41218651585C68BB2F12",
+        "visualClassName": "Visual",
+        "version": "2.2.0.0",
+        "description": "Filtro de período com botões rápidos (mês atual, mês anterior, trimestre atual e anterior, desde o início) e intervalo personalizado. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "2.2.0.0"
+}

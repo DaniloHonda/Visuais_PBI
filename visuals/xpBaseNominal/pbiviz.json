@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpBaseNominal",
+        "displayName": "XP · Base nominal",
+        "guid": "xpBaseNominal9C2E7F4A1B3D4E8C96A0F5B2D7C1E384",
+        "visualClassName": "Visual",
+        "version": "1.1.0.0",
+        "description": "Big numbers clicáveis que trocam a base da lista nominal (em andamento, agendadas, contratadas, rejeitadas, declinaram, todas), com link, busca, colunas por base e linha do tempo de cada aplicação. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.1.0.0"
+}

@@ -1,0 +1,26 @@
+{
+  "visual": {
+    "name": "xpOrg",
+    "displayName": "XP · Organograma",
+    "guid": "xpOrg7C41D9A2B6E84F0C9E3A51D2F8B06C47",
+    "visualClassName": "Visual",
+    "version": "1.0.0.0",
+    "description": "Segmentação em árvore por níveis do organograma (N2, N3, N4…), com busca e contagem. Padrão visual XP.",
+    "supportUrl": "https://github.com/",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "5.11.1",
+  "author": {
+    "name": "Time de People Analytics",
+    "email": "people-analytics@example.com"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": null,
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": null,
+  "stringResources": [],
+  "version": "1.0.0.0"
+}

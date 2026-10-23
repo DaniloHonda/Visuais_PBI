@@ -1,0 +1,141 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Níveis (N2, N3, N4… em ordem)",
+            "name": "niveis",
+            "kind": "Grouping",
+            "description": "Colunas do organograma, do nível mais alto para o mais baixo."
+        },
+        {
+            "displayName": "Contagem (opcional)",
+            "name": "contagem",
+            "kind": "Measure",
+            "description": "Número ao lado de cada nome (ex.: aplicações)."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "niveis": {
+                        "max": 8
+                    },
+                    "contagem": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "niveis"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 30000
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "contagem"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "general": {
+            "properties": {
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                }
+            }
+        },
+        "cabecalho": {
+            "properties": {
+                "titulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "mostrar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "vazio": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "alturaCaixa": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "primeiroNivel": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "nomeDoEmail": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "ordem": {
+                    "type": {
+                        "enumeration": []
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "destaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borda": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fundo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "supportsSynchronizingFilterState": true,
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "suppressDefaultTitle": true,
+    "privileges": []
+}

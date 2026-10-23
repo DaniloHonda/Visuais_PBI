@@ -1,0 +1,118 @@
+// Dash de Esteiras · etapas duplicadas na 13 (mesma passagem com dois job_stage_id)
+// Cada PASSAGEM (aplicação + etapa + data de entrada) conta uma vez; quando as cópias divergem, vale a maior saída/dias.
+// 1) Executar (F5) para conferir.  2) "Atualizar modelo com alterações" para gravar.
+DEFINE
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Média)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR P =
+            CALCULATETABLE(
+                GROUPBY( '13_ETAPA_RECRUTAMENTO',
+                    '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+                    "@d", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[days_in_stage] ) ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        RETURN AVERAGEX( P, [@d] )
+
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Mediana)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR P =
+            CALCULATETABLE(
+                GROUPBY( '13_ETAPA_RECRUTAMENTO',
+                    '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+                    "@d", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[days_in_stage] ) ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        RETURN MEDIANX( P, [@d] )
+
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (P90)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR P =
+            CALCULATETABLE(
+                GROUPBY( '13_ETAPA_RECRUTAMENTO',
+                    '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+                    "@d", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[days_in_stage] ) ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        RETURN PERCENTILEX.INC( P, [@d], 0.9 )
+
+    MEASURE '_Medidas'[Esteira | Base SLA] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        COUNTROWS(
+            CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO',
+                    '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[stage_name]) ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        )
+
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Contratações)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR Contratadas =
+            CALCULATETABLE(
+                VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                REMOVEFILTERS( dEtapa ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_contratacao]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        VAR Dias =
+            CALCULATE(
+                SUMX(
+                    GROUPBY( '13_ETAPA_RECRUTAMENTO',
+                        '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+                        "@d", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[days_in_stage] ) ),
+                    [@d]
+                ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_entrada_stage]) ),
+                TREATAS( Contratadas, '13_ETAPA_RECRUTAMENTO'[application_id] )
+            )
+        RETURN DIVIDE( Dias, COUNTROWS( Contratadas ) )
+
+    // Linha do tempo da Nominal: só etapas por onde passou (com data), uma vez cada.
+    MEASURE '_Medidas'[Esteira | Nominal Jornada] =
+        IF( ISBLANK( [Esteira | Nominal Na Base] ), BLANK(),
+            CONCATENATEX(
+                GROUPBY(
+                    FILTER( '13_ETAPA_RECRUTAMENTO', NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+                    '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+                    "@saida", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                    "@res", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+                    "@dias", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[days_in_stage] )
+                ),
+                '13_ETAPA_RECRUTAMENTO'[stage_name]
+                    & "|" & FORMAT( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], "yyyy-mm-dd" )
+                    & "|" & IF( ISBLANK( [@saida] ), "", FORMAT( [@saida], "yyyy-mm-dd" ) )
+                    & "|" & [@res]
+                    & "|" & FORMAT( [@dias], "0" ),
+                ";;",
+                '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], ASC
+            )
+        )
+
+EVALUATE
+ROW(
+    "Dias média", [Esteira | Dias na Etapa (Média)],
+    "Dias mediana", [Esteira | Dias na Etapa (Mediana)],
+    "P90", [Esteira | Dias na Etapa (P90)],
+    "Passagens (base)", [Esteira | Base SLA],
+    "Jornada de uma aplicação", CALCULATE( [Esteira | Nominal Jornada], '13_ETAPA_RECRUTAMENTO'[application_id] = "<application_id>" )
+)

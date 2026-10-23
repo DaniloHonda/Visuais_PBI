@@ -1,0 +1,26 @@
+{
+  "visual": {
+    "name": "xpSlicer",
+    "displayName": "XP · Segmentação",
+    "guid": "xpSlicer3AD5352EEC754FE9BDE8D1D040A42D36",
+    "visualClassName": "Visual",
+    "version": "2.2.0.0",
+    "description": "Segmentação em lista com busca sem acento, contagem por item, selecionar todos e limpar. Padrão visual XP.",
+    "supportUrl": "https://github.com/",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "5.11.1",
+  "author": {
+    "name": "Time de People Analytics",
+    "email": "people-analytics@example.com"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": null,
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": null,
+  "stringResources": [],
+  "version": "2.2.0.0"
+}

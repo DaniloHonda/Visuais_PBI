@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpNominal",
+        "displayName": "XP · Tabela nominal",
+        "guid": "xpNominal4E8B1C7A2D6F4930B5E2A7C1D9F36B82",
+        "visualClassName": "Visual",
+        "version": "1.1.0.0",
+        "description": "Lista nominal com link, colunas livres, situação em selo, dias com alerta, busca, botões por segmento, ordenação e contadores. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.1.0.0"
+}

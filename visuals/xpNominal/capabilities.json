@@ -1,0 +1,187 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Link",
+            "name": "link",
+            "kind": "Grouping",
+            "description": "URL ou ID (com o modelo do link em Formatar → Link)."
+        },
+        {
+            "displayName": "Colunas",
+            "name": "colunas",
+            "kind": "Grouping",
+            "description": "Campos da lista, na ordem em que devem aparecer. A primeira sai em negrito."
+        },
+        {
+            "displayName": "Segmento (botões)",
+            "name": "segmento",
+            "kind": "Grouping",
+            "description": "Ex.: etapa. Vira botões de filtro (Todas / Pré Offer / Offer) e uma coluna."
+        },
+        {
+            "displayName": "Situação (selo)",
+            "name": "situacao",
+            "kind": "Grouping",
+            "description": "Texto mostrado em selo."
+        },
+        {
+            "displayName": "Dias",
+            "name": "dias",
+            "kind": "Measure",
+            "description": "Ex.: dias na etapa. Ordena a lista e ganha cor acima dos limites."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "link": {
+                        "max": 1
+                    },
+                    "colunas": {
+                        "max": 30
+                    },
+                    "segmento": {
+                        "max": 1
+                    },
+                    "situacao": {
+                        "max": 1
+                    },
+                    "dias": {
+                        "max": 1
+                    }
+                }
+            ],
+            "table": {
+                "rows": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "link"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "colunas"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "segmento"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "situacao"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "dias"
+                            }
+                        }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "window": {
+                            "count": 10000
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "objects": {
+        "textos": {
+            "properties": {
+                "total": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "busca": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "todos": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "link": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colDias": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "unidade": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "link": {
+            "properties": {
+                "modelo": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "dias": {
+            "properties": {
+                "atencao": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "alerta": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "botao": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "colunaSegmento": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "linhasTela": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "maxLinhas": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "exportar": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        }
+    },
+    "privileges": [
+        {
+            "name": "ExportContent",
+            "essential": false
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpHeatmap",
+        "displayName": "XP · Matriz de calor",
+        "guid": "xpHeatmapC41F7A2E6B8D4E3091A5D2C7F8E3B640",
+        "visualClassName": "Visual",
+        "version": "1.2.0.0",
+        "description": "Matriz linhas × colunas com cor por volume, coluna de alerta, busca, ordenação por coluna, números ou % da linha e total. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.2.0.0"
+}

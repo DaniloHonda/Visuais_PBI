@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpCompositeBars",
+        "displayName": "XP · Barras com composição",
+        "guid": "xpCompositeBars420CC7894BF24316B37271358DB2AAB5",
+        "visualClassName": "Visual",
+        "version": "1.1.0.0",
+        "description": "Lista de barras empilhadas (ex.: aprovados, rejeitados, em andamento) com busca, filtro de linhas vazias, ordenação, indicador à direita e texto de destaque. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.1.0.0"
+}

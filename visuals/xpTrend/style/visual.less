@@ -1,0 +1,39 @@
+.xp-tr {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    color: #121212;
+    overflow: hidden;
+    user-select: none;
+}
+.xp-tr__bar { display: flex; align-items: center; gap: 12px; min-height: 36px; flex-wrap: wrap; }
+.xp-tr__spacer { flex: 1; }
+.xp-tr__seg { display: inline-flex; border: 1px solid #A9B4B6; border-radius: 10px; overflow: hidden; background: #FFFFFF; }
+.xp-tr__opt {
+    font: inherit; font-size: 13px; font-weight: 600; color: #3C3C3C;
+    padding: 7px 14px; border: 0; border-right: 1px solid #DDE2E3; background: transparent; cursor: pointer;
+    &:last-child { border-right: 0; }
+    &:hover { background: #F2F5F5; }
+    &:focus-visible { outline: 2px solid #067D84; outline-offset: -2px; }
+}
+.xp-tr__opt--on, .xp-tr__opt--on:hover { background: #E3F1F0; color: #03474C; }
+.xp-tr__kpis { display: flex; flex-wrap: wrap; gap: 4px 22px; align-items: baseline; font-size: 13px; color: #5E5E5E; padding: 10px 4px 6px; }
+.xp-tr__kpi strong { font-size: 20px; color: #121212; font-variant-numeric: tabular-nums; }
+.xp-tr__note { margin-left: auto; font-size: 12px; color: #6B6B6B; }
+.xp-tr__dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+.xp-tr__chart { position: relative; flex: none; }
+.xp-tr__svg { display: block; overflow: visible; }
+.xp-tr__ytick { font-size: 11px; fill: #8A8A8A; text-anchor: end; }
+.xp-tr__xtick { font-size: 11px; fill: #6B6B6B; text-anchor: middle; }
+.xp-tr__today { font-size: 11px; font-weight: 700; fill: #5E5E5E; }
+.xp-tr__end { font-size: 11px; font-weight: 700; fill: #121212; text-anchor: end; }
+.xp-tr__tip {
+    position: absolute; pointer-events: none; background: #121212; color: #FFFFFF; border-radius: 10px;
+    padding: 10px 12px; font-size: 12.5px; line-height: 1.6; box-shadow: 0 6px 18px rgba(0, 0, 0, .2); white-space: nowrap; z-index: 2;
+    strong { font-weight: 700; }
+    .xp-tr__dot { box-shadow: 0 0 0 1px rgba(255, 255, 255, .6); }
+}
+.xp-tr__tip-head { font-weight: 700; font-size: 13px; display: flex; gap: 8px; align-items: center; }
+.xp-tr__tag { font-size: 11px; font-weight: 600; background: rgba(255, 255, 255, .16); border-radius: 6px; padding: 0 6px; }
+.xp-tr__empty { color: #6B6B6B; font-size: 13px; padding: 24px; text-align: center; }

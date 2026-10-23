@@ -1,0 +1,160 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Etapa",
+            "name": "etapa",
+            "kind": "Grouping",
+            "description": "Ex.: dEtapa[stage_name]"
+        },
+        {
+            "displayName": "Típico (mediana, dias)",
+            "name": "tipico",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Dias na Etapa (Mediana)"
+        },
+        {
+            "displayName": "90% saem até (P90, dias)",
+            "name": "p90",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Dias na Etapa (P90)"
+        },
+        {
+            "displayName": "Base (concluídas)",
+            "name": "base",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Base SLA"
+        },
+        {
+            "displayName": "Acima hoje",
+            "name": "acima",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Acima do P90 Hoje"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "etapa": {
+                        "max": 1
+                    },
+                    "tipico": {
+                        "max": 1
+                    },
+                    "p90": {
+                        "max": 1
+                    },
+                    "base": {
+                        "max": 1
+                    },
+                    "acima": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "etapa"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 1000
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "tipico"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "p90"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "base"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "acima"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "textos": {
+            "properties": {
+                "colEtapa": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "resumo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rodape": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "soMovimento": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "ordemInicial": {
+                    "type": {
+                        "enumeration": []
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "tipico": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "p90": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "acima": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "privileges": []
+}

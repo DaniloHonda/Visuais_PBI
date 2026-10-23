@@ -1,0 +1,156 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Campo",
+            "name": "campo",
+            "kind": "Grouping",
+            "description": "Coluna a filtrar (ex.: recrutador)."
+        },
+        {
+            "displayName": "Contagem (opcional)",
+            "name": "contagem",
+            "kind": "Measure",
+            "description": "Número ao lado de cada item (ex.: aplicações)."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "campo": {
+                        "max": 1
+                    },
+                    "contagem": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "campo"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 5000
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "contagem"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "general": {
+            "properties": {
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                }
+            }
+        },
+        "cabecalho": {
+            "properties": {
+                "titulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "mostrar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "vazio": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "unica": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "busca": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "selecionarTodos": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "ordem": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "semDadosNoFim": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "modo": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "alturaCaixa": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "destaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borda": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fundo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "supportsSynchronizingFilterState": true,
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "suppressDefaultTitle": true,
+    "privileges": []
+}

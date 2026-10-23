@@ -1,0 +1,323 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Linhas",
+            "name": "categoria",
+            "kind": "Grouping",
+            "description": "Uma barra por item (ex.: etapa), na ordem da coluna. Para mostrar itens sem dados: clique com o botão direito no campo → Mostrar itens sem dados."
+        },
+        {
+            "displayName": "Partes da barra",
+            "name": "partes",
+            "kind": "Measure",
+            "description": "De 1 a 5 medidas, empilhadas na ordem em que aparecem aqui."
+        },
+        {
+            "displayName": "Total da linha (opcional)",
+            "name": "total",
+            "kind": "Measure",
+            "description": "Define o comprimento da barra e o texto abaixo do nome (ex.: entraram). Se vazio, usa a soma das partes."
+        },
+        {
+            "displayName": "Indicador à direita (opcional)",
+            "name": "indicador",
+            "kind": "Measure",
+            "description": "Ex.: conversão da etapa."
+        },
+        {
+            "displayName": "Texto de destaque (opcional)",
+            "name": "destaque",
+            "kind": "Measure",
+            "description": "Medida de texto mostrada na faixa abaixo das barras. Use **texto** para negrito."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "categoria": {
+                        "max": 1
+                    },
+                    "partes": {
+                        "max": 5
+                    },
+                    "total": {
+                        "max": 1
+                    },
+                    "indicador": {
+                        "max": 1
+                    },
+                    "destaque": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "categoria"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 500
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "partes"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "total"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "indicador"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "destaque"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "barras": {
+            "properties": {
+                "altura": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "espacamento": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "cor1": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor2": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor3": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor4": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "cor5": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "mostrarDetalhe": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "mostrarLegenda": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textoVazio": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "rotulos": {
+            "properties": {
+                "largura": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "tamanho": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "textoTotal": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotulo1": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotulo2": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotulo3": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotulo4": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotulo5": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "indicador": {
+            "properties": {
+                "texto": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "ferramentas": {
+            "properties": {
+                "busca": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "soComDados": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "soComDadosInicial": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "ordenacao": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "destaque": {
+            "properties": {
+                "mostrar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fundo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "resumo": {
+            "properties": {
+                "mostrar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textoTotal": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "nota": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "textoNota": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "pareto": {
+            "properties": {
+                "ativar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "corte": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "item": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "medida": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "ordemInicial": {
+                    "type": {
+                        "enumeration": []
+                    }
+                }
+            }
+        }
+    },
+    "sorting": {
+        "default": {}
+    },
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "privileges": []
+}

@@ -1,0 +1,218 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Data",
+            "name": "data",
+            "kind": "Grouping",
+            "description": "Coluna de data por dia (ex.: _dCALENDARIO[Data]). O visual agrupa em semana, mês, trimestre e ano."
+        },
+        {
+            "displayName": "Série 1: primeira linha",
+            "name": "s1a",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Aprovados por Data"
+        },
+        {
+            "displayName": "Série 1: segunda linha",
+            "name": "s1b",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Rejeitados por Data"
+        },
+        {
+            "displayName": "Série 2: primeira linha",
+            "name": "s2a",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Entrevistas Criadas"
+        },
+        {
+            "displayName": "Série 2: segunda linha",
+            "name": "s2b",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Entrevistas Agendadas (pode ter datas futuras)"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "data": {
+                        "max": 1
+                    },
+                    "s1a": {
+                        "max": 1
+                    },
+                    "s1b": {
+                        "max": 1
+                    },
+                    "s2a": {
+                        "max": 1
+                    },
+                    "s2b": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "data"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 30000
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "s1a"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "s1b"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "s2a"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "s2b"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "textos": {
+            "properties": {
+                "serie1": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "serie2": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "nome1a": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "nome1b": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "nome2a": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "nome2b": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloTaxa": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloFuturo": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "granularidade": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "serieInicial": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "mostrarTaxa": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "mostrarHoje": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "c1a": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "c1b": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "c2a": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "c2b": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "area": {
+            "properties": {
+                "area1": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "area2": {
+                    "type": {
+                        "enumeration": []
+                    }
+                }
+            }
+        }
+    },
+    "privileges": []
+}

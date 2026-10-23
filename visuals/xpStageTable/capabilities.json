@@ -1,0 +1,277 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Etapa",
+            "name": "etapa",
+            "kind": "Grouping",
+            "description": "Ex.: dEtapa[passo], classificada pela ordem do processo."
+        },
+        {
+            "displayName": "Participantes",
+            "name": "participantes",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Participantes"
+        },
+        {
+            "displayName": "Aprovados",
+            "name": "aprovados",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Aprovados"
+        },
+        {
+            "displayName": "Rejeitados",
+            "name": "rejeitados",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Rejeitados"
+        },
+        {
+            "displayName": "Em andamento",
+            "name": "andamento",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Em Andamento"
+        },
+        {
+            "displayName": "SLA média (dias)",
+            "name": "media",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Dias na Etapa (Média)"
+        },
+        {
+            "displayName": "SLA mediana (dias)",
+            "name": "mediana",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Dias na Etapa (Mediana)"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "etapa": {
+                        "max": 1
+                    },
+                    "participantes": {
+                        "max": 1
+                    },
+                    "aprovados": {
+                        "max": 1
+                    },
+                    "rejeitados": {
+                        "max": 1
+                    },
+                    "andamento": {
+                        "max": 1
+                    },
+                    "media": {
+                        "max": 1
+                    },
+                    "mediana": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "etapa"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 1000
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "participantes"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "aprovados"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "rejeitados"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "andamento"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "media"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "mediana"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "textos": {
+            "properties": {
+                "colEtapa": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloTotal": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "busca": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colParticipantes": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colAprovados": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colRejeitados": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colAndamento": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colConversao": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colMedia": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colMediana": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloPct": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rodape": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "soMovimento": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "modoPct": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "mostrarTotal": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "somarParticipantes": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "ordemInicial": {
+                    "type": {
+                        "enumeration": []
+                    }
+                }
+            }
+        },
+        "limites": {
+            "properties": {
+                "convBoa": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "convAtencao": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "fatorSla": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "modoConv": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "fatorMedia": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "aprovados": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "rejeitados": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "andamento": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "privileges": []
+}

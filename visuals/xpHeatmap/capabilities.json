@@ -1,0 +1,273 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Linhas",
+            "name": "linhas",
+            "kind": "Grouping",
+            "description": "Ex.: dEtapa[stage_name]"
+        },
+        {
+            "displayName": "Colunas",
+            "name": "colunas",
+            "kind": "Grouping",
+            "description": "Ex.: dFaixaDias[faixa], classificada pela ordem"
+        },
+        {
+            "displayName": "Valor",
+            "name": "valor",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Ativos na Faixa"
+        },
+        {
+            "displayName": "Base da taxa (opcional)",
+            "name": "base",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Rejeitados. Liga o botão \"Taxa vs. média\"."
+        },
+        {
+            "displayName": "Detalhe da coluna (opcional)",
+            "name": "detalhe",
+            "kind": "Measure",
+            "description": "Texto mostrado no ⓘ do título da coluna. Ex.: Esteira | Etapas do Grupo"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "linhas": {
+                        "max": 1
+                    },
+                    "colunas": {
+                        "max": 1
+                    },
+                    "valor": {
+                        "max": 1
+                    },
+                    "base": {
+                        "max": 1
+                    },
+                    "detalhe": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "linhas"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 1000
+                        }
+                    }
+                },
+                "values": {
+                    "group": {
+                        "by": "colunas",
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "valor"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "base"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "detalhe"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 60
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "objects": {
+        "textos": {
+            "properties": {
+                "colLinhas": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloTotal": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rodape": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "unidade": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "soMovimento": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "modoPct": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "mostrarTotal": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "busca": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "alerta": {
+            "properties": {
+                "coluna": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "ultima": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "cor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "clara": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "escura": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "meio": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "taxa": {
+            "properties": {
+                "modoInicial": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "formula": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "rotulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloNumeros": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "mostrarPct": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "rotuloMedia": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "tolerancia": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "escala": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "minimo": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "acima": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "abaixo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "rodape": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        }
+    },
+    "privileges": []
+}

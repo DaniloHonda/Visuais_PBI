@@ -1,0 +1,339 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Valor do período",
+            "name": "valor",
+            "kind": "Measure",
+            "description": "Número principal do card, respeitando os filtros da página."
+        },
+        {
+            "displayName": "Comparação: valor atual",
+            "name": "cmpAtual",
+            "kind": "Measure",
+            "description": "Ex.: mês corrente até hoje."
+        },
+        {
+            "displayName": "Comparação: valor anterior",
+            "name": "cmpAnterior",
+            "kind": "Measure",
+            "description": "Ex.: mês anterior, mesmo intervalo de dias."
+        },
+        {
+            "displayName": "Acumulado (YTD)",
+            "name": "ytd",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Meta",
+            "name": "meta",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Texto de contexto",
+            "name": "contexto",
+            "kind": "Measure",
+            "description": "Medida que retorna texto. Ex.: \"124 contratados de 178 decididos\"."
+        },
+        {
+            "displayName": "Período do valor",
+            "name": "perValor",
+            "kind": "Measure",
+            "description": "Texto do selo ao lado do número. Ex.: \"01/jul – 18/out\" ou \"hoje\"."
+        },
+        {
+            "displayName": "Rótulo da comparação",
+            "name": "rotCmp",
+            "kind": "Measure",
+            "description": "Substitui o rótulo fixo da comparação. Ex.: \"1–18 out vs set\"."
+        },
+        {
+            "displayName": "Rótulo do acumulado",
+            "name": "rotYtd",
+            "kind": "Measure",
+            "description": "Substitui o rótulo fixo do acumulado. Ex.: \"Desde 01/jul\"."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "valor": {
+                        "max": 1
+                    },
+                    "cmpAtual": {
+                        "max": 1
+                    },
+                    "cmpAnterior": {
+                        "max": 1
+                    },
+                    "ytd": {
+                        "max": 1
+                    },
+                    "meta": {
+                        "max": 1
+                    },
+                    "contexto": {
+                        "max": 1
+                    },
+                    "perValor": {
+                        "max": 1
+                    },
+                    "rotCmp": {
+                        "max": 1
+                    },
+                    "rotYtd": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "valor"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "cmpAtual"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "cmpAnterior"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "ytd"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "meta"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "contexto"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "perValor"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "rotCmp"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "rotYtd"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "cabecalho": {
+            "properties": {
+                "titulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "unidade": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "corTitulo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "tamanhoTitulo": {
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                }
+            }
+        },
+        "valorPrincipal": {
+            "properties": {
+                "tamanho": {
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "cor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "unidades": {
+                    "type": {
+                        "formatting": {
+                            "labelDisplayUnits": true
+                        }
+                    }
+                },
+                "casas": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "comparacao": {
+            "properties": {
+                "mostrar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "rotulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "tipo": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "polaridade": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "mostrarValores": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "corBom": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "corRuim": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "acumulado": {
+            "properties": {
+                "mostrar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "rotulo": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "metaCard": {
+            "properties": {
+                "mostrar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "rotulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "corBarra": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "aparencia": {
+            "properties": {
+                "fundo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "transparencia": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "espacamento": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "corContexto": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "periodos": {
+            "properties": {
+                "mostrar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "estilo": {
+                    "type": {
+                        "enumeration": []
+                    }
+                }
+            }
+        }
+    },
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "privileges": []
+}

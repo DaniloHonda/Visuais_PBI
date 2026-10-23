@@ -1,0 +1,67 @@
+.xp-sla {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    color: #121212;
+    font-size: 13px;
+    --xp-sla-tipico: #067D84;
+    --xp-sla-p90: #BFE3E5;
+    --xp-sla-acima: #E05A4F;
+}
+.xp-sla__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-bottom: 8px; }
+.xp-sla__search {
+    display: flex; align-items: center; gap: 6px; width: 200px; height: 32px; box-sizing: border-box;
+    border: 1px solid #A9B4B6; border-radius: 10px; padding: 0 10px; background: #FFFFFF;
+    &:focus-within { border-color: #067D84; box-shadow: 0 0 0 2px rgba(6, 125, 132, .18); }
+    input { flex: 1; border: 0; outline: 0; font: inherit; font-size: 12.5px; background: transparent; color: #121212; min-width: 0; }
+}
+.xp-sla__icon { color: #6B6B6B; font-size: 15px; }
+.xp-sla__btn, .xp-sla__select {
+    font: inherit; font-size: 12.5px; font-weight: 600; color: #3C3C3C; height: 32px; box-sizing: border-box;
+    border: 1px solid #A9B4B6; border-radius: 10px; padding: 0 11px; background: #FFFFFF; cursor: pointer; white-space: nowrap;
+    &:hover { background: #F2F5F5; }
+    &:focus-visible { outline: 2px solid #067D84; outline-offset: 1px; }
+}
+.xp-sla__btn--on, .xp-sla__btn--on:hover { background: #E3F1F0; color: #03474C; border-color: #7FB9BC; }
+.xp-sla__summary { font-size: 12.5px; color: #5E5E5E; padding: 2px 2px 6px; strong { font-size: 18px; color: #121212; font-variant-numeric: tabular-nums; } }
+.xp-sla__wrap { overflow: auto; }
+.xp-sla__table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+.xp-sla__table th {
+    position: sticky; top: 0; z-index: 1; background: #FFFFFF; text-align: right; white-space: nowrap;
+    font-size: 10.5px; font-weight: 700; color: #5E5E5E; text-transform: uppercase; letter-spacing: .03em;
+    padding: 6px 8px; border-bottom: 1px solid #C9CFD0;
+}
+.xp-sla__th-name, .xp-sla__th-range { text-align: left !important; }
+.xp-sla__th-range { width: 24%; }
+.xp-sla__sort {
+    font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+    &:hover { color: #03474C; }
+}
+.xp-sla__sort--on { color: #03474C; }
+.xp-sla__table td { height: 33px; padding: 0 8px; text-align: right; white-space: nowrap; border-bottom: 1px solid #EEF0F0; }
+.xp-sla__name {
+    text-align: left !important; font-weight: 600; max-width: 230px; overflow: hidden; text-overflow: ellipsis;
+    mark { background: #FFE9B8; color: inherit; border-radius: 2px; }
+}
+.xp-sla__row { cursor: pointer; }
+.xp-sla__row:hover td { background: #F6F8F8; }
+.xp-sla__row:focus-visible { outline: 2px solid #067D84; outline-offset: -2px; }
+.xp-sla__row--dim td { opacity: .4; }
+.xp-sla__row--sel td { background: #EEF6F6; }
+.xp-sla__range { text-align: left !important; }
+.xp-sla__track { position: relative; height: 10px; background: #F2F4F4; border-radius: 3px; min-width: 100px; }
+.xp-sla__p90, .xp-sla__tipico { position: absolute; left: 0; top: 0; height: 10px; border-radius: 3px; }
+.xp-sla__p90 { background: var(--xp-sla-p90); }
+.xp-sla__tipico { background: var(--xp-sla-tipico); }
+.xp-sla__strong { font-weight: 700; }
+.xp-sla__muted { color: #8A8A8A; }
+.xp-sla__pill { display: inline-block; min-width: 26px; text-align: center; padding: 1px 8px; border-radius: 999px; font-weight: 700; font-size: 12px; background: #FBE7E5; color: #A33A31; box-shadow: inset 0 0 0 1px var(--xp-sla-acima); }
+.xp-sla__none, .xp-sla__empty { text-align: center !important; color: #6B6B6B; padding: 24px !important; }
+.xp-sla__hint { font-size: 11.5px; color: #6B6B6B; padding-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xp-sla__tip {
+    position: absolute; z-index: 5; pointer-events: none; background: #121212; color: #FFFFFF; border-radius: 10px;
+    padding: 9px 11px; font-size: 12px; line-height: 1.55; box-shadow: 0 6px 18px rgba(0, 0, 0, .2); white-space: nowrap;
+}
+.xp-sla__tip-head { font-weight: 700; font-size: 12.5px; }
+.xp-sla__tip-sub { color: #C9CFD0; }

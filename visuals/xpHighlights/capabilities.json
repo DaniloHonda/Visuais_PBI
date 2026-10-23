@@ -1,0 +1,111 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Destaques",
+            "name": "destaques",
+            "kind": "Measure",
+            "description": "Até 8 medidas de texto no formato: número || título || texto || status (ruim, atencao, bom ou info). Título vazio esconde o destaque."
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "destaques": {
+                        "max": 8
+                    }
+                }
+            ],
+            "categorical": {
+                "values": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "destaques"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "layout": {
+            "properties": {
+                "ordenar": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "preencher": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "espaco": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "larguraNumero": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "tamanhoNumero": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "tamanhoTitulo": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "ruim": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "atencao": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "bom": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "info": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "privileges": []
+}

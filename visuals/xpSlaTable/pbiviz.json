@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpSlaTable",
+        "displayName": "XP · Tabela de SLA",
+        "guid": "xpSlaTable2F6C9A1D7E3B4C58A0B4E1D9C6F27A35",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Tempo típico (mediana) e tempo em que 90% saem (P90) por etapa, com base de cálculo e casos acima hoje. Busca, ordenação e resumo. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}
