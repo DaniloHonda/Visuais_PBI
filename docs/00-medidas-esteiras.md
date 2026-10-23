@@ -1,3 +1,5 @@
+> ⚠️ **Documento histórico.** Substituído por `docs/24-medidas-finais.dax` (medidas em uso) e pela régua do `CONTEXTO.md`. Algumas medidas aqui (ex.: `Participantes` por `data_entrada_stage`) estão desatualizadas.
+
 # Dash de Esteiras · tudo o que o modelo precisa
 
 Lista completa de colunas, tabelas e medidas usadas pelo protótipo (páginas Resumo, Report e Nominal), na ordem de criação.

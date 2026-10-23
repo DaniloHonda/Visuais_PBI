@@ -318,7 +318,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 |---|---|---|
 | 1 | ~~Capturar os valores de setembro/2026~~ **feito em 23/10/2026** (seção 14). Repetir a captura em outros meses, sempre anotando a data | os números da coorte mudam com o tempo |
 | 2 | **Conferir `data_contratacao` na 13**: deve usar `closed_at_opening` (não `resolved_at`); depois reavaliar o **SLA mediano baixo** (11 d) | principal suspeita do SLA baixo |
-| 3 | **Rodar `docs/24-medidas-finais.dax`** (F5) e só então gravar | o arquivo ainda não foi executado no Power BI |
+| 3 | ~~Rodar `docs/24-medidas-finais.dax`~~ **feito em 23/10/2026**: executado no Power BI | — |
 | 4 | **Esteira dos pools e das vagas sem esteira**: localizar o de-para **persona → esteira** (Services é a fonte da verdade; tabela no banco ou regra na engenharia?); definir a esteira da persona "Geral"; criar `esteira_dash` = esteira da vaga ou o de-para | sem isso, ao filtrar uma esteira só ~37% das aplicações aparecem (75 mil sem esteira: 62.535 em pool, 9.361 em vaga, 3.816 fora da Jobs) |
 | 5 | **Obter `job_stages`** (`job_stage_id` → `job_id`) | separar tempo no pool × na vaga, origem "Direto / Via pool" e funil do pool por esteira |
 | 6 | **Decidir sobre vagas de teste/cópia/template** ("[TESTE TESTANDO]" com 5.146 aplicações; "Cópia de…"; "[Template…]") | excluir do dash inteiro, se confirmado |
@@ -328,7 +328,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 | 10 | **Trocar o fundo da Conceitos** (1900 × 5095) e conferir os fundos de Resumo e Report | os subtítulos antigos ainda dizem "no período" sem a régua nova |
 | 11 | Investigar a diferença **119.397 × 117.477** (`application_id` distintos na 13 × aplicações com `data_aplicacao`) | não explicada |
 
-**Concluído:** instalação dos visuais novos (Período 2.2, Tabela nominal 1.1, Organograma 1.0, Base nominal 1.1); token do GitHub apagado; repositório publicado em `DaniloHonda/Visuais_PBI` (privado).
+**Concluído:** instalação dos visuais novos (Período 2.2, Tabela nominal 1.1, Organograma 1.0, Base nominal 1.1); repositório publicado em `DaniloHonda/Visuais_PBI` (privado).
 
 ### 11.2 Pendências de desenvolvimento (Claude)
 1. ~~Preencher a tabela de setembro~~ (feito). Atualizar a seção 14 quando houver novas capturas.
@@ -368,7 +368,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 ## 13. DAX final das medidas em uso
 **Arquivo único: [`docs/24-medidas-finais.dax`](docs/24-medidas-finais.dax)** (104 medidas `Esteira | …`, tabela `_Medidas`).
 - Formato `DEFINE MEASURE … EVALUATE`: colar na **Exibição de consulta DAX** → Executar → "Atualizar modelo com alterações" (cria ou substitui).
-- Consolidado por `tools/build_medidas_finais.py`: vale a **última definição** dos guias 00 a 17, sobrescrita pela régua nova (guia 18) e pelo botão de indicação (guia 19). Parênteses e colchetes foram conferidos por script; **o arquivo inteiro ainda não foi executado no Power BI**: rodar e conferir antes de gravar.
+- Consolidado por `tools/build_medidas_finais.py`: vale a **última definição** dos guias 00 a 17, sobrescrita pela régua nova (guia 18) e pelo botão de indicação (guia 19). Parênteses e colchetes foram conferidos por script; **o arquivo inteiro foi executado no Power BI em 23/10/2026**.
 - **Fora do arquivo, de propósito:** (a) medidas aposentadas (`Entrevistas Criadas`, `Entrevistas Agendadas` e trio mês/YTD, `Contratados por Data`, `Nominal Próxima Entrevista`, `Período Hoje`, `Contagem da Base`, `Mostrar na Base`); (b) a correção das etapas duplicadas (`docs/23`, em espera); (c) `Esteira | Data Referência` (placeholder: o modelo não tem a tabela de última atualização; as medidas de comparação usam `TODAY()`).
 - Pastas de exibição: `01` volume · `02` conversão e funil · `03` entrevistas · `04` tempo e SLA · `05` evolução · `06` comparações · `07` textos e destaques · `08` nominal · `99` validação (todas sob `98. ESTEIRAS\`).
 - Medidas de conferência: `Check Coorte` (aplicações − contratadas − rejeitadas − em andamento ≈ 0), `Check Funil`, `Check Agenda` (= 0), `Check Fechamento`.
