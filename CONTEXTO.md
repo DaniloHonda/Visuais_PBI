@@ -316,7 +316,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 ### 11.1 Pendências do modelo (a fazer pelo Danilo)
 | # | O que fazer | Por quê |
 |---|---|---|
-| 1 | **Capturar os valores de setembro/2026**: rodar `docs/25-valores-referencia.dax` e preencher a tabela da seção 14 | a conversa não guardou esses números |
+| 1 | ~~Capturar os valores de setembro/2026~~ **feito em 23/10/2026** (seção 14). Repetir a captura em outros meses, sempre anotando a data | os números da coorte mudam com o tempo |
 | 2 | **Conferir `data_contratacao` na 13**: deve usar `closed_at_opening` (não `resolved_at`); depois reavaliar o **SLA mediano baixo** (11 d) | principal suspeita do SLA baixo |
 | 3 | **Rodar `docs/24-medidas-finais.dax`** (F5) e só então gravar | o arquivo ainda não foi executado no Power BI |
 | 4 | **Esteira dos pools e das vagas sem esteira**: localizar o de-para **persona → esteira** (Services é a fonte da verdade; tabela no banco ou regra na engenharia?); definir a esteira da persona "Geral"; criar `esteira_dash` = esteira da vaga ou o de-para | sem isso, ao filtrar uma esteira só ~37% das aplicações aparecem (75 mil sem esteira: 62.535 em pool, 9.361 em vaga, 3.816 fora da Jobs) |
@@ -331,7 +331,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 **Concluído:** instalação dos visuais novos (Período 2.2, Tabela nominal 1.1, Organograma 1.0, Base nominal 1.1); token do GitHub apagado; repositório publicado em `DaniloHonda/Visuais_PBI` (privado).
 
 ### 11.2 Pendências de desenvolvimento (Claude)
-1. Preencher a tabela de setembro (seção 14) quando o Danilo trouxer o resultado.
+1. ~~Preencher a tabela de setembro~~ (feito). Atualizar a seção 14 quando houver novas capturas.
 2. **Pool**: com `job_stages`, criar tempo no pool × na vaga, origem "Direto / Via pool" e funil do pool por esteira (**mostrar imagens antes**).
 3. Aplicar a correção das **etapas duplicadas** (`docs/23`) e da **linha do tempo** da Nominal, depois da decisão sobre o pool.
 4. **Nominal 1.2.0:** bases "Marcadas no período" e "Na agenda" contando entrevistas, com Organizer Name e Interviewers (imagem antes).
@@ -379,20 +379,22 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 ## 14. Valores de referência
 Os números da coorte **mudam com o tempo** (aplicações em andamento viram contratadas ou rejeitadas). Sempre anotar a **data da captura**. Consulta para capturar qualquer período: [`docs/25-valores-referencia.dax`](docs/25-valores-referencia.dax).
 
-### Setembro/2026 (candidatura de 01/09 a 30/09) — **a capturar**
-Esta conversa **não registrou** os valores de setembro, então a tabela abaixo está em branco de propósito (nada foi estimado). Rodar `docs/25-valores-referencia.dax` (já está com 01/09–30/09) e preencher:
+### Setembro/2026 (candidatura de 01/09 a 30/09) — capturado em 23/10/2026
+Capturado com `docs/25-valores-referencia.dax`, depois de aplicar a régua nova. Os números de setembro ainda **vão mudar** (as 16.534 em andamento viram contratadas ou rejeitadas).
 
-| Métrica | Valor | Data da captura |
-|---|---|---|
-| Aplicações | _a preencher_ | |
-| Contratadas | _a preencher_ | |
-| Rejeitadas (total) / das quais declinaram | _a preencher_ | |
-| Em andamento (paradas > 45 d) | _a preencher_ | |
-| Conversão da esteira | _a preencher_ | |
-| SLA mediano (dias) | _a preencher_ | |
-| Check coorte (≈ 0) | _a preencher_ | |
+| Métrica | Valor (23/10/2026) |
+|---|---|
+| Aplicações | **33.756** |
+| Contratadas | **172** |
+| Rejeitadas (total) | **17.050** (das quais **26** declinaram) |
+| Em andamento | **16.534** (paradas há mais de 45 dias: **8**) |
+| Conversão da esteira | **1,0%** (172 ÷ (172 + 17.050)) |
+| SLA mediano | **12 dias** |
+| Check coorte | **0** (172 + 17.050 + 16.534 = 33.756) |
+| Entrevistas marcadas em setembro | 2.386 |
+| Entrevistas na agenda em setembro | 2.380 (2.380 realizadas, 0 a realizar) |
 
-Relação esperada: Aplicações = Contratadas + Rejeitadas + Em andamento; Conversão = Contratadas ÷ (Contratadas + Rejeitadas).
+Leitura: quase metade da coorte de setembro (49%) ainda está em processo, e só 1% foi contratada; por isso a conversão é baixa e o SLA mostra só as contratações rápidas (a janela de observação vai de 23 a 52 dias). Em setembro, "a realizar" é 0 porque o mês já passou.
 
 ### Valores já observados no modelo (conferidos nas capturas de tela)
 | Recorte | Aplicações | Contratadas | Rejeitadas | Em andamento | Conversão | SLA mediano | Captura |
