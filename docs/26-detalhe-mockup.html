@@ -27,10 +27,15 @@ td a{color:#067D84;text-decoration:none;font-weight:600}
 .tl span{display:inline-block;margin-right:18px}.tl b{color:#121212}
 .foot{font-size:11.5px;color:#6B6B6B;margin-top:10px}
 .note{margin-top:14px;font-size:12px;color:#6B6B6B}
+.seg{display:flex;gap:6px;align-items:center;margin-bottom:12px;font-size:13px}
+.seg .s{border:1px solid #DDE2E3;border-radius:16px;padding:5px 12px;color:#121212;background:#fff}
+.seg .s b{margin-left:4px}.seg .s.on{background:#067D84;border-color:#067D84;color:#fff}
+.seg .hint{margin-left:10px;color:#6B6B6B;font-size:12px}
+.more{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:12px}
+.more .btn{background:#fff}
 </style></head><body><div class="pg">
 <div class="top"><div class="back">← Voltar</div><h1>Detalhe · aplicações por trás do gráfico</h1></div>
 <div class="ctx">
-<span class="chip">Origem: <b>Motivos de saída por etapa</b></span>
 <span class="chip">Etapa: <b>Entrevista R&amp;S</b></span>
 <span class="chip">Motivo: <b>Perfil técnico abaixo do esperado</b></span>
 <span class="chip">Período: <b>01/09 – 30/09/2026</b></span>
@@ -38,23 +43,17 @@ td a{color:#067D84;text-decoration:none;font-weight:600}
 <span class="chip reg">Régua: aplicações com candidatura no período</span>
 </div>
 <div class="card">
-<div class="tabs">
-<div class="tab"><div class="n">412</div><div class="l">Todas da etapa</div></div>
-<div class="tab a"><div class="n">231</div><div class="l">Aprovadas na etapa</div></div>
-<div class="tab r on"><div class="n">147</div><div class="l">Rejeitadas pela XP</div></div>
-<div class="tab d"><div class="n">6</div><div class="l">Declinaram</div></div>
-<div class="tab"><div class="n">28</div><div class="l">Em andamento na etapa</div></div>
-</div>
-<div class="bar"><div class="search">🔍 Buscar candidato, vaga, recrutador…</div><div class="btn">Colunas ▾</div><div class="btn">⤓ Exportar CSV</div></div>
+<div class="seg"><span class="s">Todas <b>153</b></span><span class="s" style="color:#A9B4B6">Aprovadas <b>0</b></span><span class="s on">Rejeitadas pela XP <b>147</b></span><span class="s">Declinaram <b>6</b></span><span class="s" style="color:#A9B4B6">Em andamento <b>0</b></span><span class="hint">↳ selecionada automaticamente: veio um motivo de rejeição</span></div>
+<div class="bar"><div class="search">Buscar candidato, vaga, recrutador…</div><div class="btn">Colunas ▾</div><div class="btn">⤓ Exportar CSV</div></div>
 <table>
 <tr><th>Greenhouse</th><th>Candidato</th><th>Vaga</th><th>Recrutador</th><th>Etapa</th><th>Resultado</th><th>Motivo</th><th>Candidatura</th><th>Entrada</th><th>Saída</th><th>Dias na etapa</th></tr>
 <tr class="sel"><td><a>Abrir ↗</a></td><td>Ana Souza</td><td>Assessor B2C · SP</td><td>Marina L.</td><td>Entrevista R&amp;S</td><td><span class="pill pr">Rejeitada</span></td><td>Perfil técnico abaixo…</td><td>04/09</td><td>10/09</td><td>12/09</td><td>2</td></tr>
 <tr><td colspan="11" class="tl"><span>Linha do tempo:</span><span><b>Triagem</b> 04→08/09 · aprovada</span><span><b>Entrevista R&amp;S</b> 10→12/09 · rejeitada</span><span style="color:#A9B4B6">Entrevista Gestor · não chegou</span><span style="color:#A9B4B6">Offer · não chegou</span></td></tr>
 <tr><td><a>Abrir ↗</a></td><td>Bruno Lima</td><td>Analista Dados · RJ</td><td>Pedro A.</td><td>Entrevista R&amp;S</td><td><span class="pill pr">Rejeitada</span></td><td>Perfil técnico abaixo…</td><td>02/09</td><td>05/09</td><td>19/09</td><td class="alert">14</td></tr>
-<tr><td><a>Abrir ↗</a></td><td>Carla Nunes</td><td>Pool Engenharia</td><td>—</td><td>Entrevista R&amp;S</td><td><span class="pill pr">Rejeitada</span></td><td>Perfil técnico abaixo…</td><td>11/09</td><td>—</td><td>15/09</td><td>0 ⚠ sem entrada</td></tr>
+<tr><td><a>Abrir ↗</a></td><td>Carla Nunes</td><td>Pool Engenharia</td><td>—</td><td>Entrevista R&amp;S</td><td><span class="pill pr">Rejeitada</span></td><td>Perfil técnico abaixo…</td><td>11/09</td><td>15/09</td><td>15/09</td><td>0</td></tr>
 <tr><td><a>Abrir ↗</a></td><td>Diego Reis</td><td>Assessor B2C · BH</td><td>Marina L.</td><td>Entrevista R&amp;S</td><td><span class="pill pr">Rejeitada</span></td><td>Perfil técnico abaixo…</td><td>18/09</td><td>20/09</td><td>21/09</td><td>1</td></tr>
 </table>
-<div class="foot">Mostrando 4 de 147 · ordenado por Dias na etapa ↓ · confere com o gráfico de origem (147)</div>
+<div class="more"><span class="foot" style="margin:0">Mostrando 50 de 147 · ordenado por Dias na etapa ↓ · confere com o gráfico de origem</span><span class="btn">Mostrar mais 50 ▾</span></div>
 </div>
-<div class="note">Mockup ilustrativo (nomes e números fictícios). Abre por clique direito no gráfico → Detalhar → "Detalhe", ou pelo botão "Ver aplicações". A aba já vem marcada conforme o filtro recebido.</div>
+<div class="note">Mockup ilustrativo (nomes e números fictícios). Abre por clique direito no gráfico → Detalhar → "Detalhe", ou pelo botão "Ver aplicações". Busca e Exportar CSV valem para a lista inteira (147), não só para as linhas visíveis.</div>
 </div></body></html>
