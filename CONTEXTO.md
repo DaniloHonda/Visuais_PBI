@@ -1,7 +1,7 @@
 # Contexto do projeto · Dash de Esteiras (R&S · XP Inc.)
 
 Documento de referência para retomar o trabalho em qualquer conversa. Cole este arquivo (ou peça para lê-lo) no início de uma sessão nova.
-Última atualização: 23/10/2026.
+Última atualização: 24/10/2026.
 
 **Índice**
 1. [Objetivo do dashboard](#1-objetivo-do-dashboard)
@@ -34,6 +34,10 @@ O foco é o **conceito de esteira de recrutamento**, e não um relatório de con
 | **Report** | Onde e com quem está o problema? | Time de R&S e People Analytics: detalhe por etapa, praça, recrutador, motivo e SLA |
 | **Nominal** | Quais aplicações estão por trás do número? | Recrutadores e usuários: **conferir** qualquer número do dash nome a nome, com link para o Greenhouse |
 | **Conceitos** | O que cada número significa e por que pode não bater? | Todos: dicionário, "de-para" e justificativas |
+
+**Uso estratégico (24/10/2026):** hoje existe só a meta geral de **45 dias** para o processo inteiro, sem visibilidade nem meta do tempo por etapa. O dash deve dar essa visibilidade (SLA geral **e** SLA de cada etapa) para que o time defina **metas por etapa** (ex.: "Phone Screening em até 3 dias"). Por isso o tempo é o foco principal.
+
+**Prioridade atual (24/10/2026):** homologar os dados da tabela 13 e o modelo semântico **antes** de usabilidade. Para cada problema, classificar: **erro nosso** (montagem da 13 / modelo), **erro de input** (preenchimento no Greenhouse) ou **regra de negócio** a definir. B2C e Engenharia de Software dizem que os dados de pool "estão muito errados": precisa provar de quem é a causa.
 
 Princípios:
 - **Confiança nos números:** todo número do dash pode ser conferido na Nominal com os mesmos filtros. Ex.: ao filtrar um recrutador, as rejeições dele no Report são as mesmas da Nominal.
@@ -222,6 +226,18 @@ Barra única (Y 225), com sincronização entre as páginas: **Período · Organ
 - O **Período** tem atalhos (mês atual/anterior, **trimestre atual e anterior**, últimos 30 dias, desde 01/jul), digitação De/Até e a caixa mostra "T3 2026 · 01/07 – 30/09" quando o intervalo é um trimestre.
 - Cada lista abre **dentro da própria largura**: visuais da barra não podem se sobrepor.
 - Persona e Especialidade são colunas da tabela 13.
+
+---
+
+## 6.1 Decisões de 24/10/2026
+| Tema | Decisão |
+|---|---|
+| Comparação mês atual × anterior | **mantida** pela coorte (status de hoje das aplicações de cada período), mesmo sabendo que o mês anterior teve mais tempo para fechar |
+| SLA mediano baixo | não investigar agora |
+| Data de contratação | **`closed_at_opening`** (mantida) |
+| Tempo na etapa | da **data de entrada até a data de saída** da etapa; só passagens com data de entrada. A **soma das etapas** de uma aplicação compõe o SLA dela; a diferença para "candidatura → contratação" deve ficar visível e serve de teste de qualidade |
+| Pool | o **tempo no pool conta** no SLA geral, somado ao tempo na vaga da contratação. É preciso **segmentar as etapas do pool e as da vaga** (depende de `job_stages`) |
+| Detalhe nominal 1.0 | **não aprovado**: será reformulado depois (clicar em qualquer gráfico → lista nominal com os mesmos filtros, link e colunas próprias de cada gráfico, para o usuário homologar) |
 
 ---
 
