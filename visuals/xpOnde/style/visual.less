@@ -20,7 +20,7 @@
 .xp-on__sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
 .xp-on__list { flex: 1 1 auto; overflow-y: auto; min-height: 0; padding-right: 4px; }
 .xp-on__row {
-    display: grid; grid-template-columns: minmax(110px, 190px) 1fr 104px; gap: 10px; align-items: center;
+    display: grid; grid-template-columns: minmax(110px, 190px) 1fr 112px; gap: 10px; align-items: center;
     font-size: 13px; padding: 4px 6px; border-radius: 6px; cursor: pointer;
     &:hover { background: #F7FAFA; }
     &:focus-visible { outline: 2px solid var(--xp-on-accent); outline-offset: -2px; }
@@ -29,7 +29,11 @@
     &.is-blank { cursor: default; color: #6B6B6B; }
 }
 .xp-on__name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.xp-on__bar { height: 12px; border-radius: 6px; background: #F2F4F4; overflow: hidden; i { display: block; height: 100%; border-radius: 6px; } }
+.xp-on__bar { height: 14px; border-radius: 6px; background: #F2F4F4; overflow: hidden; }
+.xp-on__fill { display: flex; height: 100%; border-radius: 6px; overflow: hidden; b { display: block; height: 100%; } b + b { border-left: 1px solid #FFFFFF; } }
+.xp-on__types { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 11.5px; color: #444444; margin-bottom: 6px; }
+.xp-on__ti { white-space: nowrap; margin-right: 10px; }
+.xp-on__dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
 .xp-on__v { text-align: right; color: #444444; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .xp-on__v.is-warn { color: #9A6512; font-weight: 700; }
 .xp-on__v.is-crit { color: #A33A31; font-weight: 700; }

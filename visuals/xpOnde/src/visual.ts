@@ -17,7 +17,8 @@ import { xpFont } from "./xpTheme";
 // Um recorte (botão): soma por valor das linhas recebidas. As medidas são contadas na linha da etapa atual
 // da aplicação, então cada aplicação cai numa combinação só e as somas por recorte batem com o DAX.
 interface Dim { title: string; queryName: string; target: Target | null; groups: Map<string, Group>; }
-interface Group { key: string; raw: PrimitiveValue; label: string; apps: number; base: number; }
+interface Group { key: string; raw: PrimitiveValue; label: string; apps: number; base: number; tipos: Map<string, number>; }
+interface Tipo { name: string; ordem: number; }
 interface Target { table: string; column: string; }
 
 const SCHEMA_BASIC = "ht" + "tp://powerbi.com/product/schema#basic";
@@ -34,6 +35,7 @@ export class Visual implements IVisual {
     private selectionManager: powerbi.extensibility.ISelectionManager;
     private dims: Dim[] = [];
     private titulo = "";
+    private tipos: Tipo[] = [];
     private dimIndex = 0;
     private dimKey = "";
     private selectedKey: string | null = null;
@@ -75,11 +77,16 @@ export class Visual implements IVisual {
     private read(dv: DataView | undefined) {
         this.dims = [];
         this.titulo = "";
+        this.tipos = [];
         const table = dv && dv.table;
         if (!table) return;
         const idx = (role: string) => table.columns.findIndex(c => c.roles && c.roles[role]);
         const dimIdx = table.columns.map((c, i) => (c.roles && c.roles.dims ? i : -1)).filter(i => i >= 0);
         const iApps = idx("apps"), iBase = idx("base"), iTit = idx("titulo");
+        // Composição: com "Tipo de alerta", cada linha traz a contagem do tipo (porTipo); total e base vêm uma vez por
+        // combinação (medidas "1x"), então somam sem repetir.
+        const iTipo = idx("tipo"), iTOrd = idx("tipoOrdem"), iPor = idx("porTipo");
+        const tipoMap = new Map<string, Tipo>();
         this.dims = dimIdx.map(i => ({
             title: clean(table.columns[i].displayName),
             queryName: table.columns[i].queryName || "",
@@ -90,17 +97,25 @@ export class Visual implements IVisual {
             if (!this.titulo && iTit >= 0 && r[iTit] !== null && r[iTit] !== undefined) this.titulo = String(r[iTit]);
             const apps = iApps >= 0 ? num(r[iApps]) : 0;
             const base = iBase >= 0 ? num(r[iBase]) : 0;
-            if (!apps && !base) continue;
+            const por = iTipo >= 0 && iPor >= 0 ? num(r[iPor]) : 0;
+            const tipo = iTipo >= 0 && !isBlank(r[iTipo]) ? String(r[iTipo]) : "";
+            if (!apps && !base && !por) continue;
+            if (tipo && por && !tipoMap.has(tipo)) {
+                const o = iTOrd >= 0 ? Number(r[iTOrd]) : NaN;
+                tipoMap.set(tipo, { name: tipo, ordem: isFinite(o) ? o : 1000 + tipoMap.size });
+            }
             dimIdx.forEach((ci, d) => {
                 const raw = r[ci];
                 const key = keyOf(raw);
                 const m = this.dims[d].groups;
                 let g = m.get(key);
-                if (!g) { g = { key, raw, label: isBlank(raw) ? BLANK : fmtValue(raw), apps: 0, base: 0 }; m.set(key, g); }
+                if (!g) { g = { key, raw, label: isBlank(raw) ? BLANK : fmtValue(raw), apps: 0, base: 0, tipos: new Map<string, number>() }; m.set(key, g); }
                 g.apps += apps;
                 g.base += base;
+                if (tipo && por) g.tipos.set(tipo, (g.tipos.get(tipo) || 0) + por);
             });
         }
+        this.tipos = Array.from(tipoMap.values()).sort((a, b) => a.ordem - b.ordem || a.name.localeCompare(b.name));
         // Mantém o botão escolhido mesmo que a ordem dos campos mude.
         const k = this.dims.findIndex(d => d.queryName === this.dimKey);
         this.dimIndex = k >= 0 ? k : Math.min(this.dimIndex, Math.max(0, this.dims.length - 1));
@@ -146,6 +161,21 @@ export class Visual implements IVisual {
         this.render();
     }
 
+    // Número à direita; na composição, o status vira um ponto âmbar/coral antes do número.
+    private valueEl(apps: number, p: number, status: string, statusColor: string): HTMLElement {
+        const v = el("span", "xp-on__v" + (status ? " is-" + status : ""));
+        if (statusColor && status) { const d = el("i", "xp-on__dot"); d.style.background = statusColor; v.appendChild(d); }
+        v.appendChild(document.createTextNode(`${INT.format(apps)} · ${PCT0.format(p)}`));
+        return v;
+    }
+
+    private tipoColor(t: Tipo): string {
+        const c = this.settings.tipos;
+        const pal = [c.t1, c.t2, c.t3, c.t4, c.t5, c.t6, c.t7].map(x => x.value.value);
+        const i = t.ordem >= 1 && t.ordem <= 7 ? t.ordem - 1 : this.tipos.indexOf(t) % pal.length;
+        return pal[i];
+    }
+
     private render() {
         const s = this.settings;
         const listOld = this.root.querySelector(".xp-on__list") as HTMLElement | null;
@@ -187,6 +217,18 @@ export class Visual implements IVisual {
             sw(s.cores.critico.value.value), document.createTextNode(` ${fmtX(r.critico.value)} (só com ${INT.format(r.minimo.value)}+ aplicações)`));
         this.root.appendChild(legend);
 
+        const comp = this.tipos.length > 1;
+        if (comp) {
+            const lt = el("div", "xp-on__types");
+            for (const t of this.tipos) {
+                const item = el("span", "xp-on__ti");
+                item.append(sw(this.tipoColor(t)), document.createTextNode(" " + t.name));
+                lt.appendChild(item);
+            }
+            lt.title = "Uma aplicação pode ter mais de um alerta: a barra divide o total na proporção de cada tipo.";
+            this.root.appendChild(lt);
+        }
+
         const list = el("div", "xp-on__list");
         list.setAttribute("role", "listbox");
         list.setAttribute("aria-label", dim.title);
@@ -202,15 +244,27 @@ export class Visual implements IVisual {
             row.tabIndex = 0;
             row.setAttribute("role", "option");
             row.setAttribute("aria-selected", String(on));
-            row.title = `${g.label}: ${INT.format(g.apps)} de ${INT.format(g.base)} aplicações (${PCT1.format(p)})`;
+            const det = this.tipos.filter(t => g.tipos.get(t.name)).map(t => `\n  ${t.name}: ${INT.format(g.tipos.get(t.name) as number)}`).join("");
+            row.title = `${g.label}: ${INT.format(g.apps)} de ${INT.format(g.base)} aplicações com alerta (${PCT1.format(p)})` + det;
             const bar = el("span", "xp-on__bar");
-            const fill = el("i", "");
+            const fill = el("i", "xp-on__fill");
             fill.style.width = ((g.apps / max) * 100).toFixed(1) + "%";
             fill.style.minWidth = "4px";
-            fill.style.background = color;
+            if (comp) {
+                // Divide o comprimento do total na proporção de cada tipo (uma aplicação pode ter mais de um).
+                const soma = this.tipos.reduce((t, x) => t + (g.tipos.get(x.name) || 0), 0);
+                for (const t of this.tipos) {
+                    const n = g.tipos.get(t.name) || 0;
+                    if (!n || !soma) continue;
+                    const part = el("b", "");
+                    part.style.width = ((n / soma) * 100).toFixed(2) + "%";
+                    part.style.background = this.tipoColor(t);
+                    fill.appendChild(part);
+                }
+            } else fill.style.background = color;
             bar.appendChild(fill);
             row.append(el("span", "xp-on__name", g.label), bar,
-                el("span", "xp-on__v" + (status ? " is-" + status : ""), `${INT.format(g.apps)} · ${PCT0.format(p)}`));
+                this.valueEl(g.apps, p, status, comp ? color : ""));
             row.addEventListener("click", () => this.chooseGroup(g));
             row.addEventListener("keydown", (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); this.chooseGroup(g); } });
             list.appendChild(row);

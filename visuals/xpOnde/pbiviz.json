@@ -4,7 +4,7 @@
         "displayName": "XP · Onde acontece",
         "guid": "xpOndeD58178BC22414EB8BD92C32CF195074C",
         "visualClassName": "Visual",
-        "version": "1.0.0.0",
+        "version": "1.1.0.0",
         "description": "Título, botões de recorte (recrutador, etapa, vaga…) e barras com quantidade, % e cor de quem foge da média. Clicar numa barra filtra a página. Padrão visual XP.",
         "supportUrl": "https://github.com/",
         "gitHubUrl": ""
@@ -22,5 +22,5 @@
     "capabilities": "capabilities.json",
     "dependencies": null,
     "stringResources": [],
-    "version": "1.0.0.0"
+    "version": "1.1.0.0"
 }

@@ -7,16 +7,34 @@
             "description": "Ex.: recruiter_name, dEtapa[stage_name], job_name, esteira, especialidade. A ordem aqui é a ordem dos botões."
         },
         {
-            "displayName": "Aplicações com alerta",
-            "name": "apps",
+            "displayName": "Tipo de alerta (composição)",
+            "name": "tipo",
+            "kind": "Grouping",
+            "description": "dAlerta[alerta]: divide cada barra pelos tipos."
+        },
+        {
+            "displayName": "Ordem do tipo",
+            "name": "tipoOrdem",
+            "kind": "Grouping",
+            "description": "dAlerta[ordem]: ordem e cor dos tipos."
+        },
+        {
+            "displayName": "Aplicações por tipo",
+            "name": "porTipo",
             "kind": "Measure",
             "description": "Esteira | Aplicações com Alerta"
+        },
+        {
+            "displayName": "Aplicações com alerta (total)",
+            "name": "apps",
+            "kind": "Measure",
+            "description": "Esteira | DQ Onde Apps (sem tipo: Esteira | Aplicações com Alerta)"
         },
         {
             "displayName": "Base (aplicações do recorte)",
             "name": "base",
             "kind": "Measure",
-            "description": "Esteira | DQ Onde Base"
+            "description": "Esteira | DQ Onde Base 1x (sem tipo: Esteira | DQ Onde Base)"
         },
         {
             "displayName": "Título",
@@ -31,6 +49,15 @@
                 {
                     "dims": {
                         "max": 6
+                    },
+                    "tipo": {
+                        "max": 1
+                    },
+                    "tipoOrdem": {
+                        "max": 1
+                    },
+                    "porTipo": {
+                        "max": 1
                     },
                     "apps": {
                         "max": 1
@@ -49,6 +76,21 @@
                         {
                             "for": {
                                 "in": "dims"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "tipo"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "tipoOrdem"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "porTipo"
                             }
                         },
                         {
@@ -149,6 +191,73 @@
                     }
                 },
                 "destaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tipos": {
+            "properties": {
+                "t1": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "t2": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "t3": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "t4": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "t5": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "t6": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "t7": {
                     "type": {
                         "fill": {
                             "solid": {
