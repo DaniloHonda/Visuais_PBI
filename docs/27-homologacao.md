@@ -100,6 +100,9 @@ Todos contam na conversão (decisão de 25/10). A classificação serve para exi
 5. Colunas de exceção (alertas).
 6. Páginas Homologação e Alertas (mockup antes).
 
+## Conferência da etapa 1 (25/10/2026)
+passagens válidas 222.398 · cópias descartadas 8.284 · apps com etapa atual 121.929 · **apps com 2+ etapas atuais 329** · rejeitadas 70.127 · Rejeitado hoje 73.642 → **novo 70.215** · Voltou 9.351 · Em andamento (linhas) hoje 51.857 → novo 51.258 (−599, a investigar: suspeita de aplicações em processo sem nenhuma entrada, que a regra antiga punha numa etapa sem data).
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 
