@@ -53,6 +53,15 @@ Obs.: "Rejected from Assessoria de Investimentos: XP Future" e "Rejected from En
 - Voltar a aplicação para uma etapa anterior (ou para Pool Qualificados) antes de rejeitar.
 - Perfis e aplicações duplicados; movimentos por engano.
 
+## Motivos e pool (25/10/2026)
+- 70 motivos de rejeição. **"Duplicate" não aparece na 13**; há **4.195 rejeitadas sem motivo** (3.509 em pool). Hipótese: motivos padrão do Greenhouse (Duplicate…) chegam vazios.
+- Candidatos a "administrativo": [Geral] Limpeza de Pool 4.451 · (vazio) 4.195 · [Geral] Posição cancelada 1.799 · [Geral] Movimentação e… 313 · [Geral] Silver Medalist 35 · [Aplicação] Move intern… 1. Candidatos a "desistência do candidato": [Geral] Desistência no m… 1.066 · Preferiu outra po… 36 · Motivos pessoais 35 · [Offer] … A confirmar com os nomes completos.
+- **Pool → contratação em outra aplicação:** 36.670 aplicações de pool rejeitadas; **191** são de pessoas contratadas em outra aplicação. Das **676 pessoas contratadas, 134 (20%) passaram por pool**. Ex.: 306105340002.
+
+## Backlog
+- Rejeitadas **sem nenhuma etapa "Rejeitado"** (275).
+- Aplicações **sem esteira** (~75 mil; ver CONTEXTO seção 10).
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 
