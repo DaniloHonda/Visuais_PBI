@@ -31,6 +31,8 @@ Decisões (25/10/2026), a partir dos mockups `docs/mockups/`:
   - dias e SLA com selo cinza / âmbar (> 30) / coral (> 45), também na linha do tempo;
   - abrir uma linha não volta mais a rolagem para o topo.
 
+- **Páginas (decisão 25/10/2026):** Conceitos · Resumo · Report · **Nominal** · **Data Quality**. A página "Dados do dash" vira a nova **Nominal** (menu de visões + tabela 2.0); a Nominal antiga fica oculta até a validação com os recrutadores e depois é apagada. "Alertas / Pontos de atenção" passa a se chamar **Data Quality**. Fundos com o 5º item no submenu: `docs/mockups/43-fundos/` (gerados por `tools/gen_bg_dataquality.py`; copiar para `backgrounds/` após aprovação).
+
 ## Backlog desta etapa
 - **Nomes com sujeira na base** (vistos em `nome_completo`): "_Fabio", "^david nathan", nomes vazios, "[TESTE] …" e "#VALUE!". Avaliar um alerta de dado "Nome inválido" e a exclusão de candidatos de teste.
 - **Botão "Limpar filtros"** da faixa de filtros ativos: redesenhar (ficou feio no mockup).
