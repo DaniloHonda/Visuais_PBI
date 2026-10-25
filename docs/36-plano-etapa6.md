@@ -12,7 +12,7 @@ Decisões (25/10/2026), a partir dos mockups `docs/mockups/`:
 | 6.1 | **Base no modelo** | `nome_completo`, tabela `dVisao` (as visões do menu) e as medidas "está na visão" e "contagem da visão" para as visões por aplicação · `docs/36-dados-parte1.dax` |
 | 6.2 | Visual **XP · Menu de visões** | menu lateral da versão B (ícone, nome, descrição, contagem), seleção filtra `dVisao` |
 | 6.3 | Visual **XP · Tabela nominal 2.0** | colunas por visão, Colunas ▾, Mostrar mais 100, busca, CSV, linha do tempo com "Voltou", selos de alerta, "Só exceções", segmentos como big numbers |
-| 6.4 | Visões por passagem, entrevista e movimentação | SLA por etapa (1 linha por passagem), Entrevistas (1 por entrevista), Evolução (1 por movimentação) |
+| 6.4 | Visões por passagem, entrevista e movimentação | SLA por etapa, Entrevistas e Evolução com lista (1 linha por aplicação; passagens/entrevistas/movimentos viram colunas) |
 | 6.5 | Botões **"Ver aplicações ↗"** | passo a passo: um indicador (bookmark) por visão + botão em cada gráfico |
 | 6.6 | Página **Alertas** | big numbers (Card de KPI), tipos com ⓘ, "Onde acontece" com recorte por botões, tabela 2.0 |
 | 6.7 | Página **Conceitos** | textos dos alertas, tipos de encerramento, "Voltou", "Saiu para outra vaga", origem da contratação |
@@ -24,6 +24,12 @@ Decisões (25/10/2026), a partir dos mockups `docs/mockups/`:
 
 - **6.2 instalada e aprovada (25/10/2026).**
 - **6.3 pronta para instalar:** `docs/39-tabela2.md`, `docs/38-tabela2.dax`, `dist/XP - Tabela nominal 2.0.0.pbiviz`.
+- **6.3 ajustes (25/10/2026):** lentidão e 1.205 linhas para 77 contratadas por causa de `fonte_contratacao` nas Colunas fixas (muda dentro da aplicação) · versão rápida em `docs/40a-colunas.dax` + `docs/40b-medidas.dax`.
+- **6.4 + pedidos da homologação (25/10/2026):** `docs/41-visoes-completas.dax` e `dist/XP - Tabela nominal 2.1.0.pbiviz`:
+  - SLA por etapa, Evolução e Entrevistas com lista; o número do menu dessas 3 passa a ser de aplicações (antes passagens, movimentos e entrevistas);
+  - coluna **SLA (dias)** em todas as visões (início do ciclo → contratação, rejeição ou hoje);
+  - dias e SLA com selo cinza / âmbar (> 30) / coral (> 45), também na linha do tempo;
+  - abrir uma linha não volta mais a rolagem para o topo.
 
 ## Backlog desta etapa
 - **Nomes com sujeira na base** (vistos em `nome_completo`): "_Fabio", "^david nathan", nomes vazios, "[TESTE] …" e "#VALUE!". Avaliar um alerta de dado "Nome inválido" e a exclusão de candidatos de teste.

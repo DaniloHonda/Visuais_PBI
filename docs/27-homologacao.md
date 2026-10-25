@@ -127,3 +127,10 @@ Etapa 6 (mockups para aprovar): `docs/33-mockup-dados-do-dash.png` e `docs/33-mo
 ## Para a engenharia (rascunho de mensagem)
 > Na tabela de etapas (13), achamos 3.519 aplicações com as etapas em dobro: a mesma etapa aparece com dois `job_stage_id` diferentes e exatamente as mesmas datas de entrada e saída. Exemplo: aplicação 281242063002, vaga 6449060002 ("Future"): ids `2191486…` e `2306733…` para cada etapa. Só 38% dessas aplicações estão em vaga de pool, então não parece transferência.
 > Perguntas: (1) Como a 13 é montada (consulta/notebook)? A ligação do histórico com as etapas é feita pelo nome da etapa ou pelo `job_stage_id`? (2) A quais `job_id` pertencem os `job_stage_id` `2191486459002` e `2306733915002`? Alguma das famílias é de etapas apagadas, de outra versão do plano de entrevistas ou de outra vaga? (3) Por que existem linhas para etapas por onde a aplicação não passou (sem datas, "Aprovado", 0 dias)? (4) Como `days_in_stage` é calculado (há casos sem saída com 7 dias)? (5) Conseguem disponibilizar a tabela `job_stages` (`job_stage_id` → `job_id`)?
+
+## Regra de "Aprovado" na etapa (confirmada em 25/10/2026)
+- Aprovado na etapa X = a aplicação entrou em X e depois seguiu para uma etapa de ordem maior (ou foi contratada estando em X).
+  Ex.: Revisão de aplicação → Phone Screening: conta 1 aprovado em **Revisão de aplicação**; em Phone Screening ela fica "Em andamento" até sair de lá.
+- Etapa pulada (sem data de entrada) não conta como aprovada nem como entrada.
+- Etapa de onde a aplicação voltou para trás = "Voltou" (não é aprovação). Re-entrada na mesma etapa: vale a última passagem.
+- "Aprovados" (gráficos por etapa) é por coorte: data da candidatura no período. "Evolução" usa a data do movimento (saída da etapa).

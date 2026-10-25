@@ -30,10 +30,11 @@ class ComportamentoCard extends Card {
 }
 
 class DiasCard extends Card {
-    alerta = new formattingSettings.NumUpDown({ name: "alerta", displayName: "Dias em vermelho acima de", value: 45 });
+    atencao = new formattingSettings.NumUpDown({ name: "atencao", displayName: "Âmbar acima de (dias)", value: 30 });
+    alerta = new formattingSettings.NumUpDown({ name: "alerta", displayName: "Coral acima de (dias)", value: 45 });
     name = "dias";
     displayName = "Dias";
-    slices = [this.alerta];
+    slices = [this.atencao, this.alerta];
 }
 
 // Colunas escondidas pelo usuário em "Colunas ▾" (salvas no relatório, por visão). Não aparece no painel.

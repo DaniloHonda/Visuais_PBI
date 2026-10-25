@@ -1,0 +1,361 @@
+// =====================================================================
+// 41 · Etapa 6.4: as 11 visões com lista + coluna SLA em todas
+// Colar ESTE ARQUIVO INTEIRO na Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações".
+// Substitui: Visão Contagem, Visão Na Lista, Visão Dados e Visão Contexto (as de 36, 38 e 40b).
+//
+// Por que SLA por etapa, Evolução e Entrevistas davam zero: a lista dessas 3 visões ainda não existia
+// (a medida Na Lista não tinha linha para elas). Agora todas mostram 1 linha por APLICAÇÃO:
+//   SLA por etapa · aplicações do período com etapa concluída (entrada → saída) nas etapas filtradas
+//   Evolução      · aplicações com aprovação ou rejeição DATADA no período (não é coorte: vale a data do movimento)
+//   Entrevistas   · aplicações com entrevista marcada no período (data de criação da entrevista, como no gráfico)
+// O número no menu dessas 3 passa a ser de APLICAÇÕES (antes: passagens, movimentos e entrevistas),
+// para bater com a lista. A quantidade de passagens/entrevistas aparece numa coluna da lista.
+//
+// SLA (dias), em todas as visões: início do ciclo (entrada no pool, se veio de pool; senão a candidatura)
+// até a contratação, a rejeição ou hoje (em andamento). Para contratadas é igual a sla_esteira_dias.
+// =====================================================================
+DEFINE
+    // ---------- contagens das 3 visões novas (em aplicações) ----------
+    MEASURE '_Medidas'[Esteira | Aplicações com Etapa Concluída] =
+        VAR Ini = MIN( '_dCALENDARIO'[Data] )
+        VAR Fim = MAX( '_dCALENDARIO'[Data] ) + 1
+        RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Aplicações com Movimento] =
+        VAR Ini = MIN( '_dCALENDARIO'[Data] )
+        VAR Fim = MAX( '_dCALENDARIO'[Data] ) + 1
+        VAR A = CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] <  Fim ) )
+        VAR R = CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] <  Fim ) )
+        RETURN COUNTROWS( DISTINCT( UNION( A, R ) ) )
+
+    // Entrevistas: mesmo critério de "Esteira | Entrevistas Marcadas" (criada no período, status ≠ a agendar, etapa da barra).
+    MEASURE '_Medidas'[Esteira | Aplicações com Entrevista] =
+        VAR Ini = MIN( '_dCALENDARIO'[Data] )
+        VAR Fim = MAX( '_dCALENDARIO'[Data] ) + 1
+        VAR Apps =
+            CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), REMOVEFILTERS( '_dCALENDARIO' ), REMOVEFILTERS( dEtapa ) )
+        VAR Etapas =
+            FILTER( ALL( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] ),
+                NOT ISFILTERED( dEtapa ) || '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] IN VALUES( dEtapa[stage_name] ) )
+        RETURN
+        CALCULATE(
+            DISTINCTCOUNT( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id] ),
+            REMOVEFILTERS( '_dCALENDARIO' ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] >= Ini ),
+            KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] <  Fim ),
+            TREATAS( Apps, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id] ),
+            Etapas )
+
+    // ---------- número da visão (menu e ✓ da tabela) ----------
+    MEASURE '_Medidas'[Esteira | Visão Contagem] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        SWITCH( V,
+            "Aplicações",           [Esteira | Candidatos],
+            "Contratadas",          [Esteira | Contratados],
+            "Em andamento",         [Esteira | Ativos Agora],
+            "Funil",                [Esteira | Candidatos],
+            "Entradas por etapa",   [Esteira | Participantes],
+            "Rejeitados e motivos", [Esteira | Rejeitados],
+            "Andamento por faixa",  [Esteira | Ativos Agora],
+            "SLA por etapa",        [Esteira | Aplicações com Etapa Concluída],
+            "Por recrutador",       [Esteira | Candidatos],
+            "Evolução",             [Esteira | Aplicações com Movimento],
+            "Entrevistas",          [Esteira | Aplicações com Entrevista]
+        )
+
+    // ---------- a aplicação da linha entra na lista? (só lê colunas; leve) ----------
+    MEASURE '_Medidas'[Esteira | Visão Na Lista] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        VAR Ini = MIN( '_dCALENDARIO'[Data] )
+        VAR Fim = MAX( '_dCALENDARIO'[Data] ) + 1
+        VAR Cand = MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] )
+        VAR NoPer = NOT ISBLANK( Cand ) && Cand >= Ini && Cand < Fim
+        RETURN
+        SWITCH( V,
+            // Não são coorte: valem a data do movimento e a data da entrevista.
+            "Evolução",
+                IF( CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] <  Fim ) )
+                  + CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] <  Fim ) ) > 0, 1 ),
+            "Entrevistas",
+                IF( [Esteira | Aplicações com Entrevista] > 0, 1 ),
+            // Coorte: candidatura no período.
+            IF( NoPer,
+                SWITCH( V,
+                    "Aplicações", 1,
+                    "Funil", 1,
+                    "Por recrutador", 1,
+                    "Contratadas", IF( MAX( '13_ETAPA_RECRUTAMENTO'[status] ) = "hired", 1 ),
+                    "Em andamento",
+                        IF( CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ) ) > 0, 1 ),
+                    "Andamento por faixa",
+                        IF( CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ) ) > 0, 1 ),
+                    "Rejeitados e motivos",
+                        IF( CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ),
+                            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ) ) > 0, 1 ),
+                    "Entradas por etapa",
+                        IF( CALCULATE( COUNT( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+                            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ) ) > 0, 1 ),
+                    "SLA por etapa",
+                        IF( CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) ) ) > 0, 1 )
+                )
+            )
+        )
+
+    // ---------- uma linha da tabela ----------
+    MEASURE '_Medidas'[Esteira | Visão Dados] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        IF( [Esteira | Visão Na Lista] = 1,
+            VAR F = "yyyy-mm-dd"
+            VAR Ini = MIN( '_dCALENDARIO'[Data] )
+            VAR Fim = MAX( '_dCALENDARIO'[Data] ) + 1
+            VAR Atual = CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO',
+                    '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], '13_ETAPA_RECRUTAMENTO'[days_in_stage],
+                    '13_ETAPA_RECRUTAMENTO'[resultado_etapa], '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE(),
+                REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+            VAR TemAtual = NOT ISEMPTY( Atual )
+            VAR EtAt   = IF( TemAtual, COALESCE( MAXX( Atual, '13_ETAPA_RECRUTAMENTO'[stage_name] ), "(etapa sem nome)" ) )
+            VAR EntAt  = MAXX( Atual, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
+            VAR DiasEt = MAXX( Atual, '13_ETAPA_RECRUTAMENTO'[days_in_stage] )
+            VAR Sit    = MAX( '13_ETAPA_RECRUTAMENTO'[situacao_app] )
+            VAR Cand   = MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] )
+            VAR Ciclo  = COALESCE( MIN( '13_ETAPA_RECRUTAMENTO'[ciclo_inicio] ), Cand )
+            VAR Mot    = MAX( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] )
+            VAR Tipo   = MAX( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] )
+            VAR Contr  = MAX( '13_ETAPA_RECRUTAMENTO'[data_contratacao] )
+            VAR RejEm  = MAX( '13_ETAPA_RECRUTAMENTO'[rejected_at] )
+            VAR Saida  = SWITCH( Sit, "Contratada", Contr, "Rejeitada", RejEm, "Declinou", RejEm, "Contratada via outra vaga", RejEm )
+            VAR Sla    = IF( Sit = "Contratada", ROUND( MAX( '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ), 0 ),
+                             IF( NOT ISBLANK( Ciclo ), INT( COALESCE( Saida, TODAY() ) - Ciclo ) ) )
+            VAR tSla   = "||SLA (dias)=" & IF( ISBLANK( Sla ), "", "#" & Sla )
+            VAR dCand  = IF( ISBLANK( Cand ), "", "@" & FORMAT( Cand, F ) )
+            VAR Base   = "||Situação=" & Sit & "||Etapa atual=" & EtAt & "||Candidatura=" & dCand & tSla
+            VAR UmaEtapa = ISFILTERED( dEtapa[stage_name] ) && HASONEVALUE( dEtapa[stage_name] )
+            RETURN
+            SWITCH( V,
+                "Aplicações",     "seg=" & Sit & Base & "||Motivo=" & Mot & "||Tipo de encerramento=" & Tipo,
+                "Por recrutador", "seg=" & Sit & Base & "||Motivo=" & Mot,
+                "Funil",
+                    VAR MaxOrd = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[ordem_etapa] ),
+                        '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1, REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+                    VAR Chegou = LOOKUPVALUE( dEtapa[stage_name], dEtapa[ordem], MaxOrd )
+                    RETURN "seg=" & Sit & "||Chegou até=" & Chegou & Base,
+                "Contratadas",
+                    VAR Orig = MAX( '13_ETAPA_RECRUTAMENTO'[origem_contratacao] )
+                    RETURN "seg=" & Orig & "||Origem=" & Orig
+                        & "||Início do ciclo=" & IF( ISBLANK( Ciclo ), "", "@" & FORMAT( Ciclo, F ) )
+                        & "||Candidatura=" & dCand
+                        & "||Contratação=" & IF( ISBLANK( Contr ), "", "@" & FORMAT( Contr, F ) )
+                        & tSla,
+                "Em andamento",
+                    "seg=" & IF( DiasEt > 45, "Parada há mais de 45 dias", "Até 45 dias" )
+                    & "||Etapa atual=" & EtAt
+                    & "||Entrou na etapa=" & IF( ISBLANK( EntAt ), "", "@" & FORMAT( EntAt, F ) )
+                    & "||Dias na etapa=" & IF( ISBLANK( DiasEt ), "", "#" & DiasEt )
+                    & "||Candidatura=" & dCand & tSla,
+                "Andamento por faixa",
+                    VAR Faixa = MAXX( FILTER( dFaixaDias, DiasEt >= dFaixaDias[de] && DiasEt <= dFaixaDias[ate] ), dFaixaDias[faixa] )
+                    RETURN "seg=" & Faixa & "||Etapa atual=" & EtAt & "||Faixa=" & Faixa
+                        & "||Entrou na etapa=" & IF( ISBLANK( EntAt ), "", "@" & FORMAT( EntAt, F ) )
+                        & "||Dias na etapa=" & IF( ISBLANK( DiasEt ), "", "#" & DiasEt )
+                        & "||Candidatura=" & dCand & tSla,
+                "Rejeitados e motivos",
+                    "seg=" & Tipo & "||Etapa da rejeição=" & EtAt & "||Motivo=" & Mot & "||Tipo=" & Tipo
+                    & "||Rejeitada em=" & IF( ISBLANK( RejEm ), "", "@" & FORMAT( RejEm, F ) )
+                    & "||Dias na etapa=" & IF( ISBLANK( DiasEt ), "", "#" & DiasEt )
+                    & "||Candidatura=" & dCand & tSla,
+                "Entradas por etapa",
+                    VAR ResU = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+                    VAR EntU = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+                    VAR SaiU = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+                    VAR Et  = IF( UmaEtapa, SELECTEDVALUE( dEtapa[stage_name] ), EtAt )
+                    VAR Res = IF( UmaEtapa, ResU, MAXX( Atual, '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ) )
+                    VAR Ent = IF( UmaEtapa, EntU, EntAt )
+                    VAR Sai = IF( UmaEtapa, SaiU, MAXX( Atual, '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) )
+                    VAR Dd  = IF( UmaEtapa,
+                        CALCULATE( SUM( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ) ),
+                        DiasEt )
+                    RETURN "seg=" & Res & "||Etapa=" & Et & "||Resultado na etapa=" & Res
+                        & "||Entrada=" & IF( ISBLANK( Ent ), "", "@" & FORMAT( Ent, F ) )
+                        & "||Saída=" & IF( ISBLANK( Sai ), "", "@" & FORMAT( Sai, F ) )
+                        & "||Dias na etapa=" & IF( ISBLANK( Dd ), "", "#" & Dd )
+                        & "||Candidatura=" & dCand & tSla,
+                // Etapas concluídas (entrada → saída) dentro das etapas filtradas; com 1 etapa escolhida mostra a passagem.
+                "SLA por etapa",
+                    VAR Conc = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                        KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) ) )
+                    VAR SomaD = CALCULATE( SUM( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                        KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) ) )
+                    VAR EntP = CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                        KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) ) )
+                    VAR SaiP = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ) )
+                    VAR SomaInt = INT( SomaD )
+                    VAR Faixa = MAXX( FILTER( dFaixaDias, SomaInt >= dFaixaDias[de] && SomaInt <= dFaixaDias[ate] ), dFaixaDias[faixa] )
+                    RETURN "seg=" & Faixa
+                        & "||Etapa=" & IF( UmaEtapa, SELECTEDVALUE( dEtapa[stage_name] ), "(" & Conc & " etapas)" )
+                        & "||Etapas concluídas=#" & Conc
+                        & "||Entrada=" & IF( ISBLANK( EntP ), "", "@" & FORMAT( EntP, F ) )
+                        & "||Saída=" & IF( ISBLANK( SaiP ), "", "@" & FORMAT( SaiP, F ) )
+                        & "||Dias nas etapas=" & IF( ISBLANK( SomaD ), "", "#" & SomaInt )
+                        & "||Situação=" & Sit & "||Candidatura=" & dCand & tSla,
+                // Movimentos datados no período: aprovações (data de saída da etapa) e rejeição (rejected_at).
+                "Evolução",
+                    VAR AprN = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] <  Fim ) )
+                    VAR AprUlt = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] <  Fim ) )
+                    VAR AprEt = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] = AprUlt ) )
+                    VAR RejN = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] <  Fim ) )
+                    VAR Mov = SWITCH( TRUE(), AprN > 0 && RejN > 0, "Aprovou e foi rejeitada", RejN > 0, "Rejeitada", "Aprovou" )
+                    VAR Ult = IF( RejN > 0, RejEm, AprUlt )
+                    VAR EtUlt = IF( RejN > 0, EtAt, AprEt )
+                    RETURN "seg=" & Mov & "||Movimento=" & Mov
+                        & "||Aprovações no período=#" & COALESCE( AprN, 0 )
+                        & "||Último movimento=" & IF( ISBLANK( Ult ), "", "@" & FORMAT( Ult, F ) )
+                        & "||Etapa do movimento=" & EtUlt
+                        & "||Situação=" & Sit & "||Etapa atual=" & EtAt & "||Candidatura=" & dCand & tSla,
+                // Entrevistas marcadas no período (mesmo critério do gráfico).
+                "Entrevistas",
+                    VAR Apps = CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), REMOVEFILTERS( '_dCALENDARIO' ), REMOVEFILTERS( dEtapa ) )
+                    VAR Etapas =
+                        FILTER( ALL( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] ),
+                            NOT ISFILTERED( dEtapa ) || '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] IN VALUES( dEtapa[stage_name] ) )
+                    VAR Ent = CALCULATETABLE(
+                        SUMMARIZE( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS',
+                            '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interviews_id], '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at],
+                            '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista], '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[resultado_entrevista] ),
+                        REMOVEFILTERS( '_dCALENDARIO' ),
+                        KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" ),
+                        KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] >= Ini ),
+                        KEEPFILTERS( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] <  Fim ),
+                        TREATAS( Apps, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id] ),
+                        Etapas )
+                    VAR Agora = NOW()
+                    VAR Total = COUNTROWS( DISTINCT( SELECTCOLUMNS( Ent, "id", '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interviews_id] ) ) )
+                    VAR Feitas = FILTER( Ent, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] < Agora )
+                    VAR NFeitas = COUNTROWS( DISTINCT( SELECTCOLUMNS( Feitas, "id", '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[scheduled_interviews_id] ) ) )
+                    VAR Ult = TOPN( 1, Ent, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at], DESC )
+                    VAR UltData = MAXX( Ult, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at] )
+                    VAR UltEt = MAXX( Ult, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[etapa_entrevista] )
+                    VAR UltRes = MAXX( TOPN( 1, Feitas, '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at], DESC ), '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[resultado_entrevista] )
+                    VAR Seg = SWITCH( TRUE(),
+                        COALESCE( NFeitas, 0 ) < Total, "A realizar",
+                        UltRes IN { "Aprovado", "Rejeitado" }, UltRes,
+                        "Sem resultado" )
+                    RETURN "seg=" & Seg & "||Resultado da entrevista=" & Seg
+                        & "||Entrevistas=#" & Total
+                        & "||Realizadas=#" & COALESCE( NFeitas, 0 )
+                        & "||Última entrevista=" & IF( ISBLANK( UltData ), "", "@" & FORMAT( UltData, F ) )
+                        & "||Etapa da entrevista=" & UltEt
+                        & "||Situação=" & Sit & "||Etapa atual=" & EtAt & "||Candidatura=" & dCand & tSla
+            )
+        )
+
+    // ---------- cabeçalho da tabela ----------
+    // ALLSELECTED tira o filtro da linha (aplicação) e mantém os filtros da página.
+    MEASURE '_Medidas'[Esteira | Visão Contexto] =
+        CALCULATE(
+            VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+            VAR N = [Esteira | Visão Contagem]
+            VAR EtTxt = IF( ISFILTERED( dEtapa[stage_name] ),
+                " em " & CONCATENATEX( VALUES( dEtapa[stage_name] ), dEtapa[stage_name], ", " ), "" )
+            VAR Frase = SWITCH( V,
+                "Aplicações",           "aplicações com candidatura no período",
+                "Contratadas",          "contratadas · candidatura no período",
+                "Em andamento",         "aplicações em andamento hoje" & EtTxt,
+                "Funil",                "aplicações do período e até onde chegaram",
+                "Entradas por etapa",   "aplicações que entraram" & IF( EtTxt = "", " em alguma etapa", EtTxt ),
+                "Rejeitados e motivos", "aplicações rejeitadas" & EtTxt,
+                "Andamento por faixa",  "aplicações em andamento, por dias parada na etapa atual",
+                "SLA por etapa",        "aplicações do período com etapa concluída" & EtTxt & " · " & FORMAT( [Esteira | Base SLA], "#,0" ) & " passagens",
+                "Por recrutador",       "aplicações do período",
+                "Evolução",             "aplicações com aprovação ou rejeição no período (data do movimento)" & EtTxt,
+                "Entrevistas",          "aplicações com entrevista marcada no período" & EtTxt & " · " & FORMAT( [Esteira | Entrevistas Marcadas], "#,0" ) & " entrevistas",
+                "aplicações" )
+            VAR Origem = SWITCH( V,
+                "Aplicações",           "card Aplicações",
+                "Contratadas",          "card Contratadas",
+                "Em andamento",         "card Em andamento",
+                "Funil",                "Funil",
+                "Entradas por etapa",   "Entradas e aprovações por etapa",
+                "Rejeitados e motivos", "Rejeitados por etapa e Motivos de saída",
+                "Andamento por faixa",  "Aplicações em andamento por etapa",
+                "SLA por etapa",        "SLA por etapa",
+                "Por recrutador",       "Aprovados por recrutador",
+                "Evolução",             "Evolução",
+                "Entrevistas",          "Entrevistas",
+                "" )
+            VAR Segs = SWITCH( V,
+                "Contratadas",          "Direto;Via pool;Dentro do pool",
+                "Em andamento",         "Até 45 dias;Parada há mais de 45 dias",
+                "Entradas por etapa",   "Aprovado;Rejeitado;Em andamento;Voltou;Saiu para outra vaga",
+                "Rejeitados e motivos", "Avaliação;Desistência do candidato;Declínio da offer;Administrativo;Sem motivo na base;A classificar",
+                "Andamento por faixa",  "0–2 d;3–7 d;8–15 d;16–30 d;31–45 d;> 45 d",
+                "SLA por etapa",        "0–2 d;3–7 d;8–15 d;16–30 d;31–45 d;> 45 d",
+                "Evolução",             "Aprovou;Rejeitada;Aprovou e foi rejeitada",
+                "Entrevistas",          "Aprovado;Rejeitado;Sem resultado;A realizar",
+                "Em andamento;Contratada;Contratada via outra vaga;Rejeitada;Declinou" )
+            VAR Ordem = SWITCH( V,
+                "Em andamento",         "Dias na etapa",
+                "Andamento por faixa",  "Dias na etapa",
+                "Rejeitados e motivos", "Dias na etapa",
+                "Entradas por etapa",   "Dias na etapa",
+                "SLA por etapa",        "Dias nas etapas",
+                "Evolução",             "Último movimento",
+                "Entrevistas",          "Última entrevista",
+                "SLA (dias)" )
+            RETURN
+            "visao=" & V & "||n=" & N & "||frase=" & Frase & "||origem=" & Origem & "||segs=" & Segs & "||ordem=" & Ordem,
+            ALLSELECTED( '13_ETAPA_RECRUTAMENTO' )
+        )
+
+EVALUATE ROW( "medidas", 7 )
+
+// Conferência (sem filtro de período): a contagem de cada visão = aplicações na lista (as 11 agora)
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE( dVisao, dVisao[ordem], dVisao[visao] ),
+    "contagem", [Esteira | Visão Contagem],
+    "na lista", COUNTROWS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), [Esteira | Visão Na Lista] = 1 ) )
+)
+ORDER BY dVisao[ordem]

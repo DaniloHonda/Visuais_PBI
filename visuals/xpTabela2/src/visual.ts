@@ -42,9 +42,12 @@ const PILL: Record<string, string> = {
     "aprovado": "ok", "aprovada": "ok", "em andamento": "now", "rejeitado": "bad", "rejeitada": "bad", "voltou": "back",
     "declinou": "dec", "declinio da offer": "dec", "contratada": "hired", "contratada via outra vaga": "out", "saiu para outra vaga": "out",
     "avaliacao": "bad", "desistencia do candidato": "dec", "administrativo": "off", "sem motivo na base": "off", "a classificar": "off",
-    "direto": "ok", "via pool": "out", "dentro do pool": "bad", "ate 45 dias": "now", "parada ha mais de 45 dias": "bad"
+    "direto": "ok", "via pool": "out", "dentro do pool": "bad", "ate 45 dias": "now", "parada ha mais de 45 dias": "bad",
+    "aprovou": "ok", "aprovou e foi rejeitada": "back", "a realizar": "now", "sem resultado": "off"
 };
-const PILL_COLS = ["situação", "resultado na etapa", "tipo", "tipo de encerramento", "origem", "faixa"];
+const PILL_COLS = ["situação", "resultado na etapa", "tipo", "tipo de encerramento", "origem", "faixa", "movimento", "resultado da entrevista"];
+// Colunas de dias (dias na etapa, SLA…) ganham selo cinza / âmbar / coral pelos limites do painel "Dias".
+const DAYS_COL = /dias|sla/i;
 
 export class Visual implements IVisual {
     private host: IVisualHost;
@@ -75,6 +78,7 @@ export class Visual implements IVisual {
     private complete = true;
     private repetidas = 0;
     private height = 0;
+    private resetScroll = true;
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
@@ -148,8 +152,8 @@ export class Visual implements IVisual {
 
         const dynOrder: string[] = [];
         const dynKind: Record<string, Kind> = {};
-        // Uma linha por aplicação: se uma coluna fixa vier de uma tabela que não filtra a 13, o Power BI cruza as linhas
-        // (a mesma aplicação aparece várias vezes). Mantém a primeira e avisa no rodapé.
+        // Uma linha por aplicação: se uma coluna fixa mudar dentro da aplicação (ou vier de tabela que não filtra a 13),
+        // o Power BI repete a aplicação. Mantém a primeira e avisa no rodapé.
         const seen = new Set<string>();
         this.repetidas = 0;
         table.rows.forEach((r, i) => {
@@ -217,6 +221,7 @@ export class Visual implements IVisual {
             this.shown = this.pageSize();
             this.expanded.clear();
             this.closeMenu();
+            this.resetScroll = true;
         }
     }
 
@@ -263,11 +268,12 @@ export class Visual implements IVisual {
     }
 
     // ---------- desenho ----------
-    private render() {
+    private render(reset = false) {
         this.renderTop();
         this.renderSegs();
         this.renderHead();
-        this.renderTable();
+        this.renderTable(reset || this.resetScroll);
+        this.resetScroll = false;
     }
 
     private renderTop() {
@@ -307,7 +313,7 @@ export class Visual implements IVisual {
                 this.seg = s;
                 this.shown = this.pageSize();
                 this.expanded.clear();
-                this.render();
+                this.render(true);
             });
             this.segEl.appendChild(b);
         }
@@ -322,8 +328,8 @@ export class Visual implements IVisual {
         input.placeholder = this.settings.textos.busca.value || "Buscar";
         input.value = this.query;
         input.setAttribute("aria-label", input.placeholder);
-        input.addEventListener("input", () => { this.query = input.value; this.shown = this.pageSize(); this.renderTable(); });
-        input.addEventListener("keydown", (e: KeyboardEvent) => { e.stopPropagation(); if (e.key === "Escape") { input.value = ""; this.query = ""; this.renderTable(); } });
+        input.addEventListener("input", () => { this.query = input.value; this.shown = this.pageSize(); this.renderTable(true); });
+        input.addEventListener("keydown", (e: KeyboardEvent) => { e.stopPropagation(); if (e.key === "Escape") { input.value = ""; this.query = ""; this.renderTable(true); } });
         search.appendChild(input);
         this.head.appendChild(search);
 
@@ -331,7 +337,7 @@ export class Visual implements IVisual {
         const ex = el("button", "xp-t2__toggle" + (this.soExcecoes ? " is-on" : ""), `⚠ Só exceções (${INT.format(nEx)})`);
         ex.setAttribute("aria-pressed", String(this.soExcecoes));
         ex.title = "Mostra só as aplicações com algum alerta (voltou de etapa, etapa de configuração, sem motivo…)";
-        ex.addEventListener("click", () => { this.soExcecoes = !this.soExcecoes; this.shown = this.pageSize(); this.render(); });
+        ex.addEventListener("click", () => { this.soExcecoes = !this.soExcecoes; this.shown = this.pageSize(); this.render(true); });
         this.head.appendChild(ex);
 
         const colBtn = el("button", "xp-t2__btn xp-t2__colbtn", "Colunas ▾");
@@ -379,8 +385,12 @@ export class Visual implements IVisual {
     }
     private closeMenu() { if (this.menuEl) { this.menuEl.remove(); this.menuEl = null; } }
 
-    private renderTable() {
+    // Abrir uma linha, "Mostrar mais", trocar colunas ou uma atualização do Power BI mantêm a rolagem.
+    // Só volta ao topo ao trocar de visão, aba, busca, ordem ou "Só exceções".
+    private renderTable(reset = false) {
         const s = this.settings;
+        const top = reset ? 0 : this.wrap.scrollTop;
+        const left = reset ? 0 : this.wrap.scrollLeft;
         clear(this.wrap);
         const avail = Math.max(140, this.height - this.topEl.offsetHeight - this.segEl.offsetHeight - this.head.offsetHeight - 54);
         this.wrap.style.height = avail + "px";
@@ -408,7 +418,7 @@ export class Visual implements IVisual {
                 if (!sort || sort.key !== c.key) this.sort = { key: c.key, desc: true };
                 else if (sort.desc) this.sort = { key: c.key, desc: false };
                 else this.sort = { key: c.key, desc: true };
-                this.renderTable();
+                this.renderTable(true);
             });
             th.appendChild(btn);
             hr.appendChild(th);
@@ -428,7 +438,7 @@ export class Visual implements IVisual {
             tbody.appendChild(tr);
         }
         const q = normalize(this.query);
-        const alertaDias = s.dias.alerta.value;
+        const dayCls = (n: number) => this.dayClass(n);
         for (const r of list) {
             const open = this.expanded.has(r.key);
             const tr = el("tr", "xp-t2__row" + (open ? " is-open" : ""));
@@ -458,8 +468,8 @@ export class Visual implements IVisual {
                 } else if (c.kind === "num") {
                     td.className = "xp-t2__r xp-t2__num";
                     const n = num(raw);
-                    td.textContent = n === null ? "—" : INT.format(n);
-                    if (n !== null && /dias/i.test(c.title) && n > alertaDias) td.classList.add("is-bad");
+                    if (n !== null && DAYS_COL.test(c.title)) td.appendChild(el("span", "xp-t2__days xp-t2__days--" + dayCls(n), INT.format(n)));
+                    else td.textContent = n === null ? "—" : INT.format(n);
                 } else {
                     if (c.key === NAME_COL) td.className = "xp-t2__strong";
                     if (/motivo/i.test(c.title)) td.className = "xp-t2__muted";
@@ -496,6 +506,8 @@ export class Visual implements IVisual {
         }
         table.appendChild(tbody);
         this.wrap.appendChild(table);
+        this.wrap.scrollTop = top;
+        this.wrap.scrollLeft = left;
 
         clear(this.foot);
         this.foot.appendChild(el("span", "", all.length ? `Mostrando ${INT.format(list.length)} de ${INT.format(all.length)}` : ""));
@@ -508,12 +520,17 @@ export class Visual implements IVisual {
             if (all.length - list.length > this.step()) this.foot.appendChild(allBtn);
         }
         if (this.repetidas > 0) {
-            const w = el("span", "xp-t2__warn", `⚠ ${INT.format(this.repetidas)} linhas repetidas ignoradas: alguma coluna fixa não é da tabela 13`);
-            w.title = "Use nas Colunas fixas só colunas da 13_ETAPA_RECRUTAMENTO (ou de tabelas que filtram a 13). Colunas de outras tabelas multiplicam as linhas e deixam a tabela lenta.";
+            const w = el("span", "xp-t2__warn", `⚠ ${INT.format(this.repetidas)} linhas repetidas ignoradas: alguma coluna fixa muda dentro da mesma aplicação`);
+            w.title = "Use nas Colunas fixas só colunas com 1 valor por aplicação (ex.: fonte_app em vez de fonte_contratacao). Coluna que muda de linha para linha, ou de tabela que não filtra a 13, multiplica as linhas e deixa a tabela lenta.";
             this.foot.appendChild(w);
         }
         if (this.loading) this.foot.appendChild(el("span", "xp-t2__loading", "Carregando mais aplicações…"));
         else if (!this.complete) this.foot.appendChild(el("span", "xp-t2__loading", `Lista limitada a ${INT.format(this.rows.length)} linhas: use os filtros para reduzir`));
+    }
+
+    private dayClass(n: number): string {
+        const d = this.settings.dias;
+        return n > d.alerta.value ? "bad" : n > d.atencao.value ? "warn" : "ok";
     }
 
     // Linha do tempo: etapa|entrada|saída|resultado|dias;;… + etapas seguintes que a aplicação não alcançou.
@@ -523,9 +540,12 @@ export class Visual implements IVisual {
         const steps = r.jornada.split(";;").map(x => x.split("|")).filter(p => p[0] && p[0].trim());
         const next = r.seguintes.split(";;").map(x => x.trim()).filter(Boolean);
         if (!steps.length) { outer.appendChild(el("div", "xp-t2__muted", "Sem histórico de etapas para esta aplicação.")); return outer; }
-        const add = (name: string, sub: string, cls: string) => {
+        const add = (name: string, sub: string, cls: string, days: number | null = null, tail = "") => {
             const st = el("div", "xp-t2__st xp-t2__st--" + cls);
-            st.append(el("i", ""), el("b", "", name), el("span", "", sub));
+            const line = el("span", "", sub);
+            if (days !== null) line.append(" · ", el("em", "xp-t2__d xp-t2__d--" + this.dayClass(days), `${INT.format(days)} d`));
+            if (tail) line.append(tail);
+            st.append(el("i", ""), el("b", "", name), line);
             box.appendChild(st);
         };
         let total = 0;
@@ -536,9 +556,8 @@ export class Visual implements IVisual {
             const range = `${shortDate(ini, false)}${fim ? " → " + shortDate(fim, false) : " → hoje"}`;
             const nd = dias !== "" && isFinite(Number(dias)) ? Number(dias) : null;
             if (nd !== null) total += nd;
-            const d = nd !== null ? ` · ${INT.format(nd)} d` : "";
             const tail = cls === "bad" ? " · rejeitada" : cls === "now" ? " · em andamento" : cls === "back" ? " · voltou" : cls === "out" ? " · saiu para outra vaga" : "";
-            add(name, range + d + tail, cls);
+            add(name, range, cls, nd, tail);
         }
         const emAndamento = steps.some(p => normalize(p[3] || "").indexOf("andamento") >= 0);
         for (const n of next) add(n, emAndamento ? "ainda não chegou" : "não chegou", "off");

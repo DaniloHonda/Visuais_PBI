@@ -39,7 +39,7 @@
                 "maxLinhas": { "type": { "numeric": true } }
             }
         },
-        "dias": { "properties": { "alerta": { "type": { "numeric": true } } } },
+        "dias": { "properties": { "atencao": { "type": { "numeric": true } }, "alerta": { "type": { "numeric": true } } } },
         "colunas": { "properties": { "ocultas": { "type": { "text": true } } } }
     },
     "supportsLandingPage": true,

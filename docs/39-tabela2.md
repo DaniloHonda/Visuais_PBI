@@ -2,7 +2,7 @@
 
 A lista nominal da visão escolhida no **Menu de visões** (doc 37): colunas próprias de cada visão, **Colunas ▾** (escolher as colunas; fica salvo no relatório, por visão), **Mostrar mais 100** e **Mostrar todas**, busca sem acento, **Só exceções**, exportar CSV, linha do tempo ao clicar na linha (com "Voltou" em âmbar e a soma dos dias) e selos de alerta. No topo, o número da lista e o selo **"✓ igual ao gráfico"** (ou o aviso da diferença).
 
-Prévias (dados fictícios): `docs/39-tabela2-preview.png`, `docs/39-tabela2-colunas.png` · Pacote: `dist/XP - Tabela nominal 2.0.1.pbiviz` (2.0.1: ignora linhas repetidas da mesma aplicação e avisa no rodapé) · Medidas: `docs/38-tabela2.dax`.
+Prévias (dados fictícios): `docs/39-tabela2-preview.png`, `docs/39-tabela2-colunas.png` · Pacote: `dist/XP - Tabela nominal 2.1.0.pbiviz` (2.0.1: ignora linhas repetidas da mesma aplicação e avisa no rodapé · 2.1.0: selos de dias/SLA, rolagem mantida ao abrir uma linha) · Medidas: `docs/41-visoes-completas.dax` (+ colunas de `docs/40a-colunas.dax`).
 
 ## Versão rápida (obrigatória) · `docs/40a-colunas.dax` (colunas) e `docs/40b-medidas.dax` (medidas)
 A primeira versão das medidas recalculava a linha do tempo e as medidas "Nominal …" (que buscam entrevistas na tabela 14) em cada uma das ~22 mil linhas e travava. Agora:
@@ -48,4 +48,5 @@ Página **Dados do dash** (a mesma do Menu de visões, doc 37), **não** na Nomi
 2. Abas (Avaliação, Desistência…) somam o total; **Só exceções** mostra só quem tem alerta.
 3. **Colunas ▾** → desmarcar "Especialidade" → trocar de visão e voltar: a escolha continua.
 4. Clicar numa linha → linha do tempo; **Abrir ↗** abre o Greenhouse; **Exportar CSV** baixa a aba inteira.
-5. SLA por etapa, Evolução e Entrevistas ainda mostram a lista vazia: entram na parte 6.4.
+5. SLA por etapa, Evolução e Entrevistas: número do menu = lista, com "✓" (desde `docs/41-visoes-completas.dax`).
+6. Formatar → **Dias**: âmbar acima de 30, coral acima de 45 (vale para Dias na etapa, Dias nas etapas, SLA e a linha do tempo).
