@@ -72,10 +72,10 @@ DEFINE
     MEASURE '_Medidas'[Esteira | DQ Status] =
         VAR P = [Esteira | % com Alerta]
         VAR Um = HASONEVALUE( dAlerta[alerta] )
-        VAR At = IF( Um, VALUES( dAlerta[atencao] ), 0.10 )
-        VAR Cr = IF( Um, VALUES( dAlerta[critico] ), 0.20 )
+        VAR LimAtencao = IF( Um, VALUES( dAlerta[atencao] ), 0.10 )
+        VAR LimCritico = IF( Um, VALUES( dAlerta[critico] ), 0.20 )
         RETURN
-        IF( NOT ISBLANK( P ), SWITCH( TRUE(), P > Cr, "critico", P > At, "atencao", "ok" ) )
+        IF( NOT ISBLANK( P ), SWITCH( TRUE(), P > LimCritico, "critico", P > LimAtencao, "atencao", "ok" ) )
 
     // Cor pronta para formatação condicional (fx → Valor do campo).
     MEASURE '_Medidas'[Esteira | DQ Cor] =
