@@ -1,0 +1,101 @@
+// =====================================================================
+// 42 · Entrevistas rápida
+// Por que estava lenta: para decidir se cada aplicação (≈122 mil) entra na lista, a medida buscava as entrevistas
+// dela na tabela 14 (sem relação com a 13). Agora 2 colunas guardam a 1ª e a última criação de entrevista da
+// aplicação (calculadas 1 vez, na atualização). A busca na 14 só roda para quem tem entrevista no período.
+// A (2 colunas na 13) → B (medida) → C (conferência)
+// =====================================================================
+
+// A1 · 13_ETAPA_RECRUTAMENTO → Nova coluna (só na linha da etapa atual; as outras ficam vazias)
+ent_criada_min =
+IF( '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual],
+    VAR App = '13_ETAPA_RECRUTAMENTO'[application_id]
+    RETURN
+    CALCULATE( MIN( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] ),
+        REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO' ),
+        '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id] = App,
+        '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" )
+)
+
+// A2 · 13_ETAPA_RECRUTAMENTO → Nova coluna
+ent_criada_max =
+IF( '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual],
+    VAR App = '13_ETAPA_RECRUTAMENTO'[application_id]
+    RETURN
+    CALCULATE( MAX( '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[created_at] ),
+        REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO' ),
+        '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id] = App,
+        '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[status] <> "to_be_scheduled" )
+)
+
+// B · Exibição de consulta DAX → colar daqui até o fim → Executar → "Atualizar o modelo com alterações"
+DEFINE
+    // ---------- a aplicação da linha entra na lista? (só lê colunas; leve) ----------
+    MEASURE '_Medidas'[Esteira | Visão Na Lista] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        VAR Ini = MIN( '_dCALENDARIO'[Data] )
+        VAR Fim = MAX( '_dCALENDARIO'[Data] ) + 1
+        VAR Cand = MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] )
+        VAR NoPer = NOT ISBLANK( Cand ) && Cand >= Ini && Cand < Fim
+        RETURN
+        SWITCH( V,
+            // Não são coorte: valem a data do movimento e a data da entrevista.
+            "Evolução",
+                IF( CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] <  Fim ) )
+                  + CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] <  Fim ) ) > 0, 1 ),
+            // Pré-filtro rápido pelas colunas ent_criada_min/max (docs/42): só quem tem entrevista criada perto do período
+            // passa para a conta exata na tabela 14 (≈95% das aplicações não têm entrevista e saem aqui).
+            "Entrevistas",
+                VAR Mn = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[ent_criada_min] ),
+                    REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+                VAR Mx = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[ent_criada_max] ),
+                    REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+                RETURN
+                IF( NOT ISBLANK( Mn ) && Mn < Fim && Mx >= Ini,
+                    IF( [Esteira | Aplicações com Entrevista] > 0, 1 ) ),
+            // Coorte: candidatura no período.
+            IF( NoPer,
+                SWITCH( V,
+                    "Aplicações", 1,
+                    "Funil", 1,
+                    "Por recrutador", 1,
+                    "Contratadas", IF( MAX( '13_ETAPA_RECRUTAMENTO'[status] ) = "hired", 1 ),
+                    "Em andamento",
+                        IF( CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ) ) > 0, 1 ),
+                    "Andamento por faixa",
+                        IF( CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ) ) > 0, 1 ),
+                    "Rejeitados e motivos",
+                        IF( CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ),
+                            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ) ) > 0, 1 ),
+                    "Entradas por etapa",
+                        IF( CALCULATE( COUNT( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+                            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ) ) > 0, 1 ),
+                    "SLA por etapa",
+                        IF( CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) ) ) > 0, 1 )
+                )
+            )
+        )
+
+EVALUATE ROW( "medidas", 1 )
+
+// C · Conferência (sem filtro de período): as duas colunas têm de dar o mesmo número
+EVALUATE
+ROW(
+    "contagem Entrevistas", CALCULATE( [Esteira | Aplicações com Entrevista] ),
+    "na lista", CALCULATE( COUNTROWS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), [Esteira | Visão Na Lista] = 1 ) ),
+        TREATAS( { "Entrevistas" }, dVisao[visao] ) ),
+    "apps com coluna", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[ent_criada_min] ) )
+)

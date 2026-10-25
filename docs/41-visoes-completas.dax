@@ -1,5 +1,6 @@
 // =====================================================================
 // 41 · Etapa 6.4: as 11 visões com lista + coluna SLA em todas
+// Antes: criar as 2 colunas ent_criada_min/max de docs/42-entrevistas-rapida.dax.
 // Colar ESTE ARQUIVO INTEIRO na Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações".
 // Substitui: Visão Contagem, Visão Na Lista, Visão Dados e Visão Contexto (as de 36, 38 e 40b).
 //
@@ -95,8 +96,16 @@ DEFINE
                         KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
                         KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Ini ),
                         KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] <  Fim ) ) > 0, 1 ),
+            // Pré-filtro rápido pelas colunas ent_criada_min/max (docs/42): só quem tem entrevista criada perto do período
+            // passa para a conta exata na tabela 14 (≈95% das aplicações não têm entrevista e saem aqui).
             "Entrevistas",
-                IF( [Esteira | Aplicações com Entrevista] > 0, 1 ),
+                VAR Mn = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[ent_criada_min] ),
+                    REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+                VAR Mx = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[ent_criada_max] ),
+                    REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+                RETURN
+                IF( NOT ISBLANK( Mn ) && Mn < Fim && Mx >= Ini,
+                    IF( [Esteira | Aplicações com Entrevista] > 0, 1 ) ),
             // Coorte: candidatura no período.
             IF( NoPer,
                 SWITCH( V,
