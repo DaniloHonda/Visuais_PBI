@@ -34,19 +34,36 @@ Cor: Status = critico → coral, atencao → âmbar (Formatar → Status muda as
    Aplicações `Esteira | Aplicações com Alerta` · % `Esteira | % com Alerta` · Status `Esteira | DQ Status`.
 4. Clicar num tipo filtra a página (Onde acontece e a tabela). Clicar de novo, ou em "× Ver todos os alertas", tira o filtro. Os cards não mudam.
 
-## 3. Onde acontece
-1. Fundo: retângulo arredondado · X 1100 · Y 580 · L 752 · A 430 (mesmo estilo).
-2. **Título** (muda com o tipo escolhido): Cartão (novo) com `Esteira | DQ Onde Título` · X 1124 · Y 596 · L 700 · A 34 · rótulo da categoria desligado, valor Segoe UI 20 negrito #121212, alinhado à esquerda, sem fundo.
-3. **Subtítulo:** caixa de texto · X 1124 · Y 628 · L 700 · A 22 · 12,5 cinza #6B6B6B: "aplicações com o alerta · % sobre as aplicações de cada um · âmbar/coral = bem acima da média".
-4. **Botões:** Segmentação de dados · campo `pOnde` · X 1124 · Y 660 · L 560 · A 38 · Formatar → Configurações da segmentação → Estilo **Bloco**,
-   seleção única ligada, orientação horizontal · cabeçalho desligado · cor de seleção #067D84, texto branco.
-5. **Barras:** Gráfico de barras clusterizado · X 1124 · Y 708 · L 704 · A 286
-   - Eixo Y `pOnde` · Eixo X `Esteira | Aplicações com Alerta` · classificar por Aplicações com Alerta, decrescente;
-   - Barras → Cor → **fx** → Valor do campo → `Esteira | DQ Onde Cor`;
-   - Rótulos de dados ligados · Detalhes do rótulo: `Esteira | DQ Onde %`;
-   - Eixo X desligado, linhas de grade desligadas, título desligado.
+## 3. Onde acontece · 3 visuais NATIVOS do Power BI (ícones padrão do painel Visualizações, nada para importar)
+Só os visuais com "XP ·" no nome são nossos (importados do .pbiviz). Aqui são: Cartão, Segmentação de dados e Gráfico de barras clusterizado.
 
-Regra da cor: com 20+ aplicações, taxa de alerta ≥ 1,5× a geral = âmbar; ≥ 2× = coral; resto cinza.
+**3.0 Parâmetro pOnde (uma vez, no modelo)**
+1. Faixa de opções **Modelagem** → **Novo parâmetro** → **Campos**.
+2. Nome: `pOnde`. Na lista da direita, marcar nesta ordem: `13_ETAPA_RECRUTAMENTO` → `recruiter_name`; `dEtapa` → `stage_name`; `13_ETAPA_RECRUTAMENTO` → `job_name`, `esteira`, `especialidade`.
+3. Deixar marcado **"Adicionar segmentação a esta página"** (ela vira o item 3.2) → **Criar**.
+4. Aparece a tabela `pOnde` no painel Dados. Clicar nela; na barra de fórmula, trocar os primeiros textos de cada linha
+   (`"recruiter_name"`, `"stage_name"`…) por `"Recrutador"`, `"Etapa"`, `"Vaga"`, `"Esteira"`, `"Especialidade"` → Enter.
+
+**3.1 Fundo:** Inserir → Formas → Retângulo arredondado · X 1100 · Y 580 · L 752 · A 430 · branco, borda #E6E6E6, cantos 22.
+
+**3.2 Botões = Segmentação de dados (criada no passo 3.0)**
+1. Posição X 1124 · Y 660 · L 560 · A 38. Campo: `pOnde` (coluna da tabela pOnde).
+2. Formatar visual → Visual → **Configurações da segmentação** → Opções → Estilo **Bloco** · Seleção → **Seleção única** ligada.
+3. **Cabeçalho da segmentação** desligado · Valores: Segoe UI 12 · Fundo desligado. Clicar em "Recrutador" para deixar escolhido.
+
+**3.3 Barras = Gráfico de barras clusterizado (barras deitadas)**
+1. Clicar num espaço vazio da página → Visualizações → ícone **Gráfico de barras clusterizado**. Posição X 1124 · Y 708 · L 704 · A 286.
+2. Campos: **Eixo Y** ← `pOnde` · **Eixo X** ← `Esteira | Aplicações com Alerta`.
+3. ⋯ do visual → Classificar eixo → `Esteira | Aplicações com Alerta` e **Classificar em ordem decrescente**.
+4. Formatar → **Barras → Cores → fx** → Formatar estilo **Valor do campo** → campo `Esteira | DQ Onde Cor` → OK.
+5. **Rótulos de dados** ligados → **Detalhes** ligado → Dados `Esteira | DQ Onde %` (aparece "412 · 9%").
+6. Eixo X desligado · título do Eixo Y desligado · Linhas de grade desligadas · Título desligado · Fundo desligado.
+
+**3.4 Título = Cartão**
+1. Visualizações → ícone **Cartão** → campo `Esteira | DQ Onde Título`. Posição X 1124 · Y 594 · L 700 · A 40.
+2. Formatar: **Rótulo da categoria** desligado · Valor: Segoe UI 20, negrito, #121212, alinhado à esquerda · Fundo desligado.
+3. Subtítulo: Inserir → **Caixa de texto** · X 1124 · Y 632 · L 700 · A 24 · Segoe UI 12,5 #6B6B6B:
+   "aplicações com o alerta · % sobre as aplicações de cada um · âmbar/coral = bem acima da média".
 
 ## 4. Tabela (XP · Tabela nominal 2.1.1)
 1. Copiar a tabela da página Nominal (Ctrl+C) e colar aqui (Ctrl+V): mesmos campos e o filtro do visual `Visão Na Lista = 1`.
