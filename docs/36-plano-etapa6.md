@@ -33,6 +33,9 @@ Decisões (25/10/2026), a partir dos mockups `docs/mockups/`:
 
 - **Páginas (decisão 25/10/2026):** Conceitos · Resumo · Report · **Nominal** · **Data Quality**. A página "Dados do dash" vira a nova **Nominal** (menu de visões + tabela 2.0); a Nominal antiga já foi apagada. "Alertas / Pontos de atenção" passa a se chamar **Data Quality**. Fundos com o 5º item no submenu: aprovados e copiados para `backgrounds/` (gerados por `tools/gen_bg_dataquality.py`).
 
+- **Entrevistas rápida conferida (25/10/2026):** contagem 5.501 = na lista 5.501 = aplicações com coluna 5.501.
+- **6.6a pronta para aplicar:** `docs/45-data-quality.md`, `docs/45-data-quality.dax` + `docs/41` com a visão "Alertas"; regra de cor âmbar/coral para tipos, cards e "Onde acontece".
+
 ## Backlog desta etapa
 - **Nomes com sujeira na base** (vistos em `nome_completo`): "_Fabio", "^david nathan", nomes vazios, "[TESTE] …" e "#VALUE!". Avaliar um alerta de dado "Nome inválido" e a exclusão de candidatos de teste.
 - **Botão "Limpar filtros"** da faixa de filtros ativos: redesenhar (ficou feio no mockup).

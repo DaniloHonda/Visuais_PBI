@@ -1,0 +1,175 @@
+// =====================================================================
+// 45 · Etapa 6.6a: página Data Quality (modelo)
+// A (2 tabelas) → B (visões: rodar de novo o docs/41 inteiro) → C (medidas) → D (conferência)
+//
+// Regra de cor ("chamar atenção"), no mesmo estilo dos dias/SLA: ok (normal) · atencao (âmbar) · critico (coral).
+//   Tipos de alerta e cards: % das aplicações do período com o alerta, comparado aos limites de dAlerta
+//     (colunas atencao e critico, editáveis na própria tabela). Com algum alerta: âmbar > 10%, coral > 20%.
+//   Onde acontece: o recorte (recrutador, etapa, vaga…) com pelo menos 20 aplicações e taxa de alerta
+//     ≥ 1,5× a taxa geral fica âmbar; ≥ 2× fica coral. Mostra quem foge do padrão, não só quem tem mais volume.
+// =====================================================================
+
+// A1 · Modelagem → Nova tabela · SUBSTITUIR a fórmula de dAlerta (agora com explicação, onde corrigir e limites)
+// atencao / critico = fração das aplicações do período (0,05 = 5%). Contratada dentro do pool: qualquer caso é coral.
+dAlerta =
+DATATABLE(
+    "alerta", STRING, "grupo", STRING, "ordem", INTEGER,
+    "descricao", STRING, "onde_corrigir", STRING, "atencao", DOUBLE, "critico", DOUBLE,
+    {
+        { "Contratada dentro do pool", "Processo", 1,
+          "A contratação foi registrada na própria vaga de pool, em vez de mover a pessoa para a vaga final. A origem e o SLA da contratação ficam errados.",
+          "Greenhouse: mover a contratação para a vaga final (recrutador).", 0, 0 },
+        { "Voltou de etapa", "Processo", 2,
+          "A aplicação saiu de uma etapa e foi para uma etapa anterior do fluxo. O tempo conta no SLA e a etapa de onde voltou não conta como aprovação.",
+          "Processo: alinhar com o recrutador se foi ajuste de cadastro ou retrabalho.", 0.05, 0.10 },
+        { "Etapa de configuração", "Processo", 3,
+          "A aplicação passou por uma etapa que serve para organizar a vaga (Senior, Pleno, Pool Qualificados, Stand-by | Silver medalist). O tempo conta no SLA e na meta.",
+          "Greenhouse: revisar o desenho da vaga com a área.", 0.02, 0.05 },
+        { "Etapa sem nome", "Dado", 4,
+          "A etapa existe na base, mas veio sem nome. Conta no SLA, mas não aparece nos gráficos por etapa.",
+          "Engenharia: nome da etapa na tabela de etapas (job_stages).", 0.005, 0.01 },
+        { "Rejeitada sem motivo", "Dado", 5,
+          "Aplicação rejeitada sem motivo na base. Na maioria dos casos é o ""Duplicate"" do Greenhouse, que chega vazio.",
+          "Engenharia (motivo padrão vazio) e recrutador (preencher o motivo).", 0.02, 0.05 },
+        { "Etapa antes da candidatura", "Dado", 6,
+          "Uma etapa tem entrada mais de 1 dia antes da candidatura. Indica data errada ou migração na origem.",
+          "Engenharia: datas (timestamps) da tabela de etapas.", 0.001, 0.005 },
+        { "Etapas em dobro na origem", "Dado", 7,
+          "A mesma etapa veio repetida na origem. O dash usa uma passagem só e ignora as cópias.",
+          "Engenharia: etapas duplicadas na tabela de etapas.", 0.02, 0.05 }
+    }
+)
+// Depois: dAlerta[alerta] → Classificar por coluna → ordem (refazer se a tabela foi recriada).
+
+// A2 · Modelagem → Nova tabela · SUBSTITUIR a fórmula de dVisao (nova linha "Alertas", grupo "Data Quality")
+dVisao =
+DATATABLE(
+    "visao", STRING, "grupo", STRING, "ordem", INTEGER, "descricao", STRING, "icone", STRING, "grao", STRING,
+    {
+        { "Aplicações",           "Resumo",        1, "todas do período",                "pessoas",     "aplicacao" },
+        { "Contratadas",          "Resumo",        2, "origem e SLA",                    "check",       "aplicacao" },
+        { "Em andamento",         "Resumo",        3, "etapa atual e dias",              "relogio",     "aplicacao" },
+        { "Funil",                "Resumo",        4, "até onde chegou",                 "funil",       "aplicacao" },
+        { "Entradas por etapa",   "Report",        5, "aprovou, rejeitou, voltou",       "setas",       "aplicacao" },
+        { "Rejeitados e motivos", "Report",        6, "etapa e motivo",                  "x",           "aplicacao" },
+        { "Andamento por faixa",  "Report",        7, "dias parado",                     "grade",       "aplicacao" },
+        { "SLA por etapa",        "Report",        8, "entrada → saída",                 "cronometro",  "aplicacao" },
+        { "Por recrutador",       "Report",        9, "situação",                        "pessoa",      "aplicacao" },
+        { "Evolução",             "Report",       10, "aprovou ou rejeitou no período",  "grafico",     "aplicacao" },
+        { "Entrevistas",          "Report",       11, "entrevistas marcadas",            "calendario",  "aplicacao" },
+        { "Alertas",              "Data Quality", 12, "aplicações com alerta",           "x",           "aplicacao" }
+    }
+)
+// Depois: dVisao[visao] → Classificar por coluna → ordem.
+// Página Nominal: no menu de visões, Filtros neste visual → dVisao[grupo] → desmarcar "Data Quality".
+
+// B · Rodar de novo o docs/41-visoes-completas.dax INTEIRO (ganhou a visão "Alertas").
+
+// C · Medidas (Exibição de consulta DAX → colar daqui até o fim → Executar → "Atualizar o modelo com alterações")
+DEFINE
+    // ---------- regra de cor ----------
+    // Alerta escolhido (linha de dAlerta) ou geral: ok · atencao · critico.
+    MEASURE '_Medidas'[Esteira | DQ Status] =
+        VAR P = [Esteira | % com Alerta]
+        VAR Um = HASONEVALUE( dAlerta[alerta] )
+        VAR At = IF( Um, VALUES( dAlerta[atencao] ), 0.10 )
+        VAR Cr = IF( Um, VALUES( dAlerta[critico] ), 0.20 )
+        RETURN
+        IF( NOT ISBLANK( P ), SWITCH( TRUE(), P > Cr, "critico", P > At, "atencao", "ok" ) )
+
+    // Cor pronta para formatação condicional (fx → Valor do campo).
+    MEASURE '_Medidas'[Esteira | DQ Cor] =
+        SWITCH( [Esteira | DQ Status], "critico", "#A33A31", "atencao", "#9A6512", "#121212" )
+
+    // ---------- cards (não mudam ao clicar num tipo de alerta) ----------
+    MEASURE '_Medidas'[Esteira | DQ Com Alerta] =
+        CALCULATE( [Esteira | Aplicações com Alerta], REMOVEFILTERS( dAlerta ) )
+    MEASURE '_Medidas'[Esteira | DQ Voltou] =
+        CALCULATE( [Esteira | Aplicações com Alerta], dAlerta[alerta] = "Voltou de etapa" )
+    MEASURE '_Medidas'[Esteira | DQ Sem Motivo] =
+        CALCULATE( [Esteira | Aplicações com Alerta], dAlerta[alerta] = "Rejeitada sem motivo" )
+    MEASURE '_Medidas'[Esteira | DQ No Pool] =
+        CALCULATE( [Esteira | Aplicações com Alerta], dAlerta[alerta] = "Contratada dentro do pool" )
+
+    MEASURE '_Medidas'[Esteira | DQ Com Alerta Status] = CALCULATE( [Esteira | DQ Status], REMOVEFILTERS( dAlerta ) )
+    MEASURE '_Medidas'[Esteira | DQ Voltou Status]     = CALCULATE( [Esteira | DQ Status], dAlerta[alerta] = "Voltou de etapa" )
+    MEASURE '_Medidas'[Esteira | DQ Sem Motivo Status] = CALCULATE( [Esteira | DQ Status], dAlerta[alerta] = "Rejeitada sem motivo" )
+    MEASURE '_Medidas'[Esteira | DQ No Pool Status]    = CALCULATE( [Esteira | DQ Status], dAlerta[alerta] = "Contratada dentro do pool" )
+
+    MEASURE '_Medidas'[Esteira | DQ Com Alerta Texto] =
+        FORMAT( DIVIDE( [Esteira | DQ Com Alerta], [Esteira | Candidatos] ), "0%" )
+            & " das " & FORMAT( [Esteira | Candidatos], "#,0" ) & " aplicações"
+    // Processo × Dado (uma aplicação pode ter os dois).
+    MEASURE '_Medidas'[Esteira | DQ Com Alerta Insight] =
+        VAR Lista = VALUES( '13_ETAPA_RECRUTAMENTO'[alertas] )
+        VAR LProc = CALCULATETABLE( VALUES( dAlerta[alerta] ), REMOVEFILTERS( dAlerta ), dAlerta[grupo] = "Processo" )
+        VAR LDado = CALCULATETABLE( VALUES( dAlerta[alerta] ), REMOVEFILTERS( dAlerta ), dAlerta[grupo] = "Dado" )
+        VAR Proc = CALCULATE( [Esteira | Candidatos],
+            KEEPFILTERS( FILTER( Lista, NOT ISEMPTY( FILTER( LProc, CONTAINSSTRING( '13_ETAPA_RECRUTAMENTO'[alertas], dAlerta[alerta] ) ) ) ) ) )
+        VAR Dado = CALCULATE( [Esteira | Candidatos],
+            KEEPFILTERS( FILTER( Lista, NOT ISEMPTY( FILTER( LDado, CONTAINSSTRING( '13_ETAPA_RECRUTAMENTO'[alertas], dAlerta[alerta] ) ) ) ) ) )
+        RETURN "Processo " & FORMAT( COALESCE( Proc, 0 ), "#,0" ) & " · Dado " & FORMAT( COALESCE( Dado, 0 ), "#,0" ) & " (uma aplicação pode ter os dois)"
+
+    MEASURE '_Medidas'[Esteira | DQ Voltou Texto] =
+        FORMAT( DIVIDE( [Esteira | DQ Voltou], [Esteira | Candidatos] ), "0.0%" ) & " das aplicações"
+    // Etapa de onde mais se volta (resultado "Voltou" na última passagem).
+    MEASURE '_Medidas'[Esteira | DQ Voltou Insight] =
+        VAR T = ADDCOLUMNS( VALUES( dEtapa[stage_name] ), "@v", [Esteira | Voltaram] )
+        VAR Top = TOPN( 1, FILTER( T, [@v] > 0 ), [@v], DESC )
+        RETURN IF( ISEMPTY( Top ), "nenhum caso no período",
+            "onde mais acontece: " & MAXX( Top, dEtapa[stage_name] ) & " (" & FORMAT( MAXX( Top, [@v] ), "#,0" ) & ")" )
+
+    MEASURE '_Medidas'[Esteira | DQ Sem Motivo Texto] =
+        FORMAT( DIVIDE( [Esteira | DQ Sem Motivo], [Esteira | Rejeitados no Processo] ), "0.0%" ) & " das rejeitadas"
+    MEASURE '_Medidas'[Esteira | DQ Sem Motivo Insight] =
+        "provável ""Duplicate"" do Greenhouse, que chega sem motivo"
+
+    MEASURE '_Medidas'[Esteira | DQ No Pool Texto] =
+        IF( COALESCE( [Esteira | DQ No Pool], 0 ) > 0, "não deveria acontecer", "nenhuma no período" )
+    MEASURE '_Medidas'[Esteira | DQ No Pool Insight] =
+        "o fluxo certo é sair do pool para uma vaga"
+
+    // ---------- Onde acontece (eixo = parâmetro de campos) ----------
+    // Base: aplicações do período cuja etapa atual está no recorte (para Etapa, é a etapa atual).
+    MEASURE '_Medidas'[Esteira | DQ Onde Base] =
+        CALCULATE( [Esteira | Candidatos], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() ) )
+    MEASURE '_Medidas'[Esteira | DQ Onde %] =
+        DIVIDE( [Esteira | Aplicações com Alerta], [Esteira | DQ Onde Base] )
+    MEASURE '_Medidas'[Esteira | DQ Onde Status] =
+        VAR P = [Esteira | DQ Onde %]
+        VAR N = [Esteira | DQ Onde Base]
+        VAR Geral = CALCULATE( [Esteira | DQ Onde %], ALLSELECTED( '13_ETAPA_RECRUTAMENTO' ), ALLSELECTED( dEtapa ) )
+        RETURN
+        IF( NOT ISBLANK( P ),
+            SWITCH( TRUE(),
+                N >= 20 && P >= 2 * Geral, "critico",
+                N >= 20 && P >= 1.5 * Geral, "atencao",
+                "ok" ) )
+    MEASURE '_Medidas'[Esteira | DQ Onde Cor] =
+        SWITCH( [Esteira | DQ Onde Status], "critico", "#E05A4F", "atencao", "#E3A33B", "#B9C3C4" )
+    MEASURE '_Medidas'[Esteira | DQ Onde Rótulo] =
+        FORMAT( [Esteira | Aplicações com Alerta], "#,0" ) & " · " & FORMAT( [Esteira | DQ Onde %], "0%" )
+    MEASURE '_Medidas'[Esteira | DQ Onde Título] =
+        "Onde acontece: " & IF( HASONEVALUE( dAlerta[alerta] ), """" & VALUES( dAlerta[alerta] ) & """", "todos os alertas" )
+
+EVALUATE ROW( "medidas", 21 )
+
+// D1 · Conferência dos tipos (sem filtro de período)
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE( dAlerta, dAlerta[ordem], dAlerta[alerta] ),
+    "apps", [Esteira | Aplicações com Alerta],
+    "pct", FORMAT( [Esteira | % com Alerta], "0.0%" ),
+    "cor", [Esteira | DQ Status]
+)
+ORDER BY dAlerta[ordem]
+
+// D2 · Cards e lista (contagem = na lista)
+EVALUATE
+ROW(
+    "com alerta", [Esteira | DQ Com Alerta],
+    "cor", [Esteira | DQ Com Alerta Status],
+    "na lista", CALCULATE( COUNTROWS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), [Esteira | Visão Na Lista] = 1 ) ),
+        TREATAS( { "Alertas" }, dVisao[visao] ) ),
+    "voltou", [Esteira | DQ Voltou Insight]
+)

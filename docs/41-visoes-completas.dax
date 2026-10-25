@@ -74,7 +74,8 @@ DEFINE
             "SLA por etapa",        [Esteira | Aplicações com Etapa Concluída],
             "Por recrutador",       [Esteira | Candidatos],
             "Evolução",             [Esteira | Aplicações com Movimento],
-            "Entrevistas",          [Esteira | Aplicações com Entrevista]
+            "Entrevistas",          [Esteira | Aplicações com Entrevista],
+            "Alertas",              [Esteira | Aplicações com Alerta]
         )
 
     // ---------- a aplicação da linha entra na lista? (só lê colunas; leve) ----------
@@ -130,7 +131,12 @@ DEFINE
                     "SLA por etapa",
                         IF( CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
                             KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
-                            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) ) ) > 0, 1 )
+                            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) ) ) > 0, 1 ),
+                    // Página Data Quality: alerta escolhido em dAlerta (sem escolha = qualquer alerta). Lê só a coluna alertas.
+                    "Alertas",
+                        VAR Al = MAX( '13_ETAPA_RECRUTAMENTO'[alertas] )
+                        VAR A = SELECTEDVALUE( dAlerta[alerta] )
+                        RETURN IF( NOT ISBLANK( Al ) && ( ISBLANK( A ) || CONTAINSSTRING( Al, A ) ), 1 )
                 )
             )
         )
@@ -296,7 +302,19 @@ DEFINE
                         & "||Realizadas=#" & COALESCE( NFeitas, 0 )
                         & "||Última entrevista=" & IF( ISBLANK( UltData ), "", "@" & FORMAT( UltData, F ) )
                         & "||Etapa da entrevista=" & UltEt
-                        & "||Situação=" & Sit & "||Etapa atual=" & EtAt & "||Candidatura=" & dCand & tSla
+                        & "||Situação=" & Sit & "||Etapa atual=" & EtAt & "||Candidatura=" & dCand & tSla,
+                // Data Quality: os selos de alerta vêm de "Tabela Alertas"; aqui o contexto para corrigir.
+                "Alertas",
+                    VAR Voltou = CONCATENATEX(
+                        CALCULATETABLE(
+                            SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+                            '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Voltou",
+                            REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ),
+                        COALESCE( '13_ETAPA_RECRUTAMENTO'[stage_name], "(etapa sem nome)" ), ", ",
+                        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], ASC )
+                    RETURN "seg=" & Sit & "||Situação=" & Sit & "||Etapa atual=" & EtAt
+                        & "||Voltou de=" & Voltou & "||Motivo=" & Mot
+                        & "||Candidatura=" & dCand & tSla
             )
         )
 
@@ -320,6 +338,7 @@ DEFINE
                 "Por recrutador",       "aplicações do período",
                 "Evolução",             "aplicações com aprovação ou rejeição no período (data do movimento)" & EtTxt,
                 "Entrevistas",          "aplicações com entrevista marcada no período" & EtTxt & " · " & FORMAT( [Esteira | Entrevistas Marcadas], "#,0" ) & " entrevistas",
+                "Alertas",              "aplicações com " & IF( HASONEVALUE( dAlerta[alerta] ), """" & VALUES( dAlerta[alerta] ) & """", "algum alerta" ) & EtTxt,
                 "aplicações" )
             VAR Origem = SWITCH( V,
                 "Aplicações",           "card Aplicações",
@@ -333,6 +352,7 @@ DEFINE
                 "Por recrutador",       "Aprovados por recrutador",
                 "Evolução",             "Evolução",
                 "Entrevistas",          "Entrevistas",
+                "Alertas",              "Tipos de alerta",
                 "" )
             VAR Segs = SWITCH( V,
                 "Contratadas",          "Direto;Via pool;Dentro do pool",
