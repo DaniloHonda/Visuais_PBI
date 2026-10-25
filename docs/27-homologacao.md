@@ -58,6 +58,19 @@ Obs.: "Rejected from Assessoria de Investimentos: XP Future" e "Rejected from En
 - Candidatos a "administrativo": [Geral] Limpeza de Pool 4.451 · (vazio) 4.195 · [Geral] Posição cancelada 1.799 · [Geral] Movimentação e… 313 · [Geral] Silver Medalist 35 · [Aplicação] Move intern… 1. Candidatos a "desistência do candidato": [Geral] Desistência no m… 1.066 · Preferiu outra po… 36 · Motivos pessoais 35 · [Offer] … A confirmar com os nomes completos.
 - **Pool → contratação em outra aplicação:** 36.670 aplicações de pool rejeitadas; **191** são de pessoas contratadas em outra aplicação. Das **676 pessoas contratadas, 134 (20%) passaram por pool**. Ex.: 306105340002.
 
+## Classificação dos motivos (proposta para validar com recrutadores)
+Confirmado em 25/10/2026: **"Duplicate" chega vazio na 13** (302928376002 e 306105340002 rejeitadas como Duplicate no Greenhouse, motivo vazio na 13). Pedido à engenharia: trazer os motivos padrão do Greenhouse.
+
+| Tipo | Motivos | Aplicações |
+|---|---|---|
+| Avaliação (XP) | todo [Aplicação], [Avaliação], [Qualificação]; [Geral] Empresa off limits; [Geral] Candidato(a) AAI/B2B; [Geral] Background Check (Compliance); [Geral] Problemas de documentação (Certificação ou laudo) | — |
+| Desistência do candidato | [Geral] Desistência no meio do processo (1.066); [Geral] Preferiu outra posição na XP (36); [Geral] Motivos pessoais (35) | 1.137 |
+| Declínio da offer | todo [Offer] (Anywhere - Remuneração 114, Recebeu outra oferta 26, Composição da remuneração 25, Desistência pós hired 15, …) | ~190 |
+| Administrativo | [Geral] Limpeza de Pool (4.451); [Geral] Posição cancelada (1.799); [Geral] Movimentação entre vagas (313); [Geral] Silver Medalist (35); [Aplicação] Move interno (1) | 6.599 |
+| Sem motivo na base | (vazio) = provavelmente "Duplicate" e outros motivos padrão | 4.195 |
+
+Todos contam na conversão (decisão de 25/10). A classificação serve para exibir e filtrar.
+
 ## Backlog
 - Rejeitadas **sem nenhuma etapa "Rejeitado"** (275).
 - Aplicações **sem esteira** (~75 mil; ver CONTEXTO seção 10).
