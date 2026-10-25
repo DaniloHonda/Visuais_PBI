@@ -1,0 +1,49 @@
+{
+    "dataRoles": [
+        { "displayName": "Link (1ª coluna)", "name": "link", "kind": "Grouping", "description": "Link da aplicação no Greenhouse (ex.: link_greenhouse)." },
+        { "displayName": "Candidato", "name": "candidato", "kind": "Grouping", "description": "nome_completo (ou first_name + last_name)." },
+        { "displayName": "Colunas fixas", "name": "fixas", "kind": "Grouping", "description": "Vaga, esteira, especialidade, recrutador… (até 8). Aparecem em todas as visões." },
+        { "displayName": "Dados da visão", "name": "dados", "kind": "Measure", "description": "Esteira | Visão Dados (colunas que mudam com a visão)." },
+        { "displayName": "Linha do tempo", "name": "jornada", "kind": "Measure", "description": "Esteira | Nominal Jornada." },
+        { "displayName": "Etapas seguintes", "name": "seguintes", "kind": "Measure", "description": "Esteira | Nominal Etapas Seguintes." },
+        { "displayName": "Alertas", "name": "alertas", "kind": "Measure", "description": "Esteira | Nominal Alertas." },
+        { "displayName": "Contexto", "name": "contexto", "kind": "Measure", "description": "Esteira | Visão Contexto." }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [ { "link": { "max": 1 }, "candidato": { "max": 2 }, "fixas": { "max": 8 }, "dados": { "max": 1 }, "jornada": { "max": 1 }, "seguintes": { "max": 1 }, "alertas": { "max": 1 }, "contexto": { "max": 1 } } ],
+            "table": {
+                "rows": {
+                    "select": [
+                        { "for": { "in": "link" } },
+                        { "for": { "in": "candidato" } },
+                        { "for": { "in": "fixas" } },
+                        { "bind": { "to": "dados" } },
+                        { "bind": { "to": "jornada" } },
+                        { "bind": { "to": "seguintes" } },
+                        { "bind": { "to": "alertas" } },
+                        { "bind": { "to": "contexto" } }
+                    ],
+                    "dataReductionAlgorithm": { "window": { "count": 10000 } }
+                }
+            }
+        }
+    ],
+    "objects": {
+        "textos": { "properties": { "link": { "type": { "text": true } }, "busca": { "type": { "text": true } } } },
+        "link": { "properties": { "modelo": { "type": { "text": true } } } },
+        "comportamento": {
+            "properties": {
+                "linhasIniciais": { "type": { "numeric": true } },
+                "passo": { "type": { "numeric": true } },
+                "maxLinhas": { "type": { "numeric": true } }
+            }
+        },
+        "dias": { "properties": { "alerta": { "type": { "numeric": true } } } },
+        "colunas": { "properties": { "ocultas": { "type": { "text": true } } } }
+    },
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "suppressDefaultTitle": true,
+    "privileges": [ { "name": "ExportContent", "essential": false } ]
+}

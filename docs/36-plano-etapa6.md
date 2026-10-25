@@ -22,6 +22,9 @@ Decisões (25/10/2026), a partir dos mockups `docs/mockups/`:
 - **6.1 concluída (25/10/2026):** contagem = lista em todas as visões por aplicação (Aplicações 122.394 · Contratadas 677 · Em andamento 51.590 · Funil 122.394 · Entradas por etapa 121.929 · Rejeitados e motivos 69.903 · Andamento por faixa 51.590 · Por recrutador 122.394); SLA por etapa 172.440 passagens · Evolução 136.103 movimentações · Entrevistas 8.218.
 - **6.2 pronta para instalar:** `docs/37-menu-visoes.md`, `dist/XP - Menu de visoes 1.0.0.pbiviz`.
 
+- **6.2 instalada e aprovada (25/10/2026).**
+- **6.3 pronta para instalar:** `docs/39-tabela2.md`, `docs/38-tabela2.dax`, `dist/XP - Tabela nominal 2.0.0.pbiviz`.
+
 ## Backlog desta etapa
 - **Nomes com sujeira na base** (vistos em `nome_completo`): "_Fabio", "^david nathan", nomes vazios, "[TESTE] …" e "#VALUE!". Avaliar um alerta de dado "Nome inválido" e a exclusão de candidatos de teste.
 - **Botão "Limpar filtros"** da faixa de filtros ativos: redesenhar (ficou feio no mockup).
