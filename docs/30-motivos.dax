@@ -29,19 +29,29 @@ DATATABLE(
 )
 
 // B · Exibição de tabela → 13_ETAPA_RECRUTAMENTO → Nova coluna
-// Tipo de encerramento da aplicação (só para rejeitadas; contratadas e em andamento ficam vazias).
+// Tipo de encerramento da aplicação (só para rejeitadas). Um motivo por aplicação (o preenchido).
+// Exceções por "contém": o texto da tabela dMotivoTipo precisa estar contido no motivo (tolera caracteres invisíveis da base).
 tipo_encerramento =
-VAR M = '13_ETAPA_RECRUTAMENTO'[rejection_reason_name]
-VAR Chave = IF( ISBLANK( M ) || TRIM( M ) = "", "(vazio)", TRIM( M ) )
-VAR Excecao = LOOKUPVALUE( dMotivoTipo[tipo], dMotivoTipo[motivo], Chave )
-VAR Padrao =
-    SWITCH( TRUE(),
-        LEFT( Chave, 7 ) = "[Offer]", "Declínio da offer",
-        LEFT( Chave, 11 ) IN { "[Aplicação]", "[Avaliação]" }, "Avaliação",
-        LEFT( Chave, 14 ) = "[Qualificação]", "Avaliação",
-        "A classificar" )
-RETURN
-IF( '13_ETAPA_RECRUTAMENTO'[status] = "rejected", COALESCE( Excecao, Padrao ) )
+IF(
+    '13_ETAPA_RECRUTAMENTO'[status] = "rejected",
+    VAR M =
+        CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ) )
+    VAR Limpo = TRIM( SUBSTITUTE( SUBSTITUTE( SUBSTITUTE( M, UNICHAR( 160 ), " " ), UNICHAR( 10 ), "" ), UNICHAR( 13 ), "" ) )
+    VAR Vazio = ISBLANK( Limpo ) || Limpo = ""
+    VAR Excecao =
+        IF( Vazio,
+            LOOKUPVALUE( dMotivoTipo[tipo], dMotivoTipo[motivo], "(vazio)" ),
+            MAXX( FILTER( dMotivoTipo, dMotivoTipo[motivo] <> "(vazio)" && CONTAINSSTRING( Limpo, dMotivoTipo[motivo] ) ),
+                  dMotivoTipo[tipo] ) )
+    VAR Padrao =
+        SWITCH( TRUE(),
+            LEFT( Limpo, 7 ) = "[Offer]", "Declínio da offer",
+            LEFT( Limpo, 11 ) IN { "[Aplicação]", "[Avaliação]" }, "Avaliação",
+            LEFT( Limpo, 14 ) = "[Qualificação]", "Avaliação",
+            "A classificar" )
+    RETURN COALESCE( Excecao, Padrao )
+)
 
 // C · Medidas (Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações")
 // Declínio e situação da Nominal passam a seguir a tabela de tipos (antes: prefixo "[Offer]" fixo no DAX).

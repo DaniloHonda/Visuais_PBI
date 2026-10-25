@@ -112,6 +112,8 @@ Etapa 2: `docs/29-etapa2.dax`. Pendência no visual Base nominal: mostrar "Volto
 
 Linha do tempo do Diego conferida (25/10/2026): Revisão 01/07 (Aprovado, 0 d) → Mindsight 01/07–04/08 (Aprovado, 34 d) → Phone Screening 04/08–17/09 (**Voltou**, 44 d) → Triagem 17/09 (**Rejeitado**). Igual ao Greenhouse (que mostra 43 d no Phone Screening: datas da 13 sem hora). **Etapa 2 fechada.** Etapa 3: `docs/30-motivos.dax`.
 
+**Etapa 3 fechada (25/10/2026):** Avaliação 58.027 · Administrativo 6.595 · Sem motivo na base 4.185 · Desistência do candidato 1.132 · Declínio da offer 188 = **70.127** · nenhum "A classificar". O motivo "[Geral] Silver Medalist" vem da base com 1 caractere invisível (24 × 23): a tabela de exceções passou a comparar por "contém". 52 aplicações têm motivo preenchido só em parte das linhas: a coluna usa um motivo por aplicação.
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 

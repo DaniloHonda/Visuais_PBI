@@ -1,0 +1,157 @@
+// =====================================================================
+// 31 · Etapa 4: pool → contratação em outra vaga
+// Regra: aplicação de POOL rejeitada cuja pessoa (mesmo candidate_id) foi contratada numa vaga que NÃO é pool,
+// com a aplicação da vaga aberta antes de o pool ser encerrado (tolerância de 1 dia) e a contratação depois da entrada no pool.
+//   → a aplicação do pool vira "Saiu para outra vaga" (não conta como rejeição) e a contratação é da vaga final;
+//   → o SLA da contratação conta da ENTRADA NO POOL até a contratação.
+// A (novas colunas) → B (trocar fórmulas) → C (medidas) → D (conferência)
+// =====================================================================
+
+// A1 · 13_ETAPA_RECRUTAMENTO → Nova coluna
+saiu_para_vaga =
+IF(
+    '13_ETAPA_RECRUTAMENTO'[status] = "rejected" && RELATED( dOrganograma[eh_pool] ) = "Pool",
+    VAR DtApp = '13_ETAPA_RECRUTAMENTO'[data_aplicacao]
+    VAR RejAt = '13_ETAPA_RECRUTAMENTO'[rejected_at]
+    VAR N =
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[candidate_id] ),
+            '13_ETAPA_RECRUTAMENTO'[status] = "hired",
+            dOrganograma[eh_pool] <> "Pool",
+            '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <= RejAt + 1,
+            '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= DtApp )
+    RETURN N > 0,
+    FALSE()
+)
+
+// A2 · 13_ETAPA_RECRUTAMENTO → Nova coluna · início do ciclo: entrada no pool (se a pessoa veio de pool) ou a própria candidatura
+ciclo_inicio =
+VAR DtApp = '13_ETAPA_RECRUTAMENTO'[data_aplicacao]
+RETURN
+IF(
+    '13_ETAPA_RECRUTAMENTO'[status] = "hired",
+    VAR Contr = '13_ETAPA_RECRUTAMENTO'[data_contratacao]
+    VAR PrimeiroPool =
+        CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[candidate_id] ),
+            dOrganograma[eh_pool] = "Pool",
+            '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <= Contr,
+            ISBLANK( '13_ETAPA_RECRUTAMENTO'[rejected_at] ) || '13_ETAPA_RECRUTAMENTO'[rejected_at] >= DtApp - 1 )
+    RETURN IF( NOT ISBLANK( PrimeiroPool ) && PrimeiroPool < DtApp, PrimeiroPool, DtApp ),
+    DtApp
+)
+
+// A3 · 13_ETAPA_RECRUTAMENTO → Nova coluna · origem da contratação
+origem_contratacao =
+IF(
+    '13_ETAPA_RECRUTAMENTO'[status] = "hired",
+    SWITCH( TRUE(),
+        RELATED( dOrganograma[eh_pool] ) = "Pool", "Dentro do pool",
+        '13_ETAPA_RECRUTAMENTO'[ciclo_inicio] < '13_ETAPA_RECRUTAMENTO'[data_aplicacao], "Via pool",
+        "Direto" )
+)
+
+// B1 · trocar a fórmula de 13_ETAPA_RECRUTAMENTO[sla_esteira_dias]
+sla_esteira_dias =
+IF( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+    ( '13_ETAPA_RECRUTAMENTO'[data_contratacao] - '13_ETAPA_RECRUTAMENTO'[ciclo_inicio] ) * 1.0 )
+
+// B2 · trocar a fórmula de 13_ETAPA_RECRUTAMENTO[resultado_novo] (nova linha "Saiu para outra vaga")
+resultado_novo =
+VAR SoAtual =
+    CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[sort_order] ),
+        ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() )
+RETURN
+SWITCH( TRUE(),
+    '13_ETAPA_RECRUTAMENTO'[passagem_valida] <> 1, BLANK(),
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] && '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga], "Saiu para outra vaga",
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] && '13_ETAPA_RECRUTAMENTO'[status] = "rejected", "Rejeitado",
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] && '13_ETAPA_RECRUTAMENTO'[status] = "in_process", "Em andamento",
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual], "Aprovado",
+    NOT ISBLANK( SoAtual ) && '13_ETAPA_RECRUTAMENTO'[sort_order] > SoAtual, "Voltou",
+    "Aprovado"
+)
+
+// B3 · trocar a fórmula de 13_ETAPA_RECRUTAMENTO[tipo_encerramento] (novo tipo "Contratada em outra vaga")
+tipo_encerramento =
+IF(
+    '13_ETAPA_RECRUTAMENTO'[status] = "rejected",
+    IF( '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga], "Contratada em outra vaga",
+        VAR M =
+            CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ),
+                ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ) )
+        VAR Limpo = TRIM( SUBSTITUTE( SUBSTITUTE( SUBSTITUTE( M, UNICHAR( 160 ), " " ), UNICHAR( 10 ), "" ), UNICHAR( 13 ), "" ) )
+        VAR Vazio = ISBLANK( Limpo ) || Limpo = ""
+        VAR Excecao =
+            IF( Vazio,
+                LOOKUPVALUE( dMotivoTipo[tipo], dMotivoTipo[motivo], "(vazio)" ),
+                MAXX( FILTER( dMotivoTipo, dMotivoTipo[motivo] <> "(vazio)" && CONTAINSSTRING( Limpo, dMotivoTipo[motivo] ) ),
+                      dMotivoTipo[tipo] ) )
+        VAR Padrao =
+            SWITCH( TRUE(),
+                LEFT( Limpo, 7 ) = "[Offer]", "Declínio da offer",
+                LEFT( Limpo, 11 ) IN { "[Aplicação]", "[Avaliação]" }, "Avaliação",
+                LEFT( Limpo, 14 ) = "[Qualificação]", "Avaliação",
+                "A classificar" )
+        RETURN COALESCE( Excecao, Padrao ) )
+)
+
+// C · Medidas (Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações")
+DEFINE
+    MEASURE '_Medidas'[Esteira | Rejeitados no Processo] =
+        CALCULATE( [Esteira | Candidatos],
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[status] = "rejected" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga] = FALSE() ) )
+
+    MEASURE '_Medidas'[Esteira | Saíram para Outra Vaga] =
+        CALCULATE( [Esteira | Candidatos], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga] = TRUE() ) )
+
+    MEASURE '_Medidas'[Esteira | Saíram para Outra Vaga (Etapa)] =
+        CALCULATE( [Esteira | Participantes], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Saiu para outra vaga" ) )
+
+    MEASURE '_Medidas'[Esteira | Check Coorte] =
+        [Esteira | Candidatos] - [Esteira | Contratados] - [Esteira | Rejeitados no Processo]
+            - COALESCE( [Esteira | Ativos Agora], 0 ) - COALESCE( [Esteira | Saíram para Outra Vaga], 0 )
+
+    MEASURE '_Medidas'[Esteira | Check Fechamento] =
+        [Esteira | Participantes] - [Esteira | Aprovados] - [Esteira | Rejeitados] - [Esteira | Em Andamento]
+            - COALESCE( [Esteira | Voltaram], 0 ) - COALESCE( [Esteira | Saíram para Outra Vaga (Etapa)], 0 )
+
+    MEASURE '_Medidas'[Esteira | Nominal Situação] =
+        VAR NoPer = NOT ISBLANK( [Esteira | Candidatos] )
+        VAR Ativo = NOT ISBLANK( [Esteira | Ativos Agora] )
+        VAR St    = LOWER( MAX( '13_ETAPA_RECRUTAMENTO'[status] ) )
+        VAR Saiu  = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga] = TRUE() ) )
+        VAR Dec   = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio da offer" ) )
+        RETURN
+        SWITCH( TRUE(),
+            NOT NoPer, BLANK(),
+            Ativo, "Em andamento",
+            St = "hired", "Contratada",
+            Saiu > 0, "Contratada via outra vaga",
+            St = "rejected" && Dec > 0, "Declinou",
+            St = "rejected", "Rejeitada",
+            "Outro" )
+
+EVALUATE ROW( "medidas", 6 )
+
+// D · Conferência (sem filtro de período)
+EVALUATE
+ROW(
+    "1 saiu p/ vaga", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga] = TRUE() ),
+    "2 via pool", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[origem_contratacao] = "Via pool" ),
+    "3 dentro pool", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[origem_contratacao] = "Dentro do pool" ),
+    "4 direto", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[origem_contratacao] = "Direto" ),
+    "5 check coorte", [Esteira | Check Coorte],
+    "6 rejeitadas", [Esteira | Rejeitados no Processo],
+    "7 conversao", [Esteira | Conversão Esteira %],
+    "8 SLA geral", [Esteira | SLA da Esteira (Mediana)],
+    "9 SLA via pool", CALCULATE( [Esteira | SLA da Esteira (Mediana)], '13_ETAPA_RECRUTAMENTO'[origem_contratacao] = "Via pool" ),
+    "10 SLA direto", CALCULATE( [Esteira | SLA da Esteira (Mediana)], '13_ETAPA_RECRUTAMENTO'[origem_contratacao] = "Direto" )
+)
+
+EVALUATE
+SUMMARIZE(
+    FILTER( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] = "306105340002" ),
+    '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga], '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] )
