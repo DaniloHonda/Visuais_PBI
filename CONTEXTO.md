@@ -319,7 +319,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 
 ## 10. Achados nos dados (homologação)
 - **Etapas puladas** aparecem na 13 sem data de entrada (0 dias, "Aprovado"): as medidas novas exigem data de entrada.
-- **Etapas duplicadas** (3.646 aplicações, ~3%): a mesma passagem aparece com dois `job_stage_id` (duas versões das etapas da vaga, provavelmente pool + vaga real). Afeta só medidas de tempo, a Base do SLA e a linha do tempo. Correção proposta em `docs/23-etapas-duplicadas.dax`, **em espera** até decidir o tratamento de pool.
+- **Etapas duplicadas** (H2 em 25/10/2026: 7.390 passagens, **3.519 aplicações**; só 38% hoje em pool; 8% com saídas diferentes): a mesma passagem aparece com dois `job_stage_id` de famílias diferentes e **as mesmas datas**. Datas idênticas descartam transferência de pool: é **erro de montagem da 13** (ver `docs/27-homologacao.md`, achado A1). Afeta medidas de tempo, a Base do SLA e a linha do tempo. Correção no modelo: `docs/23-etapas-duplicadas.dax`.
 - **Transferência de pool**: a aplicação mantém o `application_id` e muda de vaga; a 13 guarda só a vaga atual. Em 48 aplicações (0,04%) a `data_aplicacao` virou a data da transferência (régua mantida).
 - **Aplicações sem esteira** (~75 mil de ~119 mil): Pool 62.535 · vaga 9.361 · vaga fora da Jobs 3.816. **Todas têm persona**: especialidade → persona funciona; quebra em **persona → esteira** (as esteiras têm "sobrenome", ex.: Atacado - Técnico, e parecem depender de persona + especialidade). A persona "Geral" concentra 16.495 aplicações em pools. Ao filtrar uma esteira, só ~37% das aplicações aparecem.
 - Vaga **"[TESTE TESTANDO]"** com 5.146 aplicações; também há "Cópia de…" e "[Template…]": avaliar exclusão.
@@ -327,6 +327,8 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 - 422 aplicações não aparecem no primeiro passo do funil (`Esteira | Check Funil`).
 
 ---
+
+Homologação em andamento: registro em `docs/27-homologacao.md`, consultas em `docs/27-homologacao.dax`.
 
 ## 11. Pendências (ordem sugerida)
 
@@ -374,6 +376,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 | `docs/21-roteiro-apresentacao.md` | roteiro de apresentação (20 min) |
 | `docs/22-organograma-e-filtros.md` | organograma, persona/especialidade e período 2.2 |
 | `docs/23-etapas-duplicadas.dax` | correção das etapas duplicadas (em espera) |
+| `docs/27-homologacao.md`, `27-homologacao.dax` | registro e consultas da homologação da tabela 13 |
 | `docs/24-medidas-finais.dax` (+ `.csx` para o Tabular Editor) | **todas as medidas em uso**, num arquivo só (104 medidas) |
 | `docs/25-valores-referencia.dax` | consulta que devolve os números de referência de um período |
 | `backgrounds/` | fundos SVG: Conceitos (1900 × 5095), Resumo, Report e Nominal |
