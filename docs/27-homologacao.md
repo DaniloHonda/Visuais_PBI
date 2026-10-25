@@ -73,7 +73,7 @@ Todos contam na conversão (decisão de 25/10). A classificação serve para exi
 
 ## Backlog
 - Rejeitadas **sem nenhuma etapa "Rejeitado"** (275).
-- Aplicações **sem esteira** (~75 mil; ver CONTEXTO seção 10).
+- Aplicações **sem esteira** (~75 mil; ver CONTEXTO seção 10). Preocupação principal: confiabilidade do **filtro de Esteira**, que deve ser um dos mais usados. Opções discutidas: "(Sem esteira)" visível no filtro, de-para oficial persona → esteira, de-para inferido dos dados (marcado como "inferida"), herdar a esteira da vaga final no pool → contratação.
 
 ## Decisões de 25/10/2026
 - **Classificação dos motivos** aprovada como ponto de partida e precisa ser **fácil de editar** (será validada com os recrutadores). Todo [Offer] = declínio. "[Geral] Candidato(a) AAI…" = avaliação. "Preferiu outra posição" = desistência do candidato.
