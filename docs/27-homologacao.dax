@@ -1,0 +1,70 @@
+// =====================================================================
+// 27 · Homologação da tabela 13 · consultas de diagnóstico (não alteram o modelo)
+// Colar na Exibição de consulta DAX → Executar. Anotar a DATA da execução e os resultados em docs/27-homologacao.md.
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// H1 · Uma aplicação, linha a linha (trocar o application_id)
+// ---------------------------------------------------------------------
+EVALUATE
+SELECTCOLUMNS(
+    FILTER( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] = "281242063002" ),
+    "job_id", '13_ETAPA_RECRUTAMENTO'[job_id],
+    "vaga", '13_ETAPA_RECRUTAMENTO'[job_name],
+    "job_stage_id", '13_ETAPA_RECRUTAMENTO'[job_stage_id],
+    "etapa", '13_ETAPA_RECRUTAMENTO'[stage_name],
+    "entrada", '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+    "saida", '13_ETAPA_RECRUTAMENTO'[data_saida_stage],
+    "dias", '13_ETAPA_RECRUTAMENTO'[days_in_stage],
+    "resultado", '13_ETAPA_RECRUTAMENTO'[resultado_etapa],
+    "status", '13_ETAPA_RECRUTAMENTO'[status],
+    "candidatura", '13_ETAPA_RECRUTAMENTO'[data_aplicacao],
+    "contratacao", '13_ETAPA_RECRUTAMENTO'[data_contratacao]
+)
+ORDER BY [entrada], [etapa]
+
+// ---------------------------------------------------------------------
+// H2 · Passagens duplicadas (mesma aplicação + etapa + data de entrada em 2+ linhas)
+// ---------------------------------------------------------------------
+EVALUATE
+VAR T = FILTER( '13_ETAPA_RECRUTAMENTO',
+    NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) && NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+VAR P = GROUPBY( T,
+    '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[job_id],
+    '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+    "@linhas", COUNTX( CURRENTGROUP(), 1 ),
+    "@saidaMin", MINX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+    "@saidaMax", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) )
+VAR D = FILTER( P, [@linhas] > 1 )
+VAR Apps = DISTINCT( SELECTCOLUMNS( D, "a", '13_ETAPA_RECRUTAMENTO'[application_id], "j", '13_ETAPA_RECRUTAMENTO'[job_id] ) )
+RETURN ROW(
+    "Passagens duplicadas", COUNTROWS( D ),
+    "Aplicações afetadas", COUNTROWS( Apps ),
+    "  hoje em vaga Pool", COUNTROWS( FILTER( Apps, LOOKUPVALUE( dOrganograma[eh_pool], dOrganograma[job_id], [j] ) = "Pool" ) ),
+    "Cópias com saída diferente", COUNTROWS( FILTER( D, [@saidaMin] <> [@saidaMax] ) ),
+    "Exemplo", MAXX( TOPN( 1, Apps, [a] ), [a] )
+)
+
+// ---------------------------------------------------------------------
+// H3 · Raio-X das linhas e das datas
+// ---------------------------------------------------------------------
+EVALUATE
+VAR T = '13_ETAPA_RECRUTAMENTO'
+RETURN ROW(
+    "Linhas na 13", COUNTROWS( T ),
+    "application_id distintos", DISTINCTCOUNT( T[application_id] ),
+    "Apps sem data_aplicacao", CALCULATE( DISTINCTCOUNT( T[application_id] ), ISBLANK( T[data_aplicacao] ) ),
+    "Apps com candidatura antes de 01/07/2026", CALCULATE( DISTINCTCOUNT( T[application_id] ), T[data_aplicacao] < DATE( 2026, 7, 1 ) ),
+    "Calendário: início", MIN( '_dCALENDARIO'[Data] ),
+    "Calendário: fim", MAX( '_dCALENDARIO'[Data] ),
+    "Linhas sem data de entrada", CALCULATE( COUNTROWS( T ), ISBLANK( T[data_entrada_stage] ) ),
+    "  dessas, com data de saída", CALCULATE( COUNTROWS( T ), ISBLANK( T[data_entrada_stage] ), NOT ISBLANK( T[data_saida_stage] ) ),
+    "  dessas, como Aprovado", CALCULATE( COUNTROWS( T ), ISBLANK( T[data_entrada_stage] ), T[resultado_etapa] = "Aprovado" ),
+    "Dias ≠ saída − entrada", COUNTROWS( FILTER( T,
+        NOT ISBLANK( T[data_entrada_stage] ) && NOT ISBLANK( T[data_saida_stage] )
+        && T[days_in_stage] <> INT( T[data_saida_stage] - T[data_entrada_stage] ) ) ),
+    "Entrada depois da saída", COUNTROWS( FILTER( T,
+        NOT ISBLANK( T[data_saida_stage] ) && T[data_entrada_stage] > T[data_saida_stage] ) ),
+    "Sem saída em aplicação encerrada", COUNTROWS( FILTER( T,
+        NOT ISBLANK( T[data_entrada_stage] ) && ISBLANK( T[data_saida_stage] ) && T[status] <> "in_process" ) )
+)

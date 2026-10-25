@@ -1,7 +1,7 @@
 # Contexto do projeto · Dash de Esteiras (R&S · XP Inc.)
 
 Documento de referência para retomar o trabalho em qualquer conversa. Cole este arquivo (ou peça para lê-lo) no início de uma sessão nova.
-Última atualização: 23/10/2026.
+Última atualização: 24/10/2026.
 
 **Índice**
 1. [Objetivo do dashboard](#1-objetivo-do-dashboard)
@@ -34,6 +34,10 @@ O foco é o **conceito de esteira de recrutamento**, e não um relatório de con
 | **Report** | Onde e com quem está o problema? | Time de R&S e People Analytics: detalhe por etapa, praça, recrutador, motivo e SLA |
 | **Nominal** | Quais aplicações estão por trás do número? | Recrutadores e usuários: **conferir** qualquer número do dash nome a nome, com link para o Greenhouse |
 | **Conceitos** | O que cada número significa e por que pode não bater? | Todos: dicionário, "de-para" e justificativas |
+
+**Uso estratégico (24/10/2026):** hoje existe só a meta geral de **45 dias** para o processo inteiro, sem visibilidade nem meta do tempo por etapa. O dash deve dar essa visibilidade (SLA geral **e** SLA de cada etapa) para que o time defina **metas por etapa** (ex.: "Phone Screening em até 3 dias"). Por isso o tempo é o foco principal.
+
+**Prioridade atual (24/10/2026):** homologar os dados da tabela 13 e o modelo semântico **antes** de usabilidade. Para cada problema, classificar: **erro nosso** (montagem da 13 / modelo), **erro de input** (preenchimento no Greenhouse) ou **regra de negócio** a definir. B2C e Engenharia de Software dizem que os dados de pool "estão muito errados": precisa provar de quem é a causa.
 
 Princípios:
 - **Confiança nos números:** todo número do dash pode ser conferido na Nominal com os mesmos filtros. Ex.: ao filtrar um recrutador, as rejeições dele no Report são as mesmas da Nominal.
@@ -225,6 +229,18 @@ Barra única (Y 225), com sincronização entre as páginas: **Período · Organ
 
 ---
 
+## 6.1 Decisões de 24/10/2026
+| Tema | Decisão |
+|---|---|
+| Comparação mês atual × anterior | **mantida** pela coorte (status de hoje das aplicações de cada período), mesmo sabendo que o mês anterior teve mais tempo para fechar |
+| SLA mediano baixo | não investigar agora |
+| Data de contratação | **`closed_at_opening`** (mantida) |
+| Tempo na etapa | da **data de entrada até a data de saída** da etapa; só passagens com data de entrada. A **soma das etapas** de uma aplicação compõe o SLA dela; a diferença para "candidatura → contratação" deve ficar visível e serve de teste de qualidade |
+| Pool | o **tempo no pool conta** no SLA geral, somado ao tempo na vaga da contratação. É preciso **segmentar as etapas do pool e as da vaga** (depende de `job_stages`) |
+| Detalhe nominal 1.0 | **não aprovado**: será reformulado depois (clicar em qualquer gráfico → lista nominal com os mesmos filtros, link e colunas próprias de cada gráfico, para o usuário homologar) |
+
+---
+
 ## 7. Modelo de dados
 
 ### 7.1 Tabelas
@@ -303,7 +319,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 
 ## 10. Achados nos dados (homologação)
 - **Etapas puladas** aparecem na 13 sem data de entrada (0 dias, "Aprovado"): as medidas novas exigem data de entrada.
-- **Etapas duplicadas** (3.646 aplicações, ~3%): a mesma passagem aparece com dois `job_stage_id` (duas versões das etapas da vaga, provavelmente pool + vaga real). Afeta só medidas de tempo, a Base do SLA e a linha do tempo. Correção proposta em `docs/23-etapas-duplicadas.dax`, **em espera** até decidir o tratamento de pool.
+- **Etapas duplicadas** (H2 em 25/10/2026: 7.390 passagens, **3.519 aplicações**; só 38% hoje em pool; 8% com saídas diferentes): a mesma passagem aparece com dois `job_stage_id` de famílias diferentes e **as mesmas datas**. Datas idênticas descartam transferência de pool: é **erro de montagem da 13** (ver `docs/27-homologacao.md`, achado A1). Afeta medidas de tempo, a Base do SLA e a linha do tempo. Correção no modelo: `docs/23-etapas-duplicadas.dax`.
 - **Transferência de pool**: a aplicação mantém o `application_id` e muda de vaga; a 13 guarda só a vaga atual. Em 48 aplicações (0,04%) a `data_aplicacao` virou a data da transferência (régua mantida).
 - **Aplicações sem esteira** (~75 mil de ~119 mil): Pool 62.535 · vaga 9.361 · vaga fora da Jobs 3.816. **Todas têm persona**: especialidade → persona funciona; quebra em **persona → esteira** (as esteiras têm "sobrenome", ex.: Atacado - Técnico, e parecem depender de persona + especialidade). A persona "Geral" concentra 16.495 aplicações em pools. Ao filtrar uma esteira, só ~37% das aplicações aparecem.
 - Vaga **"[TESTE TESTANDO]"** com 5.146 aplicações; também há "Cópia de…" e "[Template…]": avaliar exclusão.
@@ -311,6 +327,8 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 - 422 aplicações não aparecem no primeiro passo do funil (`Esteira | Check Funil`).
 
 ---
+
+Homologação em andamento: registro em `docs/27-homologacao.md`, consultas em `docs/27-homologacao.dax`.
 
 ## 11. Pendências (ordem sugerida)
 
@@ -358,6 +376,7 @@ Registro completo em `docs/20-justificativas.md` (também na página Conceitos).
 | `docs/21-roteiro-apresentacao.md` | roteiro de apresentação (20 min) |
 | `docs/22-organograma-e-filtros.md` | organograma, persona/especialidade e período 2.2 |
 | `docs/23-etapas-duplicadas.dax` | correção das etapas duplicadas (em espera) |
+| `docs/27-homologacao.md`, `27-homologacao.dax` | registro e consultas da homologação da tabela 13 |
 | `docs/24-medidas-finais.dax` (+ `.csx` para o Tabular Editor) | **todas as medidas em uso**, num arquivo só (104 medidas) |
 | `docs/25-valores-referencia.dax` | consulta que devolve os números de referência de um período |
 | `backgrounds/` | fundos SVG: Conceitos (1900 × 5095), Resumo, Report e Nominal |
