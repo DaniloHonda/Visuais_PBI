@@ -1,0 +1,167 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Recortes (um botão por campo)",
+            "name": "dims",
+            "kind": "Grouping",
+            "description": "Ex.: recruiter_name, dEtapa[stage_name], job_name, esteira, especialidade. A ordem aqui é a ordem dos botões."
+        },
+        {
+            "displayName": "Aplicações com alerta",
+            "name": "apps",
+            "kind": "Measure",
+            "description": "Esteira | Aplicações com Alerta"
+        },
+        {
+            "displayName": "Base (aplicações do recorte)",
+            "name": "base",
+            "kind": "Measure",
+            "description": "Esteira | DQ Onde Base"
+        },
+        {
+            "displayName": "Título",
+            "name": "titulo",
+            "kind": "Measure",
+            "description": "Esteira | DQ Onde Título"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "dims": {
+                        "max": 6
+                    },
+                    "apps": {
+                        "max": 1
+                    },
+                    "base": {
+                        "max": 1
+                    },
+                    "titulo": {
+                        "max": 1
+                    }
+                }
+            ],
+            "table": {
+                "rows": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "dims"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "apps"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "base"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "titulo"
+                            }
+                        }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "window": {
+                            "count": 30000
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "objects": {
+        "general": {
+            "properties": {
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                }
+            }
+        },
+        "textos": {
+            "properties": {
+                "subtitulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rodape": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "regra": {
+            "properties": {
+                "minimo": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "atencao": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "critico": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "ok": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "atencao": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "critico": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "destaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "suppressDefaultTitle": true,
+    "privileges": []
+}
