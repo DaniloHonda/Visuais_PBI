@@ -105,6 +105,9 @@ passagens válidas 222.398 · cópias descartadas 8.284 · apps com etapa atual 
 
 Investigação (25/10/2026): das 329 com 2+ etapas atuais, **313 são linhas idênticas** e 16 são etapas diferentes com a **mesma `sort_order`** (ex.: 302350009002, Qualificação e Phone Screening, ambas 3). As **465 sem etapa atual** (370 em processo, 91 rejeitadas, 4 contratadas) têm passagens em **etapas sem nome** (`stage_name` e `sort_order` vazios, `job_stage_id` preenchido; ex.: 306170782002, entradas em 22/10). Provável etapa nova que ainda não está na tabela de etapas da engenharia → pedido à engenharia. Correção no modelo: etapa sem nome conta como passagem; desempate final pelo maior `job_stage_id`; "Voltou" só quando a etapa atual tem ordem.
 
+**Etapa 1 fechada (25/10/2026):** 122.394 apps com entrada · 0 sem etapa atual · 313 com 2 atuais (linhas idênticas) · em andamento 51.590 = em processo · Rejeitado 70.127 = rejeitadas · 0 rejeitadas em 2 etapas · Voltou 9.336 passagens · **484 aplicações com etapa atual sem nome** (pedido à engenharia).
+Etapa 2: `docs/29-etapa2.dax`. Pendência no visual Base nominal: mostrar "Voltou" com estilo próprio na linha do tempo (hoje cai como aprovado).
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 

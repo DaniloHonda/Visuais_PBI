@@ -1,0 +1,195 @@
+// =====================================================================
+// 29 · Regras novas da 13 · Etapa 2: o dash passa a usar as colunas novas
+// PARTE A (colunas, à mão) → PARTE B (medidas, consulta DAX) → PARTE C (conferência).
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// PARTE A · Trocar a fórmula de 4 colunas calculadas (clicar na coluna → barra de fórmulas → colar → Enter)
+// ---------------------------------------------------------------------
+
+// A1 · 13_ETAPA_RECRUTAMENTO[eh_etapa_ativa]
+eh_etapa_ativa =
+'13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] && '13_ETAPA_RECRUTAMENTO'[status] = "in_process"
+
+// A2 · 13_ETAPA_RECRUTAMENTO[resultado_etapa]  (depois disso, resultado_novo pode ficar só como apoio)
+resultado_etapa =
+'13_ETAPA_RECRUTAMENTO'[resultado_novo]
+
+// A3 · 14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS[etapa_entrevista]
+etapa_entrevista =
+VAR App    = '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id]
+VAR Quando = '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at]
+VAR LinhaEtapa =
+    TOPN( 1,
+        FILTER( '13_ETAPA_RECRUTAMENTO',
+            '13_ETAPA_RECRUTAMENTO'[application_id] = App
+                && '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1
+                && '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] <= Quando ),
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], DESC,
+        '13_ETAPA_RECRUTAMENTO'[sort_order], DESC )
+RETURN MAXX( LinhaEtapa, '13_ETAPA_RECRUTAMENTO'[stage_name] )
+
+// A4 · 14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS[resultado_entrevista]
+resultado_entrevista =
+VAR App    = '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[application_id]
+VAR Quando = '14_WD_GREENHOUSE_SCHEDULED_INTERVIEWS'[start_at]
+VAR LinhaEtapa =
+    TOPN( 1,
+        FILTER( '13_ETAPA_RECRUTAMENTO',
+            '13_ETAPA_RECRUTAMENTO'[application_id] = App
+                && '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1
+                && '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] <= Quando ),
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], DESC,
+        '13_ETAPA_RECRUTAMENTO'[sort_order], DESC )
+RETURN MAXX( LinhaEtapa, '13_ETAPA_RECRUTAMENTO'[resultado_etapa] )
+
+// ---------------------------------------------------------------------
+// PARTE B · Medidas (colar TUDO abaixo na Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações")
+// ---------------------------------------------------------------------
+DEFINE
+    // Tempo por etapa: só passagens válidas (sem as cópias); o tempo de quem voltou de etapa conta.
+    MEASURE '_Medidas'[Esteira | Base SLA] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            COUNTROWS('13_ETAPA_RECRUTAMENTO'),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Mediana)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            MEDIAN('13_ETAPA_RECRUTAMENTO'[days_in_stage]),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Média)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            AVERAGE('13_ETAPA_RECRUTAMENTO'[days_in_stage]),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (P90)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            PERCENTILE.INC('13_ETAPA_RECRUTAMENTO'[days_in_stage], 0.9),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_saida_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+
+    MEASURE '_Medidas'[Esteira | Dias na Etapa (Contratações)] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        VAR Contratadas =
+            CALCULATETABLE(
+                VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                REMOVEFILTERS( dEtapa ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+                KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_contratacao]) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+            )
+        VAR Dias =
+            CALCULATE(
+                SUM( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                TREATAS( Contratadas, '13_ETAPA_RECRUTAMENTO'[application_id] )
+            )
+        RETURN DIVIDE( Dias, COUNTROWS( Contratadas ) )
+
+    // Resultado "Voltou" (etapa de onde a aplicação foi devolvida para trás) e a conferência que fecha com ele.
+    MEASURE '_Medidas'[Esteira | Voltaram] =
+        CALCULATE( [Esteira | Participantes], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Voltou" ) )
+
+    MEASURE '_Medidas'[Esteira | Check Fechamento] =
+        [Esteira | Participantes] - [Esteira | Aprovados] - [Esteira | Rejeitados] - [Esteira | Em Andamento] - COALESCE( [Esteira | Voltaram], 0 )
+
+    // Nominal: etapa atual = a "Current stage" do Greenhouse; linha do tempo só com passagens válidas, por entrada e saída.
+    MEASURE '_Medidas'[Esteira | Nominal Etapa Atual] =
+        VAR Tem = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() ) )
+        RETURN
+        IF( ISBLANK( [Esteira | Nominal Na Base] ) || ISBLANK( Tem ), BLANK(),
+            COALESCE(
+                CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[stage_name] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() ) ),
+                "(etapa sem nome)" ) )
+
+    MEASURE '_Medidas'[Esteira | Nominal Dias na Etapa] =
+        IF( ISBLANK( [Esteira | Nominal Na Base] ), BLANK(),
+            CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() ) ) )
+
+    MEASURE '_Medidas'[Esteira | Nominal Motivo] =
+        IF( ISBLANK( [Esteira | Nominal Na Base] ), BLANK(),
+            CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ) ) )
+
+    MEASURE '_Medidas'[Esteira | Nominal Jornada] =
+        IF( ISBLANK( [Esteira | Nominal Na Base] ), BLANK(),
+            CONCATENATEX(
+                CALCULATETABLE(
+                    SUMMARIZE( '13_ETAPA_RECRUTAMENTO',
+                        '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[sort_order],
+                        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], '13_ETAPA_RECRUTAMENTO'[data_saida_stage],
+                        '13_ETAPA_RECRUTAMENTO'[resultado_etapa], '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ) ),
+                COALESCE( '13_ETAPA_RECRUTAMENTO'[stage_name], "(etapa sem nome)" )
+                    & "|" & FORMAT( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], "yyyy-mm-dd" )
+                    & "|" & IF( ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), "", FORMAT( '13_ETAPA_RECRUTAMENTO'[data_saida_stage], "yyyy-mm-dd" ) )
+                    & "|" & '13_ETAPA_RECRUTAMENTO'[resultado_etapa]
+                    & "|" & FORMAT( '13_ETAPA_RECRUTAMENTO'[days_in_stage], "0" ),
+                ";;",
+                '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], ASC,
+                IF( ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), DATE( 2999, 1, 1 ), '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), ASC,
+                '13_ETAPA_RECRUTAMENTO'[sort_order], ASC ) )
+
+    // Etapas seguintes: as da PRÓPRIA vaga (sort_order) depois da etapa atual e por onde a aplicação nunca passou (não depende de esteira).
+    MEASURE '_Medidas'[Esteira | Nominal Etapas Seguintes] =
+        VAR Sit = [Esteira | Nominal Situação]
+        VAR SoAtual = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[sort_order] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() ) )
+        VAR Prox =
+            FILTER(
+                ADDCOLUMNS(
+                    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[stage_name] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[sort_order] > SoAtual ) ),
+                    "@o", CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[sort_order] ) ),
+                    "@ent", CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ) ),
+                ISBLANK( [@ent] ) && NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+        RETURN
+        IF( Sit IN { "Em andamento", "Rejeitada", "Declinou" } && NOT ISBLANK( SoAtual ),
+            CONCATENATEX( Prox, '13_ETAPA_RECRUTAMENTO'[stage_name], ";;", [@o], ASC ) )
+
+// ---------------------------------------------------------------------
+// PARTE C · Conferência (sem filtro de período). Esperado: 1 = 0 · 2 = 0 · 3 ≈ 4 (diferença = rejeitadas em etapa sem nome).
+// ---------------------------------------------------------------------
+EVALUATE
+ROW(
+    "1 check coorte", [Esteira | Check Coorte],
+    "2 check fech", SUMX( VALUES( dEtapa[stage_name] ), [Esteira | Check Fechamento] ),
+    "3 rej etapas", SUMX( VALUES( dEtapa[stage_name] ), [Esteira | Rejeitados] ),
+    "4 rejeitadas", [Esteira | Rejeitados no Processo],
+    "5 em andamento", [Esteira | Ativos Agora],
+    "6 voltaram", SUMX( VALUES( dEtapa[stage_name] ), [Esteira | Voltaram] ),
+    "7 mediana", [Esteira | Dias na Etapa (Mediana)],
+    "8 P90", [Esteira | Dias na Etapa (P90)],
+    "9 base SLA", [Esteira | Base SLA],
+    "10 conv entrev", [Esteira | Conversão Entrevista %]
+)
+
+EVALUATE
+ROW( "Diego (linha do tempo)", CALCULATE( [Esteira | Nominal Jornada], '13_ETAPA_RECRUTAMENTO'[application_id] = "292329017002" ) )
