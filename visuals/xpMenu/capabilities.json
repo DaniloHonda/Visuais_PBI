@@ -125,6 +125,11 @@
                         "text": true
                     }
                 },
+                "ordemGrupos": {
+                    "type": {
+                        "text": true
+                    }
+                },
                 "mostrarDescricao": {
                     "type": {
                         "bool": true

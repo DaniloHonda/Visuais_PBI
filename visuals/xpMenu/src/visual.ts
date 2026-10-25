@@ -86,11 +86,17 @@ export class Visual implements IVisual {
                 pos: i
             });
         });
-        // Ordem: campo "Ordem" se houver; senão a ordem recebida. Depois, junta cada grupo na posição da sua primeira visão.
+        // Ordem: campo "Ordem" se houver; senão a ordem recebida. Os grupos seguem "Ordem dos grupos" (Resumo;Report);
+        // grupos fora dessa lista vêm depois, na posição da sua primeira visão.
         this.items.sort((a, b) => a.ordem - b.ordem || a.pos - b.pos);
+        const lista = (this.settings.menu.ordemGrupos.value || "").split(";").map(g => g.trim().toLowerCase()).filter(Boolean);
         const firstOfGroup = new Map<string, number>();
         this.items.forEach((it, i) => { if (!firstOfGroup.has(it.grupo)) firstOfGroup.set(it.grupo, i); });
-        this.items = this.items.map((it, i) => ({ it, i })).sort((a, b) => (firstOfGroup.get(a.it.grupo) as number) - (firstOfGroup.get(b.it.grupo) as number) || a.i - b.i).map(x => x.it);
+        const rank = (g: string) => {
+            const k = lista.indexOf(g.trim().toLowerCase());
+            return k >= 0 ? k - lista.length : (firstOfGroup.get(g) as number);
+        };
+        this.items = this.items.map((it, i) => ({ it, i })).sort((a, b) => rank(a.it.grupo) - rank(b.it.grupo) || a.i - b.i).map(x => x.it);
     }
 
     private activeKey(): string | null {

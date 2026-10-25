@@ -2,7 +2,7 @@
 
 Menu lateral da versão B (`docs/mockups/34-dados-versao-B.png`): ícone, nome, descrição e contagem de cada visão. Clicar numa visão **filtra `dVisao[visao]`**; as medidas `Esteira | Visão Contagem` e `Esteira | Visão Na Lista` (parte 6.1, `docs/36-dados-parte1.dax`) leem essa escolha. Sem nada escolhido, vale a visão do campo "Visão sem seleção" (padrão: Aplicações).
 
-Prévia (dados fictícios): `docs/37-menu-visoes-preview.png` · Pacote: `dist/XP - Menu de visoes 1.0.1.pbiviz` (1.0.1: campo **Ordem** — as visões ficam na ordem de `dVisao[ordem]` e cada grupo aparece uma vez só).
+Prévia (dados fictícios): `docs/37-menu-visoes-preview.png` · Pacote: `dist/XP - Menu de visoes 1.0.2.pbiviz` (1.0.1: campo **Ordem**, cada grupo aparece uma vez só · 1.0.2: Formatar → Menu → **Ordem dos grupos** = `Resumo;Report`, o Resumo vem sempre primeiro).
 
 ## Passo a passo
 1. **Nova página** → renomear para `Dados do dash`. Tamanho igual à Nominal (1900 de largura). Fundo: o mesmo da Nominal por enquanto (`BG - Esteiras_Nominal.svg`).
