@@ -115,9 +115,9 @@ DEFINE
     // Etapa de onde mais se volta (resultado "Voltou" na última passagem).
     MEASURE '_Medidas'[Esteira | DQ Voltou Insight] =
         VAR T = ADDCOLUMNS( VALUES( dEtapa[stage_name] ), "@v", [Esteira | Voltaram] )
-        VAR Top = TOPN( 1, FILTER( T, [@v] > 0 ), [@v], DESC )
-        RETURN IF( ISEMPTY( Top ), "nenhum caso no período",
-            "onde mais acontece: " & MAXX( Top, dEtapa[stage_name] ) & " (" & FORMAT( MAXX( Top, [@v] ), "#,0" ) & ")" )
+        VAR Maior = TOPN( 1, FILTER( T, [@v] > 0 ), [@v], DESC )
+        RETURN IF( ISEMPTY( Maior ), "nenhum caso no período",
+            "onde mais acontece: " & MAXX( Maior, dEtapa[stage_name] ) & " (" & FORMAT( MAXX( Maior, [@v] ), "#,0" ) & ")" )
 
     MEASURE '_Medidas'[Esteira | DQ Sem Motivo Texto] =
         FORMAT( DIVIDE( [Esteira | DQ Sem Motivo], [Esteira | Rejeitados no Processo] ), "0.0%" ) & " das rejeitadas"
