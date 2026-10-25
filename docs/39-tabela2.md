@@ -4,6 +4,12 @@ A lista nominal da visão escolhida no **Menu de visões** (doc 37): colunas pr�
 
 Prévias (dados fictícios): `docs/39-tabela2-preview.png`, `docs/39-tabela2-colunas.png` · Pacote: `dist/XP - Tabela nominal 2.0.0.pbiviz` · Medidas: `docs/38-tabela2.dax`.
 
+## Versão rápida (obrigatória) · `docs/40-tabela2-desempenho.dax`
+A primeira versão das medidas recalculava a linha do tempo e as medidas "Nominal …" (que buscam entrevistas na tabela 14) em cada uma das ~22 mil linhas e travava. Agora:
+1. **3 colunas novas na 13:** `situacao_app`, `jornada_txt` e `seguintes_txt` (calculadas uma vez, na atualização).
+2. **Medidas:** `Esteira | Visão Na Lista` e `Esteira | Visão Dados` reescritas (só leem colunas) e 3 novas: `Esteira | Tabela Jornada`, `Esteira | Tabela Seguintes`, `Esteira | Tabela Alertas`.
+3. **No visual:** Linha do tempo → `Esteira | Tabela Jornada` · Etapas seguintes → `Esteira | Tabela Seguintes` · Alertas → `Esteira | Tabela Alertas`.
+
 ## Onde fica
 Página **Dados do dash** (a mesma do Menu de visões, doc 37), **não** na Nominal: a Nominal antiga (Base nominal) continua como está até a página nova ser validada.
 
@@ -28,9 +34,9 @@ Página **Dados do dash** (a mesma do Menu de visões, doc 37), **não** na Nomi
 | Candidato | `13_ETAPA_RECRUTAMENTO[nome_completo]` |
 | Colunas fixas | `job_name`, `esteira`, `especialidade`, `recruiter_name` (e, se quiser, praça, persona…) |
 | Dados da visão | `Esteira \| Visão Dados` |
-| Linha do tempo | `Esteira \| Nominal Jornada` |
-| Etapas seguintes | `Esteira \| Nominal Etapas Seguintes` |
-| Alertas | `Esteira \| Nominal Alertas` |
+| Linha do tempo | `Esteira \| Tabela Jornada` |
+| Etapas seguintes | `Esteira \| Tabela Seguintes` |
+| Alertas | `Esteira \| Tabela Alertas` |
 | Contexto | `Esteira \| Visão Contexto` |
 
    Renomear as colunas fixas no próprio visual (seta do campo → "Renomear para este visual"): Vaga, Esteira, Especialidade, Recrutador.

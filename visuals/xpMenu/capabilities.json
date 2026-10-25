@@ -1,41 +1,162 @@
 {
     "dataRoles": [
-        { "displayName": "Visão", "name": "visao", "kind": "Grouping", "description": "Coluna das visões (ex.: dVisao[visao]). É ela que o menu filtra." },
-        { "displayName": "Grupo (opcional)", "name": "grupo", "kind": "Grouping", "description": "Título do bloco (ex.: dVisao[grupo] = Resumo, Report)." },
-        { "displayName": "Descrição (opcional)", "name": "descricao", "kind": "Grouping", "description": "Linha pequena embaixo do nome (ex.: dVisao[descricao])." },
-        { "displayName": "Ícone (opcional)", "name": "icone", "kind": "Grouping", "description": "Nome do ícone (ex.: dVisao[icone]): pessoas, check, relogio, funil, setas, x, grade, cronometro, pessoa, grafico, calendario, alerta." },
-        { "displayName": "Contagem (opcional)", "name": "contagem", "kind": "Measure", "description": "Número à direita (ex.: Esteira | Visão Contagem)." }
+        {
+            "displayName": "Visão",
+            "name": "visao",
+            "kind": "Grouping",
+            "description": "Coluna das visões (ex.: dVisao[visao]). É ela que o menu filtra."
+        },
+        {
+            "displayName": "Grupo (opcional)",
+            "name": "grupo",
+            "kind": "Grouping",
+            "description": "Título do bloco (ex.: dVisao[grupo] = Resumo, Report)."
+        },
+        {
+            "displayName": "Descrição (opcional)",
+            "name": "descricao",
+            "kind": "Grouping",
+            "description": "Linha pequena embaixo do nome (ex.: dVisao[descricao])."
+        },
+        {
+            "displayName": "Ícone (opcional)",
+            "name": "icone",
+            "kind": "Grouping",
+            "description": "Nome do ícone (ex.: dVisao[icone]): pessoas, check, relogio, funil, setas, x, grade, cronometro, pessoa, grafico, calendario, alerta."
+        },
+        {
+            "displayName": "Ordem (opcional)",
+            "name": "ordem",
+            "kind": "Grouping",
+            "description": "Ordem das visões (ex.: dVisao[ordem]). Sem ela, vale a ordem do Power BI."
+        },
+        {
+            "displayName": "Contagem (opcional)",
+            "name": "contagem",
+            "kind": "Measure",
+            "description": "Número à direita (ex.: Esteira | Visão Contagem)."
+        }
     ],
     "dataViewMappings": [
         {
-            "conditions": [ { "visao": { "max": 1 }, "grupo": { "max": 1 }, "descricao": { "max": 1 }, "icone": { "max": 1 }, "contagem": { "max": 1 } } ],
+            "conditions": [
+                {
+                    "visao": {
+                        "max": 1
+                    },
+                    "grupo": {
+                        "max": 1
+                    },
+                    "descricao": {
+                        "max": 1
+                    },
+                    "icone": {
+                        "max": 1
+                    },
+                    "contagem": {
+                        "max": 1
+                    },
+                    "ordem": {
+                        "max": 1
+                    }
+                }
+            ],
             "categorical": {
                 "categories": {
                     "select": [
-                        { "for": { "in": "visao" } },
-                        { "for": { "in": "grupo" } },
-                        { "for": { "in": "descricao" } },
-                        { "for": { "in": "icone" } }
+                        {
+                            "for": {
+                                "in": "visao"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "grupo"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "descricao"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "icone"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "ordem"
+                            }
+                        }
                     ],
-                    "dataReductionAlgorithm": { "top": { "count": 200 } }
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 200
+                        }
+                    }
                 },
-                "values": { "select": [ { "bind": { "to": "contagem" } } ] }
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "contagem"
+                            }
+                        }
+                    ]
+                }
             }
         }
     ],
     "objects": {
-        "general": { "properties": { "filter": { "type": { "filter": true } } } },
+        "general": {
+            "properties": {
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                }
+            }
+        },
         "menu": {
             "properties": {
-                "padrao": { "type": { "text": true } },
-                "mostrarDescricao": { "type": { "bool": true } },
-                "mostrarContagem": { "type": { "bool": true } }
+                "padrao": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "mostrarDescricao": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "mostrarContagem": {
+                    "type": {
+                        "bool": true
+                    }
+                }
             }
         },
         "cores": {
             "properties": {
-                "destaque": { "type": { "fill": { "solid": { "color": true } } } },
-                "fundo": { "type": { "fill": { "solid": { "color": true } } } }
+                "destaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fundo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
             }
         }
     },

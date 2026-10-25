@@ -15,7 +15,7 @@ import { MenuSettings } from "./settings";
 import { xpFont } from "./xpTheme";
 import { icon } from "./icons";
 
-interface Item { key: string; raw: PrimitiveValue; label: string; grupo: string; descricao: string; icone: string; count: string; }
+interface Item { key: string; raw: PrimitiveValue; label: string; grupo: string; descricao: string; icone: string; count: string; ordem: number; pos: number; }
 interface Target { table: string; column: string; }
 
 // Identificador fixo do formato de filtro do Power BI (não é um endereço acessado).
@@ -67,7 +67,7 @@ export class Visual implements IVisual {
         const by = (role: string) => cats.find(c => c.source.roles && c.source.roles[role]);
         const visao = by("visao");
         if (!visao) return;
-        const grupo = by("grupo"), descricao = by("descricao"), icone = by("icone");
+        const grupo = by("grupo"), descricao = by("descricao"), icone = by("icone"), ordem = by("ordem");
         const counts = cat.values && cat.values[0];
         this.target = toTarget(visao.source.queryName || "");
         const seen = new Set<string>();
@@ -81,9 +81,16 @@ export class Visual implements IVisual {
                 grupo: grupo ? text(grupo.values[i]) : "",
                 descricao: descricao ? text(descricao.values[i]) : "",
                 icone: icone ? text(icone.values[i]) : "",
-                count: typeof c === "number" && isFinite(c) ? INT.format(c) : ""
+                count: typeof c === "number" && isFinite(c) ? INT.format(c) : "",
+                ordem: ordem && isFinite(Number(ordem.values[i])) ? Number(ordem.values[i]) : Number.MAX_SAFE_INTEGER,
+                pos: i
             });
         });
+        // Ordem: campo "Ordem" se houver; senão a ordem recebida. Depois, junta cada grupo na posição da sua primeira visão.
+        this.items.sort((a, b) => a.ordem - b.ordem || a.pos - b.pos);
+        const firstOfGroup = new Map<string, number>();
+        this.items.forEach((it, i) => { if (!firstOfGroup.has(it.grupo)) firstOfGroup.set(it.grupo, i); });
+        this.items = this.items.map((it, i) => ({ it, i })).sort((a, b) => (firstOfGroup.get(a.it.grupo) as number) - (firstOfGroup.get(b.it.grupo) as number) || a.i - b.i).map(x => x.it);
     }
 
     private activeKey(): string | null {
