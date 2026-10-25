@@ -5,3 +5,4 @@ visuals/*/dist/
 visuals/*/webpack.statistics.*.html
 .DS_Store
 visuals/*/node_modules
+__pycache__/
