@@ -1,0 +1,58 @@
+// =====================================================================
+// 49 · Homologação da coluna esteira (13_ETAPA_RECRUTAMENTO)
+// A coluna vem pronta da engenharia (não é calculada no modelo). Cadeia esperada:
+//   especialidade (Jobs, vinda do Services) → persona (de-para) → esteira (por persona, às vezes + especialidade).
+// Estas consultas mostram ONDE a cadeia quebra. Rodar uma de cada vez (Exibição de consulta DAX → Executar).
+// Sem filtro de período: contam todas as aplicações da 13. "sem" = esteira vazia (BLANK ou "").
+// =====================================================================
+
+// E1 · Por tipo de vaga: quantas aplicações têm e não têm esteira
+EVALUATE
+ADDCOLUMNS(
+    VALUES( dOrganograma[eh_pool] ),
+    "apps", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ) ),
+    "sem", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[esteira] = BLANK() ) )
+)
+
+// E2 · A esteira é da vaga? (cada vaga deveria ter 1 esteira só)
+EVALUATE
+VAR Vagas = VALUES( '13_ETAPA_RECRUTAMENTO'[job_id] )
+RETURN
+ROW(
+    "vagas", COUNTROWS( Vagas ),
+    "sem esteira", COUNTROWS( FILTER( Vagas,
+        CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[esteira] <> BLANK() ) = 0 ) ),
+    "com 2+", COUNTROWS( FILTER( Vagas,
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[esteira] ) ) > 1 ) )
+)
+
+// E3 · Por persona: aplicações sem esteira e quantas esteiras a persona tem quando vem preenchida
+//      (esteiras = 1 → dá para inferir a esteira pela persona; 2+ → depende também da especialidade)
+EVALUATE
+TOPN( 20,
+    ADDCOLUMNS(
+        VALUES( '13_ETAPA_RECRUTAMENTO'[persona] ),
+        "sem", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[esteira] = BLANK() ) ),
+        "com", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[esteira] <> BLANK() ) ),
+        "esteiras", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[esteira] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[esteira] <> BLANK() ) )
+    ),
+    [sem], DESC )
+
+// E4 · Persona + especialidade: a combinação define 1 esteira só? (para montar o de-para)
+EVALUATE
+TOPN( 25,
+    FILTER(
+        ADDCOLUMNS(
+            SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[persona], '13_ETAPA_RECRUTAMENTO'[especialidade] ),
+            "sem", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                '13_ETAPA_RECRUTAMENTO'[esteira] = BLANK() ),
+            "est", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[esteira] ),
+                '13_ETAPA_RECRUTAMENTO'[esteira] <> BLANK() ),
+            "ex", CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[esteira] ) )
+        ),
+        [sem] > 0 ),
+    [sem], DESC )
