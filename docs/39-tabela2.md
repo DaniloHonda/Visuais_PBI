@@ -2,7 +2,7 @@
 
 A lista nominal da visão escolhida no **Menu de visões** (doc 37): colunas próprias de cada visão, **Colunas ▾** (escolher as colunas; fica salvo no relatório, por visão), **Mostrar mais 100** e **Mostrar todas**, busca sem acento, **Só exceções**, exportar CSV, linha do tempo ao clicar na linha (com "Voltou" em âmbar e a soma dos dias) e selos de alerta. No topo, o número da lista e o selo **"✓ igual ao gráfico"** (ou o aviso da diferença).
 
-Prévias (dados fictícios): `docs/39-tabela2-preview.png`, `docs/39-tabela2-colunas.png` · Pacote: `dist/XP - Tabela nominal 2.0.0.pbiviz` · Medidas: `docs/38-tabela2.dax`.
+Prévias (dados fictícios): `docs/39-tabela2-preview.png`, `docs/39-tabela2-colunas.png` · Pacote: `dist/XP - Tabela nominal 2.0.1.pbiviz` (2.0.1: ignora linhas repetidas da mesma aplicação e avisa no rodapé) · Medidas: `docs/38-tabela2.dax`.
 
 ## Versão rápida (obrigatória) · `docs/40a-colunas.dax` (colunas) e `docs/40b-medidas.dax` (medidas)
 A primeira versão das medidas recalculava a linha do tempo e as medidas "Nominal …" (que buscam entrevistas na tabela 14) em cada uma das ~22 mil linhas e travava. Agora:
@@ -32,7 +32,7 @@ Página **Dados do dash** (a mesma do Menu de visões, doc 37), **não** na Nomi
 |---|---|
 | Link (1ª coluna) | `13_ETAPA_RECRUTAMENTO[link_greenhouse]` |
 | Candidato | `13_ETAPA_RECRUTAMENTO[nome_completo]` |
-| Colunas fixas | `job_name`, `esteira`, `especialidade`, `recruiter_name` (e, se quiser, praça, persona…) |
+| Colunas fixas | `job_name`, `esteira`, `especialidade`, `recruiter_name` (e, se quiser, praça, persona…). **Só colunas da 13** (ou de `dEtapa`/`dOrganograma`): coluna de outra tabela (ex.: `fonte_contratacao` da 03) cruza as linhas, multiplica cada aplicação ~16× e deixa a tabela lenta. Se precisar dela, trazer para a 13 com `LOOKUPVALUE` |
 | Dados da visão | `Esteira \| Visão Dados` |
 | Linha do tempo | `Esteira \| Tabela Jornada` |
 | Etapas seguintes | `Esteira \| Tabela Seguintes` |

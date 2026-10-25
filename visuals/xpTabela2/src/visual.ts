@@ -73,6 +73,7 @@ export class Visual implements IVisual {
     private expanded = new Set<string>();
     private loading = false;
     private complete = true;
+    private repetidas = 0;
     private height = 0;
 
     constructor(options: VisualConstructorOptions) {
@@ -147,9 +148,18 @@ export class Visual implements IVisual {
 
         const dynOrder: string[] = [];
         const dynKind: Record<string, Kind> = {};
+        // Uma linha por aplicação: se uma coluna fixa vier de uma tabela que não filtra a 13, o Power BI cruza as linhas
+        // (a mesma aplicação aparece várias vezes). Mantém a primeira e avisa no rodapé.
+        const seen = new Set<string>();
+        this.repetidas = 0;
         table.rows.forEach((r, i) => {
             const packed = iDados >= 0 ? asText(r[iDados]) : "";
             if (iDados >= 0 && !packed) return; // fora da lista da visão
+            const dedupKey = iLink >= 0 ? asText(r[iLink]) : "";
+            if (dedupKey) {
+                if (seen.has(dedupKey)) { this.repetidas++; return; }
+                seen.add(dedupKey);
+            }
             const cells: Record<string, Cell> = {};
             let seg = "";
             for (const part of packed.split("||")) {
@@ -496,6 +506,11 @@ export class Visual implements IVisual {
             const allBtn = el("button", "xp-t2__more xp-t2__more--ghost", "Mostrar todas");
             allBtn.addEventListener("click", () => { this.shown = all.length; this.renderTable(); });
             if (all.length - list.length > this.step()) this.foot.appendChild(allBtn);
+        }
+        if (this.repetidas > 0) {
+            const w = el("span", "xp-t2__warn", `⚠ ${INT.format(this.repetidas)} linhas repetidas ignoradas: alguma coluna fixa não é da tabela 13`);
+            w.title = "Use nas Colunas fixas só colunas da 13_ETAPA_RECRUTAMENTO (ou de tabelas que filtram a 13). Colunas de outras tabelas multiplicam as linhas e deixam a tabela lenta.";
+            this.foot.appendChild(w);
         }
         if (this.loading) this.foot.appendChild(el("span", "xp-t2__loading", "Carregando mais aplicações…"));
         else if (!this.complete) this.foot.appendChild(el("span", "xp-t2__loading", `Lista limitada a ${INT.format(this.rows.length)} linhas: use os filtros para reduzir`));
