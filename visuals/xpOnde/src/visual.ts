@@ -83,9 +83,8 @@ export class Visual implements IVisual {
         const idx = (role: string) => table.columns.findIndex(c => c.roles && c.roles[role]);
         const dimIdx = table.columns.map((c, i) => (c.roles && c.roles.dims ? i : -1)).filter(i => i >= 0);
         const iApps = idx("apps"), iBase = idx("base"), iTit = idx("titulo");
-        // Composição: com "Tipo de alerta", cada linha traz a contagem do tipo (porTipo); total e base vêm uma vez por
-        // combinação (medidas "1x"), então somam sem repetir.
-        const iTipo = idx("tipo"), iTOrd = idx("tipoOrdem"), iPor = idx("porTipo");
+        // Composição: medida de texto "ordem|tipo=n;;…" por combinação (uma aplicação pode ter mais de um tipo).
+        const iComp = idx("composicao");
         const tipoMap = new Map<string, Tipo>();
         this.dims = dimIdx.map(i => ({
             title: clean(table.columns[i].displayName),
@@ -97,13 +96,9 @@ export class Visual implements IVisual {
             if (!this.titulo && iTit >= 0 && r[iTit] !== null && r[iTit] !== undefined) this.titulo = String(r[iTit]);
             const apps = iApps >= 0 ? num(r[iApps]) : 0;
             const base = iBase >= 0 ? num(r[iBase]) : 0;
-            const por = iTipo >= 0 && iPor >= 0 ? num(r[iPor]) : 0;
-            const tipo = iTipo >= 0 && !isBlank(r[iTipo]) ? String(r[iTipo]) : "";
-            if (!apps && !base && !por) continue;
-            if (tipo && por && !tipoMap.has(tipo)) {
-                const o = iTOrd >= 0 ? Number(r[iTOrd]) : NaN;
-                tipoMap.set(tipo, { name: tipo, ordem: isFinite(o) ? o : 1000 + tipoMap.size });
-            }
+            if (!apps && !base) continue;
+            const partes = iComp >= 0 ? parseComp(r[iComp]) : [];
+            for (const p of partes) if (!tipoMap.has(p.name)) tipoMap.set(p.name, { name: p.name, ordem: p.ordem });
             dimIdx.forEach((ci, d) => {
                 const raw = r[ci];
                 const key = keyOf(raw);
@@ -112,7 +107,7 @@ export class Visual implements IVisual {
                 if (!g) { g = { key, raw, label: isBlank(raw) ? BLANK : fmtValue(raw), apps: 0, base: 0, tipos: new Map<string, number>() }; m.set(key, g); }
                 g.apps += apps;
                 g.base += base;
-                if (tipo && por) g.tipos.set(tipo, (g.tipos.get(tipo) || 0) + por);
+                for (const p of partes) g.tipos.set(p.name, (g.tipos.get(p.name) || 0) + p.n);
             });
         }
         this.tipos = Array.from(tipoMap.values()).sort((a, b) => a.ordem - b.ordem || a.name.localeCompare(b.name));
@@ -282,6 +277,20 @@ export class Visual implements IVisual {
     }
 }
 
+function parseComp(v: PrimitiveValue): { name: string; ordem: number; n: number }[] {
+    const out: { name: string; ordem: number; n: number }[] = [];
+    if (isBlank(v)) return out;
+    for (const part of String(v).split(";;")) {
+        const eq = part.lastIndexOf("="), bar = part.indexOf("|");
+        if (eq <= 0) continue;
+        const n = Number(part.slice(eq + 1));
+        if (!isFinite(n) || n <= 0) continue;
+        const o = bar > 0 && bar < eq ? Number(part.slice(0, bar)) : NaN;
+        const name = (bar > 0 && bar < eq ? part.slice(bar + 1, eq) : part.slice(0, eq)).trim();
+        if (name) out.push({ name, ordem: isFinite(o) ? o : 1000, n });
+    }
+    return out;
+}
 function sw(color: string): HTMLElement { const s = el("i", "xp-on__sw"); s.style.background = color; return s; }
 function fmtX(n: number): string { return "≥ " + new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(n) + "×"; }
 function isBlank(v: PrimitiveValue): boolean { return v === null || v === undefined || v === ""; }

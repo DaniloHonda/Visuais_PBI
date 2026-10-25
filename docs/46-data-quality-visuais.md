@@ -1,7 +1,7 @@
 # 6.6b · Data Quality: visuais e posições
 
 Prévia com os números reais da conferência: `docs/mockups/46-data-quality-visuais.png` (desenho aprovado: `docs/mockups/44-data-quality.png`).
-Pacotes: `dist/XP - Card de KPI 1.3.0.pbiviz` · `dist/XP - Tipos de alerta 1.0.0.pbiviz` (novo) · `dist/XP - Onde acontece 1.1.0.pbiviz` (novo) · `dist/XP - Tabela nominal 2.1.1.pbiviz`.
+Pacotes: `dist/XP - Card de KPI 1.3.0.pbiviz` · `dist/XP - Tipos de alerta 1.0.0.pbiviz` (novo) · `dist/XP - Onde acontece 1.2.0.pbiviz` (novo) · `dist/XP - Tabela nominal 2.1.1.pbiviz`.
 
 Página **Data Quality** · 1900 × 1720 · fundo `BG - Esteiras_DataQuality.svg` · barra de filtros copiada da Nominal.
 
@@ -34,25 +34,23 @@ Cor: Status = critico → coral, atencao → âmbar (Formatar → Status muda as
    Aplicações `Esteira | Aplicações com Alerta` · % `Esteira | % com Alerta` · Status `Esteira | DQ Status`.
 4. Clicar num tipo filtra a página (Onde acontece e a tabela). Clicar de novo, ou em "× Ver todos os alertas", tira o filtro. Os cards não mudam.
 
-## 3. Onde acontece · visual nosso **XP · Onde acontece 1.1.0** (título + botões + barras compostas por tipo)
-Antes: rodar `docs/48-onde-composicao.dax` (medidas DQ Onde Apps, DQ Onde Base 1x e o novo DQ Onde Título).
+## 3. Onde acontece · visual nosso **XP · Onde acontece 1.2.0** (título + botões + barras compostas por tipo)
+Antes: rodar `docs/48-onde-composicao.dax` (medida `DQ Onde Composição` e o novo `DQ Onde Título`).
 1. Fundo: Inserir → Formas → Retângulo arredondado · X 1100 · Y 580 · L 752 · A 430 · branco, borda #E6E6E6, cantos 22.
 2. Visual por cima: **X 1124 · Y 600 · L 704 · A 390**, fundo desligado, título desligado.
 3. Campos:
    | Campo do visual | O que colocar |
    |---|---|
-   | Recortes (um botão por campo) | `recruiter_name`, `dEtapa[stage_name]`, `job_name`, `esteira`, `especialidade` (nesta ordem; a ordem é a dos botões) |
-   | Tipo de alerta (composição) | `dAlerta[alerta]` |
-   | Ordem do tipo | `dAlerta[ordem]` |
-   | Aplicações por tipo | `Esteira \| Aplicações com Alerta` |
-   | Aplicações com alerta (total) | `Esteira \| DQ Onde Apps` |
-   | Base (aplicações do recorte) | `Esteira \| DQ Onde Base 1x` |
+   | Recortes (um botão por campo) | `recruiter_name`, `dEtapa[stage_name]`, `job_name`, `esteira`, `especialidade` (a ordem é a dos botões) |
+   | Aplicações com alerta | `Esteira \| Aplicações com Alerta` |
+   | Base (aplicações do recorte) | `Esteira \| DQ Onde Base` |
+   | Composição por tipo | `Esteira \| DQ Onde Composição` |
    | Título | `Esteira \| DQ Onde Título` |
 4. Nome dos botões: seta do campo em Recortes → **Renomear para este visual** → Recrutador, Etapa, Vaga, Esteira, Especialidade.
-5. Leitura: o comprimento da barra = aplicações com alerta (distintas); as cores dividem a barra na proporção de cada tipo
-   (uma aplicação pode ter mais de um). O número à direita ganha um ponto âmbar/coral quando a taxa foge da média
-   (20+ aplicações, ≥ 1,5× ou ≥ 2× a taxa geral). Passar o mouse na barra mostra a quantidade de cada tipo.
-6. Clicar numa barra filtra a página; clicar de novo ou "× tirar filtro" tira. Clicar num tipo em Tipos de alerta deixa só aquele tipo nas barras.
+5. Leitura: comprimento da barra = aplicações com alerta; as cores dividem a barra na proporção de cada tipo (uma aplicação
+   pode ter mais de um). Ponto âmbar/coral antes do número = taxa fora da média (20+ aplicações, ≥ 1,5× / ≥ 2× a taxa geral).
+   Mouse na barra = quantidade de cada tipo.
+6. Clicar numa barra filtra a página; clicar de novo ou "× tirar filtro" tira. Clicar num tipo em Tipos de alerta deixa só aquele tipo.
 7. Cores dos tipos: Formatar → Cores dos tipos (pela ordem de dAlerta). Família teal = processo, cinzas = dado.
 
 ## 4. Tabela (XP · Tabela nominal 2.1.1)

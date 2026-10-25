@@ -1,43 +1,39 @@
 // =====================================================================
-// 48 · Onde acontece com a composição por tipo de alerta (XP · Onde acontece 1.1.0)
-// O visual recebe uma linha por (recorte × tipo). O total e a base vêm só na linha do 1º tipo (medidas "1x"),
-// para não repetir 7 vezes; a contagem por tipo vem de Esteira | Aplicações com Alerta.
-// Uma aplicação pode ter mais de um alerta: a barra tem o comprimento do total (aplicações distintas)
-// e é dividida na proporção de cada tipo.
+// 48 · Onde acontece com a composição por tipo de alerta (XP · Onde acontece 1.2.0)
+// Uma medida de texto entrega a composição de cada recrutador/etapa/vaga: "ordem|tipo=quantidade;;…".
+// Assim o visual não precisa de dAlerta como coluna de agrupamento (na 1.1.0 a composição não chegava).
+// Uma aplicação pode ter mais de um alerta: a barra tem o comprimento do total e é dividida na proporção de cada tipo.
 // Colar daqui até o fim na Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações".
 // =====================================================================
 DEFINE
-    // Total de aplicações com alerta do recorte (respeita o tipo clicado em Tipos de alerta).
-    MEASURE '_Medidas'[Esteira | DQ Onde Apps] =
-        VAR Primeiro = CALCULATE( MIN( dAlerta[ordem] ), ALLSELECTED( dAlerta ) )
+    // Tipos com pelo menos 1 aplicação no recorte; respeita o tipo clicado em Tipos de alerta.
+    MEASURE '_Medidas'[Esteira | DQ Onde Composição] =
+        VAR T =
+            ADDCOLUMNS(
+                ALLSELECTED( dAlerta[ordem], dAlerta[alerta] ),
+                "@n", [Esteira | Aplicações com Alerta] )
         RETURN
-        IF( NOT ISINSCOPE( dAlerta[alerta] ) || SELECTEDVALUE( dAlerta[ordem] ) = Primeiro,
-            CALCULATE( [Esteira | Aplicações com Alerta], ALLSELECTED( dAlerta ) ) )
+        CONCATENATEX(
+            FILTER( T, [@n] > 0 ),
+            dAlerta[ordem] & "|" & dAlerta[alerta] & "=" & [@n],
+            ";;",
+            dAlerta[ordem], ASC )
 
-    // Base do % (aplicações do recorte), uma vez por recorte.
-    MEASURE '_Medidas'[Esteira | DQ Onde Base 1x] =
-        VAR Primeiro = CALCULATE( MIN( dAlerta[ordem] ), ALLSELECTED( dAlerta ) )
-        RETURN
-        IF( NOT ISINSCOPE( dAlerta[alerta] ) || SELECTEDVALUE( dAlerta[ordem] ) = Primeiro,
-            [Esteira | DQ Onde Base] )
-
-    // Título: olha o tipo clicado na página, não o tipo da linha.
+    // Título: olha o tipo clicado na página.
     MEASURE '_Medidas'[Esteira | DQ Onde Título] =
         "Onde acontece: "
             & CALCULATE(
                 IF( HASONEVALUE( dAlerta[alerta] ), """" & VALUES( dAlerta[alerta] ) & """", "todos os alertas" ),
                 ALLSELECTED( dAlerta ) )
 
-EVALUATE ROW( "medidas", 3 )
+EVALUATE ROW( "medidas", 2 )
 
-// Conferência: por recrutador, total = aplicações com alerta e soma dos tipos ≥ total (quem tem 2 alertas conta nos 2)
+// Conferência: os 5 recrutadores com mais alertas e a composição de cada um
 EVALUATE
 TOPN( 5,
     ADDCOLUMNS(
         VALUES( '13_ETAPA_RECRUTAMENTO'[recruiter_name] ),
-        "total", [Esteira | DQ Onde Apps],
-        "com alerta", [Esteira | Aplicações com Alerta],
-        "soma tipos", SUMX( VALUES( dAlerta[alerta] ), [Esteira | Aplicações com Alerta] ),
-        "base", [Esteira | DQ Onde Base 1x]
+        "total", [Esteira | Aplicações com Alerta],
+        "composição", [Esteira | DQ Onde Composição]
     ),
     [total], DESC )

@@ -7,34 +7,22 @@
             "description": "Ex.: recruiter_name, dEtapa[stage_name], job_name, esteira, especialidade. A ordem aqui é a ordem dos botões."
         },
         {
-            "displayName": "Tipo de alerta (composição)",
-            "name": "tipo",
-            "kind": "Grouping",
-            "description": "dAlerta[alerta]: divide cada barra pelos tipos."
-        },
-        {
-            "displayName": "Ordem do tipo",
-            "name": "tipoOrdem",
-            "kind": "Grouping",
-            "description": "dAlerta[ordem]: ordem e cor dos tipos."
-        },
-        {
-            "displayName": "Aplicações por tipo",
-            "name": "porTipo",
-            "kind": "Measure",
-            "description": "Esteira | Aplicações com Alerta"
-        },
-        {
-            "displayName": "Aplicações com alerta (total)",
+            "displayName": "Aplicações com alerta",
             "name": "apps",
             "kind": "Measure",
-            "description": "Esteira | DQ Onde Apps (sem tipo: Esteira | Aplicações com Alerta)"
+            "description": "Esteira | Aplicações com Alerta"
         },
         {
             "displayName": "Base (aplicações do recorte)",
             "name": "base",
             "kind": "Measure",
-            "description": "Esteira | DQ Onde Base 1x (sem tipo: Esteira | DQ Onde Base)"
+            "description": "Esteira | DQ Onde Base"
+        },
+        {
+            "displayName": "Composição por tipo",
+            "name": "composicao",
+            "kind": "Measure",
+            "description": "Esteira | DQ Onde Composição (texto ordem|tipo=n;;…)"
         },
         {
             "displayName": "Título",
@@ -50,19 +38,13 @@
                     "dims": {
                         "max": 6
                     },
-                    "tipo": {
-                        "max": 1
-                    },
-                    "tipoOrdem": {
-                        "max": 1
-                    },
-                    "porTipo": {
-                        "max": 1
-                    },
                     "apps": {
                         "max": 1
                     },
                     "base": {
+                        "max": 1
+                    },
+                    "composicao": {
                         "max": 1
                     },
                     "titulo": {
@@ -80,27 +62,17 @@
                         },
                         {
                             "for": {
-                                "in": "tipo"
-                            }
-                        },
-                        {
-                            "for": {
-                                "in": "tipoOrdem"
-                            }
-                        },
-                        {
-                            "for": {
-                                "in": "porTipo"
-                            }
-                        },
-                        {
-                            "for": {
                                 "in": "apps"
                             }
                         },
                         {
                             "for": {
                                 "in": "base"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "composicao"
                             }
                         },
                         {
