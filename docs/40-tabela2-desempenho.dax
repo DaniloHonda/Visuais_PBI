@@ -104,7 +104,8 @@ DEFINE
             VAR F = "yyyy-mm-dd"
             VAR Atual = CALCULATETABLE(
                 SUMMARIZE( '13_ETAPA_RECRUTAMENTO',
-                    '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                    '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], '13_ETAPA_RECRUTAMENTO'[days_in_stage],
+                    '13_ETAPA_RECRUTAMENTO'[resultado_etapa], '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
                 '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE(),
                 REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
             VAR TemAtual = NOT ISEMPTY( Atual )
@@ -161,20 +162,13 @@ DEFINE
                     & "||Candidatura=" & dCand,
                 "Entradas por etapa",
                     VAR UmaEtapa = ISFILTERED( dEtapa[stage_name] ) && HASONEVALUE( dEtapa[stage_name] )
-                    VAR Pass = IF( UmaEtapa,
-                        CALCULATETABLE(
-                            SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[resultado_etapa],
-                                '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
-                            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) ),
-                        CALCULATETABLE(
-                            SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[resultado_etapa],
-                                '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
-                            '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE(),
-                            REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ) )
+                    VAR ResU = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+                    VAR EntU = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+                    VAR SaiU = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
                     VAR Et  = IF( UmaEtapa, SELECTEDVALUE( dEtapa[stage_name] ), EtAt )
-                    VAR Res = MAXX( Pass, '13_ETAPA_RECRUTAMENTO'[resultado_etapa] )
-                    VAR Ent = MAXX( Pass, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
-                    VAR Sai = MAXX( Pass, '13_ETAPA_RECRUTAMENTO'[data_saida_stage] )
+                    VAR Res = IF( UmaEtapa, ResU, MAXX( Atual, '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ) )
+                    VAR Ent = IF( UmaEtapa, EntU, EntAt )
+                    VAR Sai = IF( UmaEtapa, SaiU, MAXX( Atual, '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) )
                     VAR Dd  = IF( UmaEtapa,
                         CALCULATE( SUM( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ) ),
                         DiasEt )

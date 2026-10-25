@@ -1,0 +1,64 @@
+// =====================================================================
+// 40 · Tabela nominal 2.0 · versão rápida
+// Por que estava lenta: cada linha (≈22 mil aplicações) recalculava a linha do tempo, as etapas seguintes e as medidas
+// "Nominal …", que por dentro buscam entrevistas na tabela 14. Agora o que é fixo da aplicação vira coluna (calculada
+// uma vez, na atualização) e as medidas da tabela só leem essas colunas.
+// A (3 colunas na 13) → B (medidas) → C (trocar 3 campos no visual) → D (conferência)
+// =====================================================================
+
+// A1 · 13_ETAPA_RECRUTAMENTO → Nova coluna · situação da aplicação (vale em todas as linhas da aplicação)
+situacao_app =
+SWITCH( TRUE(),
+    '13_ETAPA_RECRUTAMENTO'[status] = "in_process", "Em andamento",
+    '13_ETAPA_RECRUTAMENTO'[status] = "hired", "Contratada",
+    '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga], "Contratada via outra vaga",
+    '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio da offer", "Declinou",
+    '13_ETAPA_RECRUTAMENTO'[status] = "rejected", "Rejeitada"
+)
+
+// A2 · 13_ETAPA_RECRUTAMENTO → Nova coluna · linha do tempo pronta (só na linha da etapa atual)
+jornada_txt =
+IF(
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual],
+    CONCATENATEX(
+        CALCULATETABLE(
+            SUMMARIZE( '13_ETAPA_RECRUTAMENTO',
+                '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[sort_order],
+                '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], '13_ETAPA_RECRUTAMENTO'[data_saida_stage],
+                '13_ETAPA_RECRUTAMENTO'[resultado_etapa], '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+        COALESCE( '13_ETAPA_RECRUTAMENTO'[stage_name], "(etapa sem nome)" )
+            & "|" & FORMAT( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], "yyyy-mm-dd" )
+            & "|" & IF( ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), "", FORMAT( '13_ETAPA_RECRUTAMENTO'[data_saida_stage], "yyyy-mm-dd" ) )
+            & "|" & '13_ETAPA_RECRUTAMENTO'[resultado_etapa]
+            & "|" & FORMAT( '13_ETAPA_RECRUTAMENTO'[days_in_stage], "0" ),
+        ";;",
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], ASC,
+        IF( ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), DATE( 2999, 1, 1 ), '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), ASC,
+        '13_ETAPA_RECRUTAMENTO'[sort_order], ASC
+    )
+)
+
+// A3 · 13_ETAPA_RECRUTAMENTO → Nova coluna · etapas da própria vaga depois da atual e nunca alcançadas (só na linha da etapa atual)
+seguintes_txt =
+VAR So = '13_ETAPA_RECRUTAMENTO'[sort_order]
+RETURN
+IF(
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual]
+        && '13_ETAPA_RECRUTAMENTO'[situacao_app] IN { "Em andamento", "Rejeitada", "Declinou" }
+        && NOT ISBLANK( So ),
+    VAR G =
+        GROUPBY(
+            CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO',
+                    '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[sort_order], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+                ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ) ),
+            '13_ETAPA_RECRUTAMENTO'[stage_name],
+            "@o", MINX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[sort_order] ),
+            "@ent", MAXX( CURRENTGROUP(), '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) )
+    RETURN
+    CONCATENATEX(
+        FILTER( G, [@o] > So && ISBLANK( [@ent] ) && NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ),
+        '13_ETAPA_RECRUTAMENTO'[stage_name], ";;", [@o], ASC )
+)
