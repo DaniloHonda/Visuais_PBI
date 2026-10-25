@@ -62,6 +62,15 @@ Obs.: "Rejected from Assessoria de Investimentos: XP Future" e "Rejected from En
 - Rejeitadas **sem nenhuma etapa "Rejeitado"** (275).
 - Aplicações **sem esteira** (~75 mil; ver CONTEXTO seção 10).
 
+## Decisões de 25/10/2026
+- **Classificação dos motivos** aprovada como ponto de partida e precisa ser **fácil de editar** (será validada com os recrutadores). Todo [Offer] = declínio. "[Geral] Candidato(a) AAI…" = avaliação. "Preferiu outra posição" = desistência do candidato.
+- **Desistência do candidato conta como rejeição na conversão** (rejeição pela XP ou desistência: as duas entram).
+- **Passagem única** por etapa. Linha do tempo **ordenada por entrada e saída**, coerente com o histórico.
+- **Etapas de configuração** (Senior, Pleno, Pool Qualificados, Stand-by): erro de input, mas o tempo **conta** no SLA total e nas metas, como qualquer etapa.
+- **Contratação dentro de pool** não deveria acontecer: sinalizar como exceção.
+- A Nominal precisa mostrar **casos de exceção** (muito vai-e-volta, contratação em pool etc.).
+- O usuário só consegue mandar resultados **por foto**: consultas com poucas colunas e textos curtos.
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 
