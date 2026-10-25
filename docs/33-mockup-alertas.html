@@ -1,0 +1,69 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#F0F2F2;font-family:"Segoe UI",Arial,sans-serif;color:#121212}
+.pg{width:1900px;padding:22px 30px;box-sizing:border-box}
+.hdr{display:flex;align-items:center;gap:16px;margin-bottom:10px}
+h1{font-size:24px;margin:0;color:#03474C}.sub{color:#6B6B6B;font-size:13px}
+.fbar{display:flex;gap:8px;background:#fff;border-radius:10px;padding:8px 10px;margin-bottom:14px;font-size:12.5px}
+.f{border:1px solid #DDE2E3;border-radius:8px;padding:5px 10px;color:#6B6B6B}.f b{color:#121212;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+.card{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px #0001}
+.k .l{font-size:13px;color:#6B6B6B}.k .n{font-size:32px;font-weight:600;color:#03474C;margin:4px 0}.k .c{font-size:12.5px;color:#6B6B6B}
+.k.w .n{color:#9A6512}.k.b .n{color:#B8433A}
+.row{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:14px}
+h2{font-size:15px;margin:0 0 4px;color:#03474C}.h2s{font-size:12px;color:#6B6B6B;margin-bottom:12px}
+.grp{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:#6B6B6B;margin:12px 0 6px}
+.it{display:grid;grid-template-columns:230px 1fr 80px 60px;gap:10px;align-items:center;font-size:13.5px;padding:5px 0}
+.it .b{height:12px;border-radius:6px}.it .v{text-align:right;font-weight:600}.it .p{text-align:right;color:#6B6B6B;font-size:12px}
+.proc{background:#E3A33B}.dado{background:#8FA3A6}
+.it.on{background:#F7FBFB;border-radius:8px}
+.who{font-size:13px}.who .r{display:grid;grid-template-columns:150px 1fr 60px;gap:10px;align-items:center;padding:4px 0}
+.seg{height:12px;border-radius:6px;display:flex;overflow:hidden}.seg i{display:block;height:12px}
+.leg{font-size:12px;color:#6B6B6B;margin-top:8px}.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 4px 0 12px;vertical-align:middle}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:#6B6B6B;font-weight:600;border-bottom:1px solid #DDE2E3;padding:7px 8px;font-size:12px}
+td{padding:8px;border-bottom:1px solid #F0F2F2}td a{color:#067D84;text-decoration:none;font-weight:600}
+.al{display:inline-block;border-radius:6px;padding:1px 6px;font-size:11px;margin:0 3px 2px 0}
+.ap{background:#FBF0DC;color:#9A6512}.ad{background:#EEF0F0;color:#555}
+.bar{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.search{flex:1;border:1px solid #DDE2E3;border-radius:8px;padding:7px 10px;color:#A9B4B6;font-size:13px}
+.btn{border:1px solid #067D84;color:#067D84;border-radius:8px;padding:6px 12px;font-size:13px;background:#fff}
+.chip{background:#E3F1F0;color:#03474C;border-radius:14px;padding:4px 12px;font-size:12.5px}
+.foot{font-size:11.5px;color:#6B6B6B;margin-top:10px}
+</style></head><body><div class="pg">
+<div class="hdr"><h1>Alertas</h1><span class="sub">qualidade dos dados e do processo · o que corrigir e com quem</span></div>
+<div class="fbar"><span class="f">Período <b>Desde 01/07</b></span><span class="f">Organograma <b>Todos</b></span><span class="f">Esteira <b>Todas</b></span><span class="f">Recrutador <b>Todos</b></span><span class="f">Especialidade <b>Todas</b></span><span class="f">Etapa <b>Todas</b></span></div>
+<div class="kpis">
+<div class="card k"><div class="l">Aplicações com algum alerta</div><div class="n">16.867</div><div class="c">14% das 122.394 aplicações</div></div>
+<div class="card k w"><div class="l">Alertas de processo</div><div class="n">10.971</div><div class="c">ocorrências · corrigir no Greenhouse (áreas e recrutadores)</div></div>
+<div class="card k"><div class="l">Alertas de dado</div><div class="n">8.050</div><div class="c">ocorrências · tabela de etapas (engenharia)</div></div>
+<div class="card k b"><div class="l">Contratada dentro do pool</div><div class="n">1</div><div class="c">não deveria acontecer</div></div>
+</div>
+<div class="row">
+<div class="card"><h2>Tipos de alerta</h2><div class="h2s">aplicações com cada alerta (uma aplicação pode ter mais de um) · clique para filtrar a lista</div>
+<div class="grp">Processo · corrigir no Greenhouse</div>
+<div class="it"><span>Contratada dentro do pool</span><span class="b proc" style="width:1%"></span><span class="v">1</span><span class="p">0,0%</span></div>
+<div class="it on"><span>Voltou de etapa</span><span class="b proc" style="width:100%"></span><span class="v">8.023</span><span class="p">6,6%</span></div>
+<div class="it"><span>Etapa de configuração</span><span class="b proc" style="width:37%"></span><span class="v">2.947</span><span class="p">2,4%</span></div>
+<div class="grp">Dado · tabela de etapas</div>
+<div class="it"><span>Rejeitada sem motivo</span><span class="b dado" style="width:52%"></span><span class="v">4.162</span><span class="p">3,4%</span></div>
+<div class="it"><span>Etapas em dobro na origem</span><span class="b dado" style="width:41%"></span><span class="v">3.280</span><span class="p">2,7%</span></div>
+<div class="it"><span>Etapa sem nome</span><span class="b dado" style="width:7%"></span><span class="v">561</span><span class="p">0,5%</span></div>
+<div class="it"><span>Etapa antes da candidatura</span><span class="b dado" style="width:1%"></span><span class="v">47</span><span class="p">0,0%</span></div>
+</div>
+<div class="card who"><h2>Onde acontece: "Voltou de etapa" por recrutador</h2><div class="h2s">aplicações do recrutador com o alerta escolhido · % sobre as aplicações dele</div>
+<div class="r"><span>Marina L.</span><div class="seg"><i class="proc" style="width:88%"></i></div><span>412 · 9%</span></div>
+<div class="r"><span>Pedro A.</span><div class="seg"><i class="proc" style="width:64%"></i></div><span>301 · 7%</span></div>
+<div class="r"><span>Laura F.</span><div class="seg"><i class="proc" style="width:51%"></i></div><span>240 · 5%</span></div>
+<div class="r"><span>Elisa G.</span><div class="seg"><i class="proc" style="width:33%"></i></div><span>156 · 4%</span></div>
+<div class="r"><span>Rafael C.</span><div class="seg"><i class="proc" style="width:20%"></i></div><span>94 · 3%</span></div>
+<div class="r"><span>(sem recrutador)</span><div class="seg"><i class="proc" style="width:15%"></i></div><span>71 · 1%</span></div>
+<div class="leg">Alternar: <span class="chip">Recrutador</span> Etapa · Vaga · Esteira</div>
+</div></div>
+<div class="card"><div class="bar"><span class="chip">Filtro: Voltou de etapa</span><div class="search">Buscar candidato, vaga, recrutador…</div><div class="btn">⤓ Exportar CSV</div></div>
+<table><tr><th>Greenhouse</th><th>Candidato</th><th>Vaga</th><th>Recrutador</th><th>Situação</th><th>Etapa atual</th><th>Candidatura</th><th>Alertas</th></tr>
+<tr><td><a>Abrir ↗</a></td><td>Ana Souza</td><td>[Pool B2C] Assessoria · SP</td><td>Marina L.</td><td>Rejeitada</td><td>Phone Screening</td><td>02/07</td><td><span class="al ap">Voltou de etapa (1×)</span></td></tr>
+<tr><td><a>Abrir ↗</a></td><td>Gustavo Melo</td><td>[2026] Pool Eng. Back-end</td><td>Pedro A.</td><td>Rejeitada</td><td>Phone Screening</td><td>18/10</td><td><span class="al ap">Voltou de etapa (1×)</span><span class="al ap">Etapa de configuração</span></td></tr>
+<tr><td><a>Abrir ↗</a></td><td>Helena Dias</td><td>Analista de Seg. Info Sr.</td><td>Laura F.</td><td>Rejeitada</td><td>Triagem</td><td>30/06</td><td><span class="al ap">Voltou de etapa (1×)</span></td></tr>
+<tr><td><a>Abrir ↗</a></td><td>Igor Santos</td><td>Group Product Manager</td><td>Elisa G.</td><td>Em andamento</td><td>Revisão de aplicação</td><td>01/07</td><td><span class="al ap">Voltou de etapa (2×)</span><span class="al ad">Etapas em dobro na origem</span></td></tr>
+</table><div class="foot">Mostrando 50 de 8.023 · clique numa linha para ver a linha do tempo · contagens por tipo são reais (25/10/2026); nomes e números por recrutador são fictícios</div></div>
+</div></body></html>

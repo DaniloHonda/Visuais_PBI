@@ -118,6 +118,9 @@ Linha do tempo do Diego conferida (25/10/2026): Revisão 01/07 (Aprovado, 0 d) �
 
 Etapas de configuração (25/10/2026), todas existem na `dEtapa`: Senior 1.765 · Stand-by | Silver medalist 838 · Pleno 339 · Pool Qualificados 33 aplicações. Nenhuma etapa da 13 está fora da `dEtapa`. Etapa 5: `docs/32-alertas.dax`.
 
+**Etapa 5 fechada (25/10/2026):** Contratada dentro do pool 1 · Voltou de etapa 8.023 · Etapa de configuração 2.947 · Etapa sem nome 561 · Rejeitada sem motivo 4.162 · Etapa antes da candidatura 47 · Etapas em dobro na origem 3.280 · **16.867 aplicações com algum alerta (14%)** · Check Fechamento 0 · Check Coorte 0.
+Etapa 6 (mockups para aprovar): `docs/33-mockup-dados-do-dash.png` e `docs/33-mockup-alertas.png`.
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 
