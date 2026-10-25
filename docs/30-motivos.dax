@@ -1,0 +1,85 @@
+// =====================================================================
+// 30 · Etapa 3: classificação editável dos motivos de encerramento
+// A → tabela de exceções (Modelagem → Nova tabela) · B → coluna na 13 (Nova coluna) · C → medidas (consulta DAX) · D → conferência
+// Para mudar a classificação depois: editar só a tabela dMotivoTipo (uma linha por motivo).
+// =====================================================================
+
+// A · Modelagem → Nova tabela
+// Motivos que fogem da regra padrão. A regra padrão (coluna B) é:
+//   [Offer]… → "Declínio da offer" · [Aplicação]… / [Avaliação]… / [Qualificação]… → "Avaliação" · qualquer outro → "A classificar"
+// O nome do motivo precisa ser IGUAL ao do Greenhouse (acentos e espaços). "(vazio)" = sem motivo na base.
+dMotivoTipo =
+DATATABLE(
+    "motivo", STRING,
+    "tipo", STRING,
+    {
+        { "(vazio)",                                                    "Sem motivo na base" },
+        { "[Geral] Limpeza de Pool",                                    "Administrativo" },
+        { "[Geral] Posição cancelada",                                  "Administrativo" },
+        { "[Geral] Movimentação entre vagas",                           "Administrativo" },
+        { "[Geral] Silver Medalist",                                    "Administrativo" },
+        { "[Geral] Desistência no meio do processo",                    "Desistência do candidato" },
+        { "[Geral] Preferiu outra posição na XP",                       "Desistência do candidato" },
+        { "[Geral] Motivos pessoais",                                   "Desistência do candidato" },
+        { "[Geral] Empresa off limits",                                 "Avaliação" },
+        { "[Geral] Candidato(a) AAI/B2B",                               "Avaliação" },
+        { "[Geral] Background Check (Compliance)",                      "Avaliação" },
+        { "[Geral] Problemas de documentação (Certificação ou laudo)",  "Avaliação" }
+    }
+)
+
+// B · Exibição de tabela → 13_ETAPA_RECRUTAMENTO → Nova coluna
+// Tipo de encerramento da aplicação (só para rejeitadas; contratadas e em andamento ficam vazias).
+tipo_encerramento =
+VAR M = '13_ETAPA_RECRUTAMENTO'[rejection_reason_name]
+VAR Chave = IF( ISBLANK( M ) || TRIM( M ) = "", "(vazio)", TRIM( M ) )
+VAR Excecao = LOOKUPVALUE( dMotivoTipo[tipo], dMotivoTipo[motivo], Chave )
+VAR Padrao =
+    SWITCH( TRUE(),
+        LEFT( Chave, 7 ) = "[Offer]", "Declínio da offer",
+        LEFT( Chave, 11 ) IN { "[Aplicação]", "[Avaliação]" }, "Avaliação",
+        LEFT( Chave, 14 ) = "[Qualificação]", "Avaliação",
+        "A classificar" )
+RETURN
+IF( '13_ETAPA_RECRUTAMENTO'[status] = "rejected", COALESCE( Excecao, Padrao ) )
+
+// C · Medidas (Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações")
+// Declínio e situação da Nominal passam a seguir a tabela de tipos (antes: prefixo "[Offer]" fixo no DAX).
+DEFINE
+    MEASURE '_Medidas'[Esteira | Declinados (Offer)] =
+        CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio da offer" ) )
+
+    MEASURE '_Medidas'[Esteira | Nominal Situação] =
+        VAR NoPer = NOT ISBLANK( [Esteira | Candidatos] )
+        VAR Ativo = NOT ISBLANK( [Esteira | Ativos Agora] )
+        VAR St    = LOWER( MAX( '13_ETAPA_RECRUTAMENTO'[status] ) )
+        VAR Dec   = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio da offer" ) )
+        RETURN
+        SWITCH( TRUE(),
+            NOT NoPer, BLANK(),
+            Ativo, "Em andamento",
+            St = "hired", "Contratada",
+            St = "rejected" && Dec > 0, "Declinou",
+            St = "rejected", "Rejeitada",
+            "Outro" )
+
+    MEASURE '_Medidas'[Esteira | Nominal Tipo de Encerramento] =
+        IF( ISBLANK( [Esteira | Nominal Na Base] ), BLANK(), MAX( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] ) )
+
+EVALUATE ROW( "medidas", 3 )
+
+// D · Conferência (dois resultados)
+// 1) aplicações por tipo (a soma dos tipos = rejeitadas = 70.127)  2) motivos que caíram em "A classificar" (devem ser poucos)
+EVALUATE
+ADDCOLUMNS(
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] ), '13_ETAPA_RECRUTAMENTO'[status] = "rejected" ),
+    "aplicações", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[status] = "rejected" )
+)
+ORDER BY [aplicações] DESC
+
+EVALUATE
+ADDCOLUMNS(
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ), '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "A classificar" ),
+    "aplicações", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "A classificar" )
+)
+ORDER BY [aplicações] DESC
