@@ -1,0 +1,83 @@
+// =====================================================================
+// 36 · Etapa 6.1: base no modelo para a página "Dados do dash"
+// A (coluna) → B (tabela dVisao) → C (medidas) → D (conferência)
+// =====================================================================
+
+// A · 13_ETAPA_RECRUTAMENTO → Nova coluna
+nome_completo =
+TRIM( COALESCE( '13_ETAPA_RECRUTAMENTO'[first_name], "" ) & " " & COALESCE( '13_ETAPA_RECRUTAMENTO'[last_name], "" ) )
+
+// B · Modelagem → Nova tabela · as visões do menu lateral (sem relação com nenhuma tabela)
+// grao: aplicacao = 1 linha por aplicação · passagem = 1 por passagem em etapa · entrevista = 1 por entrevista · movimentacao = 1 por evento
+dVisao =
+DATATABLE(
+    "visao", STRING, "grupo", STRING, "ordem", INTEGER, "descricao", STRING, "icone", STRING, "grao", STRING,
+    {
+        { "Aplicações",           "Resumo",    1, "todas do período",            "pessoas",     "aplicacao" },
+        { "Contratadas",          "Resumo",    2, "origem e SLA",                "check",       "aplicacao" },
+        { "Em andamento",         "Resumo",    3, "etapa atual e dias",          "relogio",     "aplicacao" },
+        { "Funil",                "Resumo",    4, "até onde chegou",             "funil",       "aplicacao" },
+        { "Entradas por etapa",   "Report",    5, "aprovou, rejeitou, voltou",   "setas",       "aplicacao" },
+        { "Rejeitados e motivos", "Report",    6, "etapa e motivo",              "x",           "aplicacao" },
+        { "Andamento por faixa",  "Report",    7, "dias parado",                 "grade",       "aplicacao" },
+        { "SLA por etapa",        "Report",    8, "entrada → saída",             "cronometro",  "passagem" },
+        { "Por recrutador",       "Report",    9, "situação",                    "pessoa",      "aplicacao" },
+        { "Evolução",             "Report",   10, "movimentações",               "grafico",     "movimentacao" },
+        { "Entrevistas",          "Report",   11, "1 linha por entrevista",      "calendario",  "entrevista" }
+    }
+)
+// Depois: dVisao[visao] → Classificar por coluna → ordem.
+
+// C · Medidas (Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações")
+DEFINE
+    // Quantas aplicações (ou passagens/entrevistas/movimentações) a visão tem · é o número do gráfico de origem.
+    MEASURE '_Medidas'[Esteira | Visão Contagem] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        SWITCH( V,
+            "Aplicações",           [Esteira | Candidatos],
+            "Contratadas",          [Esteira | Contratados],
+            "Em andamento",         [Esteira | Ativos Agora],
+            "Funil",                [Esteira | Candidatos],
+            "Entradas por etapa",   [Esteira | Participantes],
+            "Rejeitados e motivos", [Esteira | Rejeitados],
+            "Andamento por faixa",  [Esteira | Ativos Agora],
+            "SLA por etapa",        [Esteira | Base SLA],
+            "Por recrutador",       [Esteira | Candidatos],
+            "Evolução",             COALESCE( [Esteira | Aprovados por Data], 0 ) + COALESCE( [Esteira | Rejeitados por Data], 0 ),
+            "Entrevistas",          [Esteira | Entrevistas Marcadas]
+        )
+
+    // 1 = a aplicação da linha entra na lista da visão escolhida (visões por aplicação; as outras entram na parte 6.4).
+    MEASURE '_Medidas'[Esteira | Visão Na Lista] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        VAR M =
+            SWITCH( V,
+                "Aplicações",           [Esteira | Candidatos],
+                "Contratadas",          [Esteira | Contratados],
+                "Em andamento",         [Esteira | Ativos Agora],
+                "Funil",                [Esteira | Candidatos],
+                "Entradas por etapa",   [Esteira | Participantes],
+                "Rejeitados e motivos", [Esteira | Rejeitados],
+                "Andamento por faixa",  [Esteira | Ativos Agora],
+                "Por recrutador",       [Esteira | Candidatos] )
+        RETURN IF( NOT ISBLANK( M ) && M > 0, 1 )
+
+EVALUATE ROW( "medidas", 2 )
+
+// D · Conferência (sem filtro de período): a contagem de cada visão = aplicações que entram na lista dela
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE( dVisao, dVisao[ordem], dVisao[visao], dVisao[grao] ),
+    "contagem", [Esteira | Visão Contagem],
+    "na lista", IF( dVisao[grao] = "aplicacao",
+        COUNTROWS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), [Esteira | Visão Na Lista] = 1 ) ) )
+)
+ORDER BY dVisao[ordem]
+
+EVALUATE
+TOPN( 5,
+    ADDCOLUMNS(
+        SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[first_name], '13_ETAPA_RECRUTAMENTO'[last_name], '13_ETAPA_RECRUTAMENTO'[nome_completo] ),
+        "x", 1 ),
+    '13_ETAPA_RECRUTAMENTO'[nome_completo], ASC )

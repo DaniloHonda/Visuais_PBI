@@ -1,0 +1,24 @@
+# 36 · Etapa 6: páginas "Dados do dash" e "Alertas" (plano)
+
+Decisões (25/10/2026), a partir dos mockups `docs/mockups/`:
+- **Dados do dash = versão B** (menu lateral com ícone, descrição e contagem). `docs/mockups/34-dados-versao-B.png`.
+- **Alertas = v2** (big numbers no padrão do dash com o insight embaixo, ⓘ em cada alerta), com o recorte do "Onde acontece" escolhido por **botões segmentados** (recrutador · etapa · vaga · esteira…). `docs/mockups/35-alertas-v2.png`.
+- **Em TODAS as tabelas nominais:** "Mostrando 50 de N" + botão **"Mostrar mais 100"**, e **"Colunas ▾"** para escolher as colunas.
+- Nome do candidato: coluna **`nome_completo`** na 13 (`first_name` + `last_name`, que estão na 13).
+
+## Partes
+| # | Parte | Entrega |
+|---|---|---|
+| 6.1 | **Base no modelo** | `nome_completo`, tabela `dVisao` (as visões do menu) e as medidas "está na visão" e "contagem da visão" para as visões por aplicação · `docs/36-dados-parte1.dax` |
+| 6.2 | Visual **XP · Menu de visões** | menu lateral da versão B (ícone, nome, descrição, contagem), seleção filtra `dVisao` |
+| 6.3 | Visual **XP · Tabela nominal 2.0** | colunas por visão, Colunas ▾, Mostrar mais 100, busca, CSV, linha do tempo com "Voltou", selos de alerta, "Só exceções", segmentos como big numbers |
+| 6.4 | Visões por passagem, entrevista e movimentação | SLA por etapa (1 linha por passagem), Entrevistas (1 por entrevista), Evolução (1 por movimentação) |
+| 6.5 | Botões **"Ver aplicações ↗"** | passo a passo: um indicador (bookmark) por visão + botão em cada gráfico |
+| 6.6 | Página **Alertas** | big numbers (Card de KPI), tipos com ⓘ, "Onde acontece" com recorte por botões, tabela 2.0 |
+| 6.7 | Página **Conceitos** | textos dos alertas, tipos de encerramento, "Voltou", "Saiu para outra vaga", origem da contratação |
+| 6.8 | Demais tabelas nominais | Base nominal, Tabela nominal (Pré Offer/Offer) e Detalhe com Colunas ▾ e Mostrar mais 100 |
+
+## Backlog desta etapa
+- **Botão "Limpar filtros"** da faixa de filtros ativos: redesenhar (ficou feio no mockup).
+- **Faixa "Filtros ativos"**: construir depois (aprovada no mockup).
+- **Filtros que bloqueiam cliques:** as caixas da barra de filtros precisam de altura para a lista abrir, e essa área invisível cobre o que está embaixo (ex.: na Evolução, o Período impede clicar em Aprovados × Entrevistas). Proposta: deixar as caixas baixas (~50 px) e abrir a lista numa **janela** (modo "janela" que a Segmentação 2.2 já tem; levar o mesmo para o Período e o Organograma). Alternativa: um botão "Filtros" que abre um painel por indicador.
