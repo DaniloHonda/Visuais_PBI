@@ -1,0 +1,147 @@
+// =====================================================================
+// 32 · Etapa 5: alertas (exceções de processo e de dado) + Check Fechamento pela última passagem
+// A (2 tabelas) → B (2 colunas) → C (medidas) → D (conferência)
+// =====================================================================
+
+// A1 · Modelagem → Nova tabela · etapas de configuração/espera (editável: incluir ou tirar linhas)
+dEtapaConfig =
+DATATABLE(
+    "etapa", STRING,
+    {
+        { "Senior" },
+        { "Pleno" },
+        { "Pool Qualificados" },
+        { "Stand-by | Silver medalist" }
+    }
+)
+
+// A2 · Modelagem → Nova tabela · lista de alertas (para a página Alertas e filtros)
+dAlerta =
+DATATABLE(
+    "alerta", STRING,
+    "grupo", STRING,
+    "ordem", INTEGER,
+    {
+        { "Contratada dentro do pool", "Processo", 1 },
+        { "Voltou de etapa",           "Processo", 2 },
+        { "Etapa de configuração",     "Processo", 3 },
+        { "Etapa sem nome",            "Dado",     4 },
+        { "Rejeitada sem motivo",      "Dado",     5 },
+        { "Etapa antes da candidatura","Dado",     6 },
+        { "Etapas em dobro na origem", "Dado",     7 }
+    }
+)
+// Depois: Exibição de tabela → dAlerta → coluna alerta → Classificar por coluna → ordem.
+
+// B1 · 13_ETAPA_RECRUTAMENTO → Nova coluna · última passagem da aplicação em cada etapa
+ultima_na_etapa =
+IF(
+    '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+    '13_ETAPA_RECRUTAMENTO'[data_entrada_stage]
+        = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+    FALSE()
+)
+
+// B2 · 13_ETAPA_RECRUTAMENTO → Nova coluna · alertas da aplicação (preenchido só na linha da etapa atual)
+alertas =
+IF(
+    NOT '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual],
+    BLANK(),
+    VAR Voltas =
+        CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Voltou" )
+    VAR Config =
+        CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+            TREATAS( VALUES( dEtapaConfig[etapa] ), '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+    VAR SemNome =
+        CALCULATE( COUNTBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 )
+    VAR PrimEnt =
+        CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 )
+    VAR Copias =
+        CALCULATE( COUNT( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 0 )
+    VAR L =
+        IF( '13_ETAPA_RECRUTAMENTO'[origem_contratacao] = "Dentro do pool", "Contratada dentro do pool · ", "" )
+        & IF( Voltas > 0, "Voltou de etapa (" & Voltas & "×) · ", "" )
+        & IF( Config > 0, "Etapa de configuração · ", "" )
+        & IF( SemNome > 0, "Etapa sem nome · ", "" )
+        & IF( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Sem motivo na base", "Rejeitada sem motivo · ", "" )
+        & IF( PrimEnt < '13_ETAPA_RECRUTAMENTO'[data_aplicacao] - 1, "Etapa antes da candidatura · ", "" )
+        & IF( Copias > 0, "Etapas em dobro na origem · ", "" )
+    RETURN IF( L = "", BLANK(), LEFT( L, LEN( L ) - 3 ) )
+)
+
+// C · Medidas (Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações")
+DEFINE
+    // Resultado por etapa: só a última passagem da aplicação na etapa (resolve o Check Fechamento negativo).
+    MEASURE '_Medidas'[Esteira | Aprovados] =
+        CALCULATE( [Esteira | Participantes],
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+
+    MEASURE '_Medidas'[Esteira | Rejeitados] =
+        CALCULATE( [Esteira | Participantes],
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+
+    MEASURE '_Medidas'[Esteira | Em Andamento] =
+        CALCULATE( [Esteira | Participantes],
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+
+    MEASURE '_Medidas'[Esteira | Voltaram] =
+        CALCULATE( [Esteira | Participantes],
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Voltou" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+
+    MEASURE '_Medidas'[Esteira | Saíram para Outra Vaga (Etapa)] =
+        CALCULATE( [Esteira | Participantes],
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Saiu para outra vaga" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ultima_na_etapa] = TRUE() ) )
+
+    // Alertas: aplicações do período com o alerta escolhido em dAlerta (sem escolha = qualquer alerta).
+    MEASURE '_Medidas'[Esteira | Aplicações com Alerta] =
+        VAR A = SELECTEDVALUE( dAlerta[alerta] )
+        RETURN
+        CALCULATE( [Esteira | Candidatos],
+            KEEPFILTERS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[alertas] ),
+                IF( ISBLANK( A ), NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[alertas] ),
+                    CONTAINSSTRING( '13_ETAPA_RECRUTAMENTO'[alertas], A ) ) ) ) )
+
+    MEASURE '_Medidas'[Esteira | % com Alerta] =
+        DIVIDE( [Esteira | Aplicações com Alerta], [Esteira | Candidatos] )
+
+    MEASURE '_Medidas'[Esteira | Nominal Alertas] =
+        IF( ISBLANK( [Esteira | Nominal Na Base] ), BLANK(),
+            CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[alertas] ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() ) ) )
+
+    MEASURE '_Medidas'[Esteira | Nominal Tem Alerta] =
+        IF( NOT ISBLANK( [Esteira | Nominal Alertas] ), 1 )
+
+EVALUATE ROW( "medidas", 9 )
+
+// D · Conferência (sem filtro de período)
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE( dAlerta, dAlerta[ordem], dAlerta[grupo], dAlerta[alerta] ),
+    "apps", [Esteira | Aplicações com Alerta]
+)
+ORDER BY dAlerta[ordem]
+
+EVALUATE
+ROW(
+    "com algum alerta", [Esteira | Aplicações com Alerta],
+    "% com alerta", [Esteira | % com Alerta],
+    "check fech", SUMX( VALUES( dEtapa[stage_name] ), [Esteira | Check Fechamento] ),
+    "check coorte", [Esteira | Check Coorte]
+)

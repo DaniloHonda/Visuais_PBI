@@ -116,6 +116,8 @@ Linha do tempo do Diego conferida (25/10/2026): Revisão 01/07 (Aprovado, 0 d) �
 
 **Etapa 4 fechada (25/10/2026):** 131 aplicações de pool "saíram para outra vaga" (Felipe 306105340002 confere) · contratadas: **Direto 587 · Via pool 89 · Dentro do pool 1** (= 677) · Check Coorte 0 · rejeitadas 69.996 (= 70.127 − 131) · conversão ~1% · **SLA mediano geral 15 d** (antes 12) · **via pool 42 d** · direto 13 d.
 
+Etapas de configuração (25/10/2026), todas existem na `dEtapa`: Senior 1.765 · Stand-by | Silver medalist 838 · Pleno 339 · Pool Qualificados 33 aplicações. Nenhuma etapa da 13 está fora da `dEtapa`. Etapa 5: `docs/32-alertas.dax`.
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 
