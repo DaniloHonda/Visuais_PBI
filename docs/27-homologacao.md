@@ -108,6 +108,8 @@ Investigação (25/10/2026): das 329 com 2+ etapas atuais, **313 são linhas id�
 **Etapa 1 fechada (25/10/2026):** 122.394 apps com entrada · 0 sem etapa atual · 313 com 2 atuais (linhas idênticas) · em andamento 51.590 = em processo · Rejeitado 70.127 = rejeitadas · 0 rejeitadas em 2 etapas · Voltou 9.336 passagens · **484 aplicações com etapa atual sem nome** (pedido à engenharia).
 Etapa 2: `docs/29-etapa2.dax`. Pendência no visual Base nominal: mostrar "Voltou" com estilo próprio na linha do tempo (hoje cai como aprovado).
 
+**Conferência da etapa 2 (25/10/2026):** Check Coorte 0 · Check Fechamento (soma das etapas) **−192** (aplicações que entraram 2× na mesma etapa em dias diferentes contam em dois resultados) · Rejeitados nas etapas 70.034 × rejeitadas 70.127 (93 = rejeitadas em etapa sem nome) · em andamento 51.590 · Voltaram 9.269 · mediana geral por etapa 0 d (etapas automáticas resolvidas no mesmo dia) · P90 30 d · base SLA 172.440 · conversão de entrevista 36%.
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 
