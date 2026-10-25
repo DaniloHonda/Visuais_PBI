@@ -4,11 +4,22 @@ A lista nominal da visão escolhida no **Menu de visões** (doc 37): colunas pr�
 
 Prévias (dados fictícios): `docs/39-tabela2-preview.png`, `docs/39-tabela2-colunas.png` · Pacote: `dist/XP - Tabela nominal 2.0.0.pbiviz` · Medidas: `docs/38-tabela2.dax`.
 
+## Onde fica
+Página **Dados do dash** (a mesma do Menu de visões, doc 37), **não** na Nominal: a Nominal antiga (Base nominal) continua como está até a página nova ser validada.
+
+| Elemento | X | Y | Largura | Altura |
+|---|---|---|---|---|
+| Página (Configurações → Tamanho personalizado) | — | — | 1900 | 1720 |
+| Barra de filtros (copiada da Report, sincronizada) | mesmas posições da Report | 225 | — | — |
+| XP · Menu de visões | 300 | 370 | 260 | 720 |
+| Linha divisória (Inserir → Formas → Linha, vertical, cor #ECECEC, 1 px) | 566 | 380 | 1 | 1300 |
+| **XP · Tabela nominal 2.0** | **572** | **370** | **1290** | **1310** |
+
 ## Passo a passo
 1. **Medidas:** colar `docs/38-tabela2.dax` na Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações" (cria `Esteira | Visão Dados` e `Esteira | Visão Contexto`).
 2. **Link:** usar a coluna de link no formato novo (`link_greenhouse`, doc da conversa de 25/10). Se ainda não existir, criar na 13:
    `link_greenhouse = "https://xpi.greenhouse.io/people/" & FORMAT( [candidate_id], "0" ) & "/applications/" & [application_id] & "/redesign?src=search"`
-3. **Importar** `XP - Tabela nominal 2.0.0.pbiviz` e inserir na página Dados do dash, à direita do menu: **X 572 · Y 370 · L 1290 · A 900**. Formatar → Geral: desligar Título e Plano de fundo.
+3. **Importar** `XP - Tabela nominal 2.0.0.pbiviz` e inserir na página Dados do dash, à direita do menu: **X 572 · Y 370 · L 1290 · A 1310**. Formatar → Geral: desligar Título e Plano de fundo.
 4. **Campos:**
 
 | Campo do visual | O que colocar |
