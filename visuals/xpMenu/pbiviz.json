@@ -4,7 +4,7 @@
         "displayName": "XP · Menu de visões",
         "guid": "xpMenu384F47A4208047B4B853FB1C88C19777",
         "visualClassName": "Visual",
-        "version": "1.0.2.0",
+        "version": "1.1.0.0",
         "description": "Menu lateral de visões (ícone, nome, descrição e contagem) que filtra uma tabela de visões. Padrão visual XP.",
         "supportUrl": "https://github.com/",
         "gitHubUrl": ""
@@ -22,5 +22,5 @@
     "capabilities": "capabilities.json",
     "dependencies": null,
     "stringResources": [],
-    "version": "1.0.2.0"
+    "version": "1.1.0.0"
 }

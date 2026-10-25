@@ -114,6 +114,40 @@ export class Visual implements IVisual {
         this.render();
     }
 
+    // Horizontal: um bloco por grupo (Resumo, Report) com um card clicável por visão: nome, número grande e descrição.
+    private renderHorizontal(active: string | null) {
+        const s = this.settings;
+        this.root.className = "xp-mn xp-mn--h";
+        const groups: { name: string; items: Item[] }[] = [];
+        for (const it of this.items) {
+            const last = groups[groups.length - 1];
+            if (last && last.name === it.grupo) last.items.push(it); else groups.push({ name: it.grupo, items: [it] });
+        }
+        for (const g of groups) {
+            const sec = el("div", "xp-mn__sec");
+            sec.style.flexGrow = String(g.items.length);
+            if (g.name) sec.appendChild(el("div", "xp-mn__grp", g.name.toUpperCase()));
+            const row = el("div", "xp-mn__cards");
+            for (const it of g.items) {
+                const on = it.key === active;
+                const card = el("button", "xp-mn__card" + (on ? " is-on" : ""));
+                card.setAttribute("aria-pressed", on ? "true" : "false");
+                card.title = it.label + (it.descricao ? " · " + it.descricao : "");
+                const top = el("span", "xp-mn__ctop");
+                const ic = el("span", "xp-mn__ic");
+                ic.appendChild(icon(it.icone));
+                top.append(ic, el("span", "xp-mn__nm", it.label));
+                card.appendChild(top);
+                if (s.menu.mostrarContagem.value) card.appendChild(el("span", "xp-mn__big", it.count || "—"));
+                if (s.menu.mostrarDescricao.value && it.descricao) card.appendChild(el("small", "xp-mn__ds", it.descricao));
+                card.addEventListener("click", () => this.choose(it));
+                row.appendChild(card);
+            }
+            sec.appendChild(row);
+            this.root.appendChild(sec);
+        }
+    }
+
     private render() {
         const s = this.settings;
         this.root.replaceChildren();
@@ -124,6 +158,8 @@ export class Visual implements IVisual {
             return;
         }
         const active = this.activeKey();
+        if (String(s.menu.layout.value.value) === "horizontal") { this.renderHorizontal(active); return; }
+        this.root.className = "xp-mn";
         let lastGroup: string | null = null;
         for (const it of this.items) {
             if (it.grupo !== lastGroup) {

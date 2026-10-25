@@ -139,6 +139,20 @@
                     "type": {
                         "bool": true
                     }
+                },
+                "layout": {
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "vertical",
+                                "displayName": "Vertical (barra lateral)"
+                            },
+                            {
+                                "value": "horizontal",
+                                "displayName": "Horizontal (cards em cima da tabela)"
+                            }
+                        ]
+                    }
                 }
             }
         },

@@ -27,3 +27,15 @@ Prévia (dados fictícios): `docs/37-menu-visoes-preview.png` · Pacote: `dist/X
 - A contagem de cada visão muda com a barra de filtros (ex.: escolher um recrutador).
 - Clicar em "Contratadas" destaca a linha. Até a tabela 2.0 (parte 6.3) chegar, dá para conferir com um cartão simples com `Esteira | Visão Contagem` na página: ele mostra o número da visão escolhida.
 - A escolha fica salva no indicador (bookmark): é assim que os botões "Ver aplicações" vão abrir a página na visão certa (parte 6.5).
+
+## 1.1.0 · Formato horizontal (cards em cima da tabela)
+Prévia: `docs/37-menu-horizontal-preview.png`. Pacote: `dist/XP - Menu de visoes 1.1.0.pbiviz`.
+Formatar → Menu → **Formato: Horizontal (cards em cima da tabela)**. Um bloco por grupo (Resumo | Report) e um card clicável
+por visão com nome, número grande (Visão Contagem) e descrição.
+
+Página Nominal (1900 × 1720):
+| Item | X | Y | L | A |
+|---|---|---|---|---|
+| Menu de visões (horizontal) | 310 | 372 | 1552 | 140 |
+| Tabela nominal 2.x | 310 | 524 | 1552 | 1156 |
+A linha divisória vertical (X 566) sai.

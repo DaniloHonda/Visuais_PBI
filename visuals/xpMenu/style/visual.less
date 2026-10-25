@@ -24,6 +24,31 @@
 .xp-mn__it.is-on .xp-mn__ds { color: #CDE9E7; }
 .xp-mn__it.is-on .xp-mn__ct { color: #E3F1F0; }
 .xp-mn__empty { color: #6B6B6B; font-size: 12.5px; padding: 8px; }
+
+// Formato horizontal (cards)
+.xp-mn--h { display: flex; gap: 18px; overflow-x: auto; overflow-y: hidden; padding: 6px 4px; align-items: stretch; }
+.xp-mn--h .xp-mn__sec { display: flex; flex-direction: column; min-width: 0; flex-basis: 0; }
+.xp-mn--h .xp-mn__sec + .xp-mn__sec { border-left: 1px solid #E6E6E6; padding-left: 18px; }
+.xp-mn--h .xp-mn__grp { margin: 0 2px 6px; }
+.xp-mn__cards { display: flex; gap: 8px; flex: 1 1 auto; min-height: 0; }
+.xp-mn__card {
+    flex: 1 1 0; min-width: 112px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+    padding: 10px 12px; border: 1px solid #E6E6E6; border-radius: 14px; background: #FFFFFF; text-align: left;
+    font: inherit; color: inherit; cursor: pointer; overflow: hidden;
+}
+.xp-mn__card:hover { border-color: var(--xp-accent); background: #F3FAFA; }
+.xp-mn__card:focus-visible { outline: 2px solid var(--xp-accent); outline-offset: 1px; }
+.xp-mn__ctop { display: flex; align-items: flex-start; gap: 6px; width: 100%; min-width: 0; font-size: 12.5px; font-weight: 600; line-height: 1.25; }
+// No card o nome pode quebrar em 2 linhas ("Rejeitados e motivos" não corta).
+.xp-mn__ctop .xp-mn__nm { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 2.5em; }
+.xp-mn__ctop .xp-mn__ic { width: 22px; height: 22px; flex: none; border-radius: 7px; }
+.xp-mn__big { font-size: 24px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; margin-top: auto; }
+.xp-mn__card .xp-mn__ds { max-width: 100%; }
+.xp-mn__card.is-on { background: var(--xp-accent); border-color: var(--xp-accent); color: #FFFFFF; }
+.xp-mn__card.is-on .xp-mn__ic { background: #FFFFFF; }
+.xp-mn__card.is-on .xp-mn__ds { color: #CDE9E7; }
+
 @media (forced-colors: active) {
+    .xp-mn__card.is-on { outline: 2px solid Highlight; }
     .xp-mn__it.is-on { outline: 2px solid Highlight; }
 }
