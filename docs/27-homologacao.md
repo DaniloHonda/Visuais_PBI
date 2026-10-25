@@ -71,6 +71,22 @@ Obs.: "Rejected from Assessoria de Investimentos: XP Future" e "Rejected from En
 - A Nominal precisa mostrar **casos de exceção** (muito vai-e-volta, contratação em pool etc.).
 - O usuário só consegue mandar resultados **por foto**: consultas com poucas colunas e textos curtos.
 
+## Decisões de 25/10/2026 (2)
+- **Encerramentos administrativos contam na conversão** (por enquanto; validar com recrutadores na segunda).
+- **Pool → contratação em outra aplicação:** a contratação é da vaga final (não do pool); a rejeição no pool **não conta** como rejeição; a aplicação do pool aparece como **"Contratada via outra vaga"**; o SLA conta da **entrada no pool** até a contratação.
+- **"Voltou":** o tempo conta no SLA; não conta como aprovação; aparece nas exceções. **Sem indicador de retrabalho** (muitas voltas são erro manual corrigido na hora).
+- **Desrejeição:** ignorar; vale a última rejeição.
+- **Exceções de processo** para a Nominal: contratada dentro de pool, voltou de etapa, passou por etapa de configuração. **Problemas de dado** (sem motivo, etapa antes da candidatura, etapas em dobro) ficam para investigar.
+- **Homologação no dash:** em todo gráfico, um jeito fácil (botão) de ir para uma tabela com as aplicações por trás do número, com os mesmos filtros e colunas próprias (etapa, resultado, entrada, saída, faixa de SLA…). Duas páginas separadas: **dados do dash** e **alertas (data quality)**.
+
+## Plano de implementação
+1. Colunas `passagem_valida`, `eh_etapa_atual`, `resultado_novo` (`docs/28-colunas-13.dax`) + conferência.
+2. Trocar `resultado_etapa`/`eh_etapa_ativa` pelas novas; medidas de tempo só com passagens válidas; linha do tempo por entrada e saída.
+3. Tabela editável de motivos (`tipo_encerramento`).
+4. Pool → outra vaga (desfecho e SLA desde o pool).
+5. Colunas de exceção (alertas).
+6. Páginas Homologação e Alertas (mockup antes).
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 

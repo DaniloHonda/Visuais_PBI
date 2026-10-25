@@ -1,0 +1,98 @@
+// =====================================================================
+// 28 · Regras novas da tabela 13 · Etapa 1: passagem única, etapa atual e resultado
+// Criar cada coluna em: Exibição de tabela → 13_ETAPA_RECRUTAMENTO → Ferramentas de tabela → Nova coluna.
+// Criar NESTA ORDEM (uma depende da outra). Não altera nenhuma medida ainda.
+// =====================================================================
+
+// 1) passagem_valida · 1 = a linha que representa a passagem (aplicação + etapa + data de entrada).
+//    Cópias (etapas em dobro) e linhas sem entrada = 0. Entre cópias, fica a de maior saída; empate: menor job_stage_id.
+passagem_valida =
+VAR E = '13_ETAPA_RECRUTAMENTO'[data_entrada_stage]
+RETURN
+IF(
+    ISBLANK( E ) || ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+    0,
+    VAR SaidaMax =
+        CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id],
+                '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) )
+    VAR IdEscolhido =
+        CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[job_stage_id] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id],
+                '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            '13_ETAPA_RECRUTAMENTO'[data_saida_stage] == SaidaMax )
+    RETURN
+        IF( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] == SaidaMax
+            && '13_ETAPA_RECRUTAMENTO'[job_stage_id] = IdEscolhido, 1, 0 )
+)
+
+// 2) eh_etapa_atual · a etapa em que a aplicação está (ou estava quando foi rejeitada/contratada), igual à "Current stage" do Greenhouse.
+//    Regra: maior data de entrada → empate: a que ainda está aberta (sem saída) ou a de maior saída → empate: maior sort_order (ordem da vaga).
+eh_etapa_atual =
+IF(
+    '13_ETAPA_RECRUTAMENTO'[passagem_valida] <> 1,
+    FALSE(),
+    VAR Ult =
+        CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 )
+    VAR AindaLa =
+        CALCULATE( COUNTBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+            '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] = Ult ) > 0
+    VAR S1 =
+        CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+            '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] = Ult )
+    VAR So =
+        CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[sort_order] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+            '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] = Ult,
+            IF( AindaLa, ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), '13_ETAPA_RECRUTAMENTO'[data_saida_stage] = S1 ) )
+    VAR MinhaSaidaOk =
+        IF( AindaLa, ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ), '13_ETAPA_RECRUTAMENTO'[data_saida_stage] = S1 )
+    RETURN
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] = Ult && MinhaSaidaOk && '13_ETAPA_RECRUTAMENTO'[sort_order] = So
+)
+
+// 3) resultado_novo · Rejeitado e Em andamento só na etapa atual; "Voltou" = etapa de onde a aplicação foi devolvida
+//    para trás (o tempo conta no SLA, mas não é aprovação nem rejeição); vazio = sem passagem (ou cópia).
+resultado_novo =
+VAR SoAtual =
+    CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[sort_order] ),
+        ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() )
+RETURN
+SWITCH( TRUE(),
+    '13_ETAPA_RECRUTAMENTO'[passagem_valida] <> 1, BLANK(),
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] && '13_ETAPA_RECRUTAMENTO'[status] = "rejected", "Rejeitado",
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] && '13_ETAPA_RECRUTAMENTO'[status] = "in_process", "Em andamento",
+    '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual], "Aprovado",
+    '13_ETAPA_RECRUTAMENTO'[sort_order] > SoAtual, "Voltou",
+    "Aprovado"
+)
+
+// =====================================================================
+// Conferência (Exibição de consulta DAX → Executar). Uma linha, nomes curtos para caber na foto.
+// Esperado: 4 ≈ 0 · 7 ≈ 5 · 10 ≈ 9.
+// =====================================================================
+EVALUATE
+ROW(
+    "1 passagens", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+    "2 copias", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 0,
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+    "3 apps atual", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() ),
+    "4 apps 2+ atual", COUNTROWS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE() ) > 1 ) ),
+    "5 rejeitadas", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[status] = "rejected", NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+    "6 rej hoje", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado",
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+    "7 rej novo", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[resultado_novo] = "Rejeitado" ),
+    "8 voltou", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[resultado_novo] = "Voltou" ),
+    "9 and hoje", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Em andamento" ),
+    "10 and novo", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[resultado_novo] = "Em andamento" )
+)
