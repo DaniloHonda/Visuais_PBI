@@ -23,6 +23,36 @@ Consultas: `docs/27-homologacao.dax` (H1, H2, H3…). Sempre anotar a data da ex
 | A12 | **Motivo "[Geral] Limpeza de Pool"**: encerramento administrativo de pool, não é decisão de avaliação. Conta como rejeição e derruba a conversão do pool | print (activity feed de 292327176002) | **regra** | decidir se vira categoria própria |
 | A8 | `days_in_stage` = saída − entrada em 100% das linhas com as duas datas; 0 linhas com entrada depois da saída; 3.025 etapas sem saída em aplicações encerradas | H3 (25/10/2026) | ok / a classificar | — |
 
+## Casos conferidos no Activity Feed (25/10/2026)
+| Caso | Aplicação | O que aconteceu no Greenhouse | O que a 13 mostra | Lição |
+|---|---|---|---|---|
+| A | 302928376002 (Assistente de BDO PcD) | Qualificação 16/10 → Pool Qualificados 22/10 16:19 → rejeitada 16:20, motivo **Duplicate** | Rejeitado em Qualificação e em Pool Qualificados | rejeição = etapa atual; "Duplicate" é encerramento administrativo |
+| A | 305897329002 (Talent Pool Eng. Back-end) | **Auto-Advance** levou para "Senior" (etapa que não deveria existir) 20/10 → Phone Screening 22/10 08:14 → rejeitada 08:27 | Rejeitado em Senior e em Phone Screening | rejeição = etapa atual; "Senior" é erro de configuração do pool (input) |
+| B | 306105340002 (Pool B2C Manaus) | entrou no pool 21/10 → Entrevista com supervisor 22/10 09:08 → rejeitada 10:38 (**Duplicate**) → contratada **em outra aplicação** (vaga Future) no mesmo dia | Rejeitado em 2 etapas | o pool "perde" uma pessoa que foi contratada: o desfecho real é do **candidato**, não da aplicação |
+| B | 304611944002 (Pool B2C SP) | Ranking Score 22/10 09:37 → rejeitada 14:11 | Rejeitado também na etapa anterior | rejeição = etapa atual |
+| C | 296107176002 (Pool B2C ABC) | criado 03/08 em outra vaga → **transferido** para o pool 01/09 → Qualificação e Phone Screening no mesmo minuto → rejeitada 04/09 → **desrejeitada** 18/09 → várias etapas → rejeitada 22/10. Short List e Phone Screening **foram apagadas da vaga** depois | etapas em dobro | duplicadas vêm de transferência e/ou de etapas apagadas/recriadas na vaga; desrejeição existe |
+| C | 304354609002 (Pool Eng. Back-end PcD) | auto-rejeitada ao se candidatar 07/10 → desrejeitada 09/10 → Mindsight 13:50 → Phone Screening 13:50 (engano) → Mindsight de novo 14:07 → rejeitada 22/10 em Mindsight | Mindsight em 2 linhas no mesmo dia | sem hora, idas e voltas no mesmo dia parecem "duplicadas" e confundem a etapa atual |
+
+Obs.: "Rejected from Assessoria de Investimentos: XP Future" e "Rejected from Engenheiro(a) de Software | Pleno, Sênior e Especialista" são, muito provavelmente, o **nome público (job post)** dos pools, e não outra vaga.
+
+## Proposta de mudanças (em discussão)
+**No modelo (nosso, sem depender da engenharia)**
+1. `passagem_valida`: uma linha por passagem (aplicação + etapa + data de entrada); as cópias ficam de fora.
+2. `eh_etapa_atual`: maior data de entrada → maior data de saída (vazia = ainda está lá) → maior `sort_order`. `eh_etapa_ativa` passa a ser `eh_etapa_atual` + in_process.
+3. `resultado_etapa`: Rejeitado / Em andamento só na etapa atual; **Voltou** quando a aplicação saiu para uma etapa anterior; Aprovado no resto; vazio sem passagem.
+4. `tipo_encerramento`: Declinou ([Offer]) · **Administrativo** (Duplicate, Limpeza de Pool…) · Avaliação. Administrativo sai de perdas e conversão.
+5. Desfecho por **candidato**: aplicação de pool encerrada cujo candidato foi contratado em outra aplicação = "Contratado via outra vaga"; SLA total = da 1ª aplicação do ciclo até a contratação.
+
+**Pedidos à engenharia**
+- Data **e hora** de entrada e saída (idas e voltas no mesmo dia).
+- Origem das famílias de etapas (transferência × etapas apagadas/recriadas) e remoção das linhas sem passagem.
+- `rejected_at` em desrejeições: deve ser a última rejeição.
+
+**Processo e configuração (áreas)**
+- Auto-Advance do pool de Engenharia levando para "Senior"/"Pleno".
+- Voltar a aplicação para uma etapa anterior (ou para Pool Qualificados) antes de rejeitar.
+- Perfis e aplicações duplicados; movimentos por engano.
+
 ## Decisões pendentes
 - **Em qual etapa a rejeição conta** quando o recrutador volta a aplicação para uma etapa anterior antes de rejeitar: (A) a etapa registrada no Greenhouse ("Current stage" na rejeição) ou (B) a etapa mais avançada a que a aplicação chegou (pela ordem da vaga).
 
