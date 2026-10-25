@@ -480,7 +480,7 @@ export class Visual implements IVisual {
             }
             if (hasAlert) {
                 const td = el("td", "xp-t2__al");
-                for (const a of r.alertas) td.appendChild(el("span", "xp-t2__alc" + (/sem nome|sem motivo|antes da|em dobro/i.test(a) ? " is-dado" : ""), a));
+                for (const a of r.alertas) td.appendChild(el("span", "xp-t2__alc" + alertClass(a), a));
                 tr.appendChild(td);
             }
             const toggle = () => {
@@ -604,6 +604,15 @@ export class Visual implements IVisual {
 }
 
 // ---------- auxiliares ----------
+// Selo de alerta: dado = cinza; processo = âmbar; coral quando chama mais atenção
+// (contratada dentro do pool, ou voltou de etapa 3 vezes ou mais).
+function alertClass(a: string): string {
+    if (/sem nome|sem motivo|antes da|em dobro/i.test(a)) return " is-dado";
+    if (/dentro do pool/i.test(a)) return " is-crit";
+    const m = /voltou de etapa \((\d+)×\)/i.exec(a);
+    if (m && Number(m[1]) >= 3) return " is-crit";
+    return "";
+}
 function toCell(v: string): Cell {
     if (v.startsWith("@")) {
         const raw = v.slice(1);

@@ -1,0 +1,36 @@
+.xp-al {
+    position: relative; box-sizing: border-box; width: 100%; height: 100%; overflow: hidden auto; color: #121212;
+}
+.xp-al__title { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+.xp-al__sub { font-size: 12.5px; color: #6B6B6B; margin-bottom: 10px; }
+.xp-al__empty { font-size: 12px; color: #6B6B6B; padding: 12px 0; }
+.xp-al__grp { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: #6B6B6B; margin: 12px 0 4px; }
+.xp-al__row {
+    display: grid; grid-template-columns: 18px minmax(120px, 230px) 1fr 64px 52px; gap: 10px; align-items: center;
+    font-size: 13.5px; padding: 6px 8px; border-radius: 8px; cursor: pointer;
+    &:hover { background: #F7FAFA; }
+    &:focus-visible { outline: 2px solid var(--xp-al-accent); outline-offset: -2px; }
+    &.is-on { background: #E3F1F0; box-shadow: inset 3px 0 0 var(--xp-al-accent); font-weight: 600; }
+    &.is-dim { opacity: 0.55; }
+}
+.xp-al__info {
+    width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--xp-al-accent); color: var(--xp-al-accent);
+    font-size: 10px; font-weight: 700; font-style: italic; display: inline-flex; align-items: center; justify-content: center; cursor: help;
+    &.is-off { visibility: hidden; }
+}
+.xp-al__name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xp-al__bar { height: 12px; border-radius: 6px; background: #F2F4F4; overflow: hidden; i { display: block; height: 100%; border-radius: 6px; } }
+.xp-al__v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.xp-al__p { text-align: right; color: #6B6B6B; font-size: 12px; font-variant-numeric: tabular-nums; }
+.xp-al__v.is-warn, .xp-al__p.is-warn { color: #9A6512; font-weight: 700; }
+.xp-al__v.is-crit, .xp-al__p.is-crit { color: #A33A31; font-weight: 700; }
+.xp-al__clear {
+    margin-top: 10px; border: 1px solid var(--xp-al-accent); color: var(--xp-al-accent); background: #FFFFFF;
+    border-radius: 8px; padding: 5px 12px; font: inherit; font-size: 12px; cursor: pointer;
+}
+.xp-al__tip {
+    position: absolute; left: 30px; right: 8px; z-index: 5; background: #121212; color: #FFFFFF; border-radius: 10px;
+    padding: 10px 14px; font-size: 12.5px; line-height: 1.5; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2); pointer-events: none;
+    b { display: block; color: #7FD3D0; margin-bottom: 2px; }
+}
+.xp-al__tip-onde { margin-top: 4px; strong { color: #7FD3D0; } }

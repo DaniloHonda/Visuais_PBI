@@ -2,7 +2,7 @@
 
 A lista nominal da visão escolhida no **Menu de visões** (doc 37): colunas próprias de cada visão, **Colunas ▾** (escolher as colunas; fica salvo no relatório, por visão), **Mostrar mais 100** e **Mostrar todas**, busca sem acento, **Só exceções**, exportar CSV, linha do tempo ao clicar na linha (com "Voltou" em âmbar e a soma dos dias) e selos de alerta. No topo, o número da lista e o selo **"✓ igual ao gráfico"** (ou o aviso da diferença).
 
-Prévias (dados fictícios): `docs/39-tabela2-preview.png`, `docs/39-tabela2-colunas.png` · Pacote: `dist/XP - Tabela nominal 2.1.0.pbiviz` (2.0.1: ignora linhas repetidas da mesma aplicação e avisa no rodapé · 2.1.0: selos de dias/SLA, rolagem mantida ao abrir uma linha) · Medidas: `docs/41-visoes-completas.dax` (+ colunas de `docs/40a-colunas.dax`).
+Prévias (dados fictícios): `docs/39-tabela2-preview.png`, `docs/39-tabela2-colunas.png` · Pacote: `dist/XP - Tabela nominal 2.1.1.pbiviz` (2.0.1: ignora linhas repetidas da mesma aplicação e avisa no rodapé · 2.1.0: selos de dias/SLA, rolagem mantida ao abrir uma linha) · Medidas: `docs/41-visoes-completas.dax` (+ colunas de `docs/40a-colunas.dax`).
 
 ## Versão rápida (obrigatória) · `docs/40a-colunas.dax` (colunas) e `docs/40b-medidas.dax` (medidas)
 A primeira versão das medidas recalculava a linha do tempo e as medidas "Nominal …" (que buscam entrevistas na tabela 14) em cada uma das ~22 mil linhas e travava. Agora:

@@ -91,6 +91,23 @@ class PeriodosCard extends Card {
     slices = [this.mostrar, this.estilo];
 }
 
+// Status vindo da medida (ok · atencao · critico): pinta o número.
+class StatusCard extends Card {
+    corAtencao = new formattingSettings.ColorPicker({ name: "corAtencao", displayName: "Cor de atenção", value: { value: "#9A6512" } });
+    corCritico = new formattingSettings.ColorPicker({ name: "corCritico", displayName: "Cor de crítico", value: { value: "#A33A31" } });
+    name = "status";
+    displayName = "Status";
+    slices = [this.corAtencao, this.corCritico];
+}
+
+// Texto do ⓘ quando não vem de medida.
+class ExplicacaoCard extends Card {
+    texto = new formattingSettings.TextArea({ name: "texto", displayName: "Texto do ⓘ", value: "", placeholder: "O que o número significa" });
+    name = "explicacao";
+    displayName = "Explicação (ⓘ)";
+    slices = [this.texto];
+}
+
 export class KpiCardSettings extends Model {
     cabecalho = new CabecalhoCard();
     valor = new ValorCard();
@@ -99,5 +116,7 @@ export class KpiCardSettings extends Model {
     meta = new MetaCard();
     periodos = new PeriodosCard();
     aparencia = new AparenciaCard();
-    cards = [this.cabecalho, this.valor, this.comparacao, this.acumulado, this.meta, this.periodos, this.aparencia];
+    status = new StatusCard();
+    explicacao = new ExplicacaoCard();
+    cards = [this.cabecalho, this.valor, this.comparacao, this.acumulado, this.meta, this.periodos, this.aparencia, this.status, this.explicacao];
 }

@@ -21,7 +21,7 @@ interface RoleValue {
     displayName: string;
 }
 
-type Roles = Partial<Record<"valor" | "cmpAtual" | "cmpAnterior" | "ytd" | "meta" | "contexto" | "perValor" | "rotCmp" | "rotYtd", RoleValue>>;
+type Roles = Partial<Record<"valor" | "cmpAtual" | "cmpAnterior" | "ytd" | "meta" | "contexto" | "perValor" | "rotCmp" | "rotYtd" | "status" | "insight" | "info", RoleValue>>;
 
 export class Visual implements IVisual {
     private host: IVisualHost;
@@ -136,16 +136,20 @@ export class Visual implements IVisual {
         }
 
         const title = (s.cabecalho.titulo.value || "").trim() || roles.valor.displayName;
+        const titleRow = this.el("div", "xp-kpi__title-row");
         const titleEl = this.el("div", "xp-kpi__title", title);
         titleEl.style.color = s.cabecalho.corTitulo.value.value;
         titleEl.style.fontSize = s.cabecalho.tamanhoTitulo.value + "px";
-        this.root.appendChild(titleEl);
+        titleRow.appendChild(titleEl);
+        const info = this.text(roles.info) || (s.explicacao.texto.value || "").trim();
+        if (info) titleRow.appendChild(this.infoIcon(info));
+        this.root.appendChild(titleRow);
 
         const valueRow = this.el("div", "xp-kpi__value-row");
         const valueText = this.fmt(roles.valor, Number(s.valor.unidades.value) || 0, s.valor.casas.value);
         const valueEl = this.el("span", "xp-kpi__value", valueText);
         valueEl.style.fontSize = s.valor.tamanho.value + "px";
-        valueEl.style.color = s.valor.cor.value.value;
+        valueEl.style.color = this.statusColor(this.text(roles.status)) || s.valor.cor.value.value;
         valueRow.appendChild(valueEl);
         if (s.cabecalho.unidade.value) valueRow.appendChild(this.el("span", "xp-kpi__unit", s.cabecalho.unidade.value));
         const perValor = s.periodos.mostrar.value ? this.text(roles.perValor) : "";
@@ -160,6 +164,13 @@ export class Visual implements IVisual {
             const ctx = this.el("div", "xp-kpi__context", String(roles.contexto.value));
             ctx.style.color = s.aparencia.corContexto.value.value;
             this.root.appendChild(ctx);
+        }
+
+        const insight = this.text(roles.insight);
+        if (insight) {
+            const ins = this.el("div", "xp-kpi__insight", insight);
+            ins.title = insight;
+            this.root.appendChild(ins);
         }
 
         const meta = this.num(roles.meta), valor = this.num(roles.valor);
@@ -227,6 +238,30 @@ export class Visual implements IVisual {
             block.appendChild(this.el("div", "xp-kpi__block-detail", `${this.fmt(roles.cmpAtual)} vs ${this.fmt(roles.cmpAnterior)}`));
         }
         return block;
+    }
+
+    // ok · atencao · critico (aceita acento e maiúscula). Vazio = cor normal do valor.
+    private statusColor(status: string): string {
+        const k = (status || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        if (k.startsWith("crit")) return this.settings.status.corCritico.value.value;
+        if (k.startsWith("aten")) return this.settings.status.corAtencao.value.value;
+        return "";
+    }
+
+    // ⓘ: abre um balão dentro do card ao passar o mouse ou focar com o teclado.
+    private infoIcon(text: string): HTMLElement {
+        const btn = this.el("span", "xp-kpi__info", "i");
+        btn.tabIndex = 0;
+        btn.setAttribute("role", "button");
+        btn.setAttribute("aria-label", text);
+        const tip = this.el("div", "xp-kpi__tip", text);
+        const show = () => { if (!tip.parentNode) this.root.appendChild(tip); };
+        const hide = () => { if (tip.parentNode) tip.parentNode.removeChild(tip); };
+        btn.addEventListener("mouseenter", show);
+        btn.addEventListener("mouseleave", hide);
+        btn.addEventListener("focus", show);
+        btn.addEventListener("blur", hide);
+        return btn;
     }
 
     private text(role: RoleValue | undefined): string {

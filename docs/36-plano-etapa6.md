@@ -36,6 +36,9 @@ Decisões (25/10/2026), a partir dos mockups `docs/mockups/`:
 - **Entrevistas rápida conferida (25/10/2026):** contagem 5.501 = na lista 5.501 = aplicações com coluna 5.501.
 - **6.6a pronta para aplicar:** `docs/45-data-quality.md`, `docs/45-data-quality.dax` + `docs/41` com a visão "Alertas"; regra de cor âmbar/coral para tipos, cards e "Onde acontece".
 
+- **6.6a conferida (25/10/2026):** 7 tipos com cor (Contratada dentro do pool 1 coral · Voltou 8.023 · Configuração 2.947 · Sem motivo 4.162 · Em dobro 3.280 âmbar · Sem nome 561 · Antes da candidatura 47 ok); com alerta 16.867 = na lista; onde mais volta: Mindsight e PI Cognitivo (3.230).
+- **6.6b pronta para montar:** `docs/46-data-quality-visuais.md` · Card de KPI 1.3.0 (status, ⓘ, insight) · Tipos de alerta 1.0.0 (novo) · Tabela nominal 2.1.1 (selos coral).
+
 ## Backlog desta etapa
 - **Nomes com sujeira na base** (vistos em `nome_completo`): "_Fabio", "^david nathan", nomes vazios, "[TESTE] …" e "#VALUE!". Avaliar um alerta de dado "Nome inválido" e a exclusão de candidatos de teste.
 - **Botão "Limpar filtros"** da faixa de filtros ativos: redesenhar (ficou feio no mockup).

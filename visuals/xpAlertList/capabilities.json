@@ -1,0 +1,213 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Alerta",
+            "name": "alerta",
+            "kind": "Grouping",
+            "description": "dAlerta[alerta]. Clicar filtra esta coluna."
+        },
+        {
+            "displayName": "Grupo",
+            "name": "grupo",
+            "kind": "Grouping",
+            "description": "dAlerta[grupo] (Processo, Dado)."
+        },
+        {
+            "displayName": "Ordem",
+            "name": "ordem",
+            "kind": "Grouping",
+            "description": "dAlerta[ordem]."
+        },
+        {
+            "displayName": "Explicação",
+            "name": "descricao",
+            "kind": "Grouping",
+            "description": "dAlerta[descricao] (texto do ⓘ)."
+        },
+        {
+            "displayName": "Onde corrigir",
+            "name": "onde",
+            "kind": "Grouping",
+            "description": "dAlerta[onde_corrigir]."
+        },
+        {
+            "displayName": "Aplicações",
+            "name": "apps",
+            "kind": "Measure",
+            "description": "Esteira | Aplicações com Alerta"
+        },
+        {
+            "displayName": "% das aplicações",
+            "name": "pct",
+            "kind": "Measure",
+            "description": "Esteira | % com Alerta"
+        },
+        {
+            "displayName": "Status",
+            "name": "status",
+            "kind": "Measure",
+            "description": "Esteira | DQ Status (ok, atencao, critico)"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "alerta": {
+                        "max": 1
+                    },
+                    "grupo": {
+                        "max": 1
+                    },
+                    "ordem": {
+                        "max": 1
+                    },
+                    "descricao": {
+                        "max": 1
+                    },
+                    "onde": {
+                        "max": 1
+                    },
+                    "apps": {
+                        "max": 1
+                    },
+                    "pct": {
+                        "max": 1
+                    },
+                    "status": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "alerta"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "grupo"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "ordem"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "descricao"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "onde"
+                            }
+                        }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 100
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "apps"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "pct"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "status"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "general": {
+            "properties": {
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                }
+            }
+        },
+        "textos": {
+            "properties": {
+                "titulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "subtitulo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "legendas": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "ok": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "atencao": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "critico": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "destaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "suppressDefaultTitle": true,
+    "privileges": []
+}

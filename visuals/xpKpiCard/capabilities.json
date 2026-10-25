@@ -51,6 +51,24 @@
             "name": "rotYtd",
             "kind": "Measure",
             "description": "Substitui o rótulo fixo do acumulado. Ex.: \"Desde 01/jul\"."
+        },
+        {
+            "displayName": "Status (cor do número)",
+            "name": "status",
+            "kind": "Measure",
+            "description": "Medida que retorna ok, atencao ou critico. Pinta o número de âmbar ou coral."
+        },
+        {
+            "displayName": "Linha de insight",
+            "name": "insight",
+            "kind": "Measure",
+            "description": "Texto da linha de baixo, separada por um traço. Ex.: \"onde mais acontece: Phone Screening\"."
+        },
+        {
+            "displayName": "Explicação (ⓘ)",
+            "name": "info",
+            "kind": "Measure",
+            "description": "Texto que aparece ao passar o mouse no ⓘ do título."
         }
     ],
     "dataViewMappings": [
@@ -82,6 +100,15 @@
                         "max": 1
                     },
                     "rotYtd": {
+                        "max": 1
+                    },
+                    "status": {
+                        "max": 1
+                    },
+                    "insight": {
+                        "max": 1
+                    },
+                    "info": {
                         "max": 1
                     }
                 }
@@ -132,6 +159,21 @@
                         {
                             "bind": {
                                 "to": "rotYtd"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "status"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "insight"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "info"
                             }
                         }
                     ]
@@ -328,6 +370,37 @@
                 "estilo": {
                     "type": {
                         "enumeration": []
+                    }
+                }
+            }
+        },
+        "status": {
+            "properties": {
+                "corAtencao": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "corCritico": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "explicacao": {
+            "properties": {
+                "texto": {
+                    "type": {
+                        "text": true
                     }
                 }
             }
