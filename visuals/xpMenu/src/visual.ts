@@ -30,6 +30,7 @@ export class Visual implements IVisual {
     private items: Item[] = [];
     private target: Target | null = null;
     private selectedKey: string | null = null;
+    private alvo = "";
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
@@ -48,6 +49,7 @@ export class Visual implements IVisual {
             this.read(dataView);
             const f = ((options.jsonFilters || [])[0] || null) as { values?: PrimitiveValue[] } | null;
             this.selectedKey = f && Array.isArray(f.values) && f.values.length ? keyOf(f.values[0]) : null;
+            if (this.applyAlvo()) return void this.host.eventService.renderingFinished(options);
             this.render();
             this.host.eventService.renderingFinished(options);
         } catch (e) {
@@ -68,7 +70,10 @@ export class Visual implements IVisual {
         const visao = by("visao");
         if (!visao) return;
         const grupo = by("grupo"), descricao = by("descricao"), icone = by("icone"), ordem = by("ordem");
-        const counts = cat.values && cat.values[0];
+        const vals = (cat.values || []) as powerbi.DataViewValueColumn[];
+        const counts = vals.find(v => v.source.roles && v.source.roles.contagem) || null;
+        const alvoCol = vals.find(v => v.source.roles && v.source.roles.alvo) || null;
+        this.alvo = alvoCol ? (alvoCol.values.map(text).find(x => x.trim() !== "") || "").trim() : "";
         this.target = toTarget(visao.source.queryName || "");
         const seen = new Set<string>();
         visao.values.forEach((v, i) => {
@@ -104,6 +109,20 @@ export class Visual implements IVisual {
         const padrao = (this.settings.menu.padrao.value || "").trim().toLowerCase();
         const p = this.items.find(i => i.label.trim().toLowerCase() === padrao);
         return p ? p.key : (this.items[0] ? this.items[0].key : null);
+    }
+
+    // Detalhamento: o gráfico de origem leva um filtro em dVisaoAlvo e a medida "Visão Alvo" chega aqui.
+    // Seleciona essa visão uma vez (guarda a última aplicada para o usuário poder trocar depois).
+    private applyAlvo(): boolean {
+        const ultimo = this.settings.estado.alvo.value || "";
+        if (this.alvo === ultimo) return false;
+        this.settings.estado.alvo.value = this.alvo;
+        this.host.persistProperties({ merge: [{ objectName: "estado", selector: null, properties: { alvo: this.alvo } }] });
+        if (!this.alvo) return false;
+        const it = this.items.find(i => i.label.trim().toLowerCase() === this.alvo.toLowerCase());
+        if (!it || it.key === this.selectedKey) return false;
+        this.choose(it);
+        return true;
     }
 
     private choose(item: Item) {

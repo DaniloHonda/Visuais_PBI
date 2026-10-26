@@ -1,0 +1,63 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Botão Ver aplicações</title>
+<style>
+body{margin:0;background:#F0F0F0;font-family:"Segoe UI",Arial,sans-serif;color:#121212;padding:28px;width:1544px}
+h1{font-size:26px;margin:0 0 4px}.sub{color:#6B6B6B;font-size:14px;margin-bottom:20px}
+.row{display:flex;gap:20px;align-items:stretch}
+.box{background:#fff;border:1px solid #E6E6E6;border-radius:22px;padding:22px 24px;position:relative}
+h2{font-size:17px;margin:0 0 4px}.k{font-size:12px;color:#6B6B6B;margin-bottom:12px}
+.pill{white-space:nowrap;flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid #067D84;color:#067D84;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;background:#fff}
+.pill.off{opacity:.4}.pill.hov{background:#E3F1F0}
+.chart .pill{position:absolute;right:22px;top:20px}
+.bar{display:grid;grid-template-columns:170px 1fr 60px;gap:10px;align-items:center;font-size:13px;margin:7px 0;padding:3px 6px;border-radius:6px}
+.bar .b{height:16px;border-radius:5px;display:flex;overflow:hidden}.bar .b i{display:block;height:100%}
+.bar.sel{background:#E3F1F0;box-shadow:inset 3px 0 0 #067D84;font-weight:600}
+.cur{font-size:22px;position:absolute}
+.steps{display:flex;gap:14px;align-items:center;margin-top:20px}
+.st{background:#fff;border:1px solid #E6E6E6;border-radius:16px;padding:14px 16px;flex:1;min-height:150px}
+.st b.n{display:inline-flex;width:26px;height:26px;border-radius:50%;background:#067D84;color:#fff;align-items:center;justify-content:center;font-size:14px;margin-bottom:6px}
+.st p{font-size:13px;margin:4px 0;line-height:1.45}.arr{font-size:26px;color:#067D84}
+.chip{display:inline-block;background:#E3F1F0;color:#04585D;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;margin:2px 2px 0 0}
+.card{display:inline-block;border:1px solid #E6E6E6;border-radius:10px;padding:6px 10px;font-size:12px;margin:2px}.card.on{background:#067D84;color:#fff;border-color:#067D84}
+table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;padding:7px 8px;border-bottom:1px solid #F0F2F2;vertical-align:top}th{font-size:11px;color:#6B6B6B;letter-spacing:.04em}
+.t{font-weight:700;color:#04585D}.t2{font-weight:700;color:#5B6770}
+.states{display:flex;flex-direction:column;gap:14px;font-size:13px}
+.states div{display:flex;align-items:center;gap:12px}
+</style></head><body>
+<h1>Botão "Ver aplicações ↗": como fica e o caminho</h1>
+<div class="sub">O texto e a pílula ficam desenhados no fundo da página (SVG). Por cima, um botão transparente do Power BI com a ação de Detalhamento.</div>
+<div class="row">
+  <div class="box chart" style="width:760px">
+    <h2>Onde a esteira perde aplicações</h2><div class="k">aprovados · rejeitados · em andamento por etapa</div>
+    <span class="pill">Ver aplicações ↗</span>
+    <div class="bar"><span>Revisão de aplicação</span><span class="b"><i style="width:55%;background:#067D84"></i><i style="width:35%;background:#E05A4F"></i><i style="width:6%;background:#E3A33B"></i></span><span>4.120</span></div>
+    <div class="bar"><span>Mindsight e PI Cognitivo</span><span class="b"><i style="width:40%;background:#067D84"></i><i style="width:30%;background:#E05A4F"></i><i style="width:8%;background:#E3A33B"></i></span><span>3.230</span></div>
+    <div class="bar sel"><span>Phone Screening</span><span class="b"><i style="width:28%;background:#067D84"></i><i style="width:22%;background:#E05A4F"></i><i style="width:7%;background:#E3A33B"></i></span><span>2.105</span></div>
+    <div class="bar"><span>Entrevista com gestor</span><span class="b"><i style="width:14%;background:#067D84"></i><i style="width:10%;background:#E05A4F"></i><i style="width:5%;background:#E3A33B"></i></span><span>980</span></div>
+    <div class="bar"><span>Offer</span><span class="b"><i style="width:5%;background:#067D84"></i><i style="width:2%;background:#E05A4F"></i><i style="width:1%;background:#E3A33B"></i></span><span>210</span></div>
+    <span class="cur" style="left:420px;top:178px">👆</span>
+  </div>
+  <div class="box" style="width:300px">
+    <h2>Os 3 estados do botão</h2><div class="k">formatação por estado do botão transparente</div>
+    <div class="states">
+      <div><span class="pill off">Ver aplicações ↗</span><span><b>Desabilitado</b><br>nenhum ponto clicado · branco 40% por cima "apaga" o texto · dica: "Clique num ponto do gráfico"</span></div>
+      <div><span class="pill">Ver aplicações ↗</span><span><b>Ativo</b><br>um ponto foi clicado · transparente</span></div>
+      <div><span class="pill hov">Ver aplicações ↗</span><span><b>Mouse em cima</b><br>teal 90% transparente</span></div>
+    </div>
+  </div>
+  <div class="box" style="width:380px">
+    <h2>Dois tipos de botão</h2><div class="k">depende de o gráfico ter etapa, recrutador ou motivo</div>
+    <table><tr><th>TIPO</th><th>LEVA</th><th>ONDE</th></tr>
+    <tr><td class="t">Detalhamento</td><td>visão + ponto clicado + filtros da página</td><td>gráficos por etapa, recrutador, motivo, praça</td></tr>
+    <tr><td class="t2">Indicador</td><td>visão + filtros da página (sempre ativo)</td><td>Funil, Evolução</td></tr></table>
+  </div>
+</div>
+<div class="steps">
+  <div class="st"><b class="n">1</b><p><b>Clica num ponto</b> do gráfico, ex.: a barra "Phone Screening".</p><p>O botão, que estava apagado, acende.</p></div><span class="arr">→</span>
+  <div class="st"><b class="n">2</b><p><b>Clica em "Ver aplicações ↗"</b>.</p><p>O Power BI faz o Detalhamento para a página Nominal, levando todos os filtros.</p></div><span class="arr">→</span>
+  <div class="st" style="flex:1.6"><b class="n">3</b><p><b>A Nominal abre pronta:</b></p>
+    <p><span class="card">Aplicações</span><span class="card on">Entradas por etapa</span><span class="card">Rejeitados e motivos</span> …</p>
+    <p><span class="chip">Etapa: Phone Screening</span><span class="chip">Período: out/2026</span><span class="chip">Esteira, recrutador… da página</span></p>
+    <p>O card certo vem selecionado (o gráfico carrega a "visão alvo" num filtro do próprio visual).</p></div><span class="arr">→</span>
+  <div class="st"><b class="n">4</b><p><b>Botão "← Voltar"</b> no topo da Nominal volta para o gráfico.</p><p>Na Nominal dá para trocar de card normalmente.</p></div>
+</div>
+</body></html>

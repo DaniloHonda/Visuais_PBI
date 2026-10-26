@@ -35,6 +35,12 @@
             "name": "contagem",
             "kind": "Measure",
             "description": "Número à direita (ex.: Esteira | Visão Contagem)."
+        },
+        {
+            "displayName": "Visão alvo (Detalhamento)",
+            "name": "alvo",
+            "kind": "Measure",
+            "description": "Esteira | Visão Alvo: quando a página é aberta por Detalhamento, seleciona essa visão sozinho."
         }
     ],
     "dataViewMappings": [
@@ -57,6 +63,9 @@
                         "max": 1
                     },
                     "ordem": {
+                        "max": 1
+                    },
+                    "alvo": {
                         "max": 1
                     }
                 }
@@ -101,6 +110,11 @@
                         {
                             "bind": {
                                 "to": "contagem"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "alvo"
                             }
                         }
                     ]
@@ -174,6 +188,15 @@
                                 "color": true
                             }
                         }
+                    }
+                }
+            }
+        },
+        "estado": {
+            "properties": {
+                "alvo": {
+                    "type": {
+                        "text": true
                     }
                 }
             }

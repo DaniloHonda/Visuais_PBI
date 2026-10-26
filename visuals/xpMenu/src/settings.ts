@@ -30,8 +30,18 @@ class CoresCard extends Card {
     slices = [this.destaque, this.fundo];
 }
 
+// Última visão alvo já aplicada (salva no relatório; não aparece no painel).
+class EstadoCard extends Card {
+    alvo = new formattingSettings.TextInput({ name: "alvo", displayName: "Alvo aplicado", value: "", placeholder: "" });
+    name = "estado";
+    displayName = "Estado";
+    visible = false;
+    slices = [this.alvo];
+}
+
 export class MenuSettings extends Model {
     menu = new MenuCard();
     cores = new CoresCard();
-    cards = [this.menu, this.cores];
+    estado = new EstadoCard();
+    cards = [this.menu, this.cores, this.estado];
 }
