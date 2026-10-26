@@ -1,6 +1,6 @@
 # 6.5 · Botão "Ver aplicações ↗" (gráfico → Nominal)
 
-Imagem: `docs/mockups/50-botao-ver-aplicacoes.png`. Pacote: `dist/XP - Menu de visoes 1.2.0.pbiviz` (campo novo "Visão alvo").
+Imagem: `docs/mockups/50-botao-ver-aplicacoes.png`. Pacote: `dist/XP - Menu de visoes 1.2.1.pbiviz` (campo novo "Visão alvo").
 
 ## Como funciona
 1. Clica num ponto do gráfico (ex.: barra "Phone Screening") → o botão acende.
@@ -14,7 +14,7 @@ Imagem: `docs/mockups/50-botao-ver-aplicacoes.png`. Pacote: `dist/XP - Menu de v
 - Medida: `Esteira | Visão Alvo = SELECTEDVALUE( dVisaoAlvo[visao] )`.
 
 ## Passo 2 · Página Nominal (uma vez)
-1. Importar o Menu de visões 1.2.0 → campo **Visão alvo (Detalhamento)** ← `Esteira | Visão Alvo`.
+1. Importar o Menu de visões 1.2.1 → campo **Visão alvo (Detalhamento)** ← `Esteira | Visão Alvo`.
 2. Clicar no fundo da página → Visualizações → **Detalhamento**: arrastar `dEtapa[stage_name]`, `recruiter_name`,
    `rejection_reason_name` e a coluna de praça · **Manter todos os filtros: ligado**.
 3. Mover o botão "← Voltar" que o Power BI cria para o topo (X 310 · Y 330 · L 120 · A 32).

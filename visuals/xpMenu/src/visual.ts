@@ -31,6 +31,7 @@ export class Visual implements IVisual {
     private target: Target | null = null;
     private selectedKey: string | null = null;
     private alvo = "";
+    private alvoFeito = "";
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
@@ -112,13 +113,10 @@ export class Visual implements IVisual {
     }
 
     // Detalhamento: o gráfico de origem leva um filtro em dVisaoAlvo e a medida "Visão Alvo" chega aqui.
-    // Seleciona essa visão uma vez (guarda a última aplicada para o usuário poder trocar depois).
+    // Aplica uma vez por abertura da página (o Power BI recria o visual ao entrar na página); depois o usuário troca à vontade.
     private applyAlvo(): boolean {
-        const ultimo = this.settings.estado.alvo.value || "";
-        if (this.alvo === ultimo) return false;
-        this.settings.estado.alvo.value = this.alvo;
-        this.host.persistProperties({ merge: [{ objectName: "estado", selector: null, properties: { alvo: this.alvo } }] });
-        if (!this.alvo) return false;
+        if (!this.alvo || this.alvoFeito === this.alvo) return false;
+        this.alvoFeito = this.alvo;
         const it = this.items.find(i => i.label.trim().toLowerCase() === this.alvo.toLowerCase());
         if (!it || it.key === this.selectedKey) return false;
         this.choose(it);
