@@ -14,7 +14,7 @@ import DataView = powerbi.DataView;
 import { NominalSettings } from "./settings";
 import { xpFont } from "./xpTheme";
 
-type Kind = "link" | "texto" | "segmento" | "situacao" | "dias";
+type Kind = "link" | "texto" | "segmento" | "situacao" | "dias" | "sla";
 
 interface Col {
     key: string;
@@ -110,7 +110,7 @@ export class Visual implements IVisual {
         return this.formattingSettingsService.buildFormattingModel(this.settings);
     }
 
-    // Monta as colunas: link, as duas primeiras "Colunas", segmento, situação, o resto das "Colunas" e dias.
+    // Monta as colunas: link, as duas primeiras "Colunas", segmento, situação, o resto das "Colunas", dias e SLA total.
     private read(dv: DataView | undefined) {
         this.cols = [];
         this.rows = [];
@@ -123,7 +123,7 @@ export class Visual implements IVisual {
             key: kind === "texto" ? "c" + x.i : kind, title: title || clean(x.c.displayName), kind, src: x.i,
             isDate: !!(x.c.type && x.c.type.dateTime)
         });
-        const link = idx("link")[0], seg = idx("segmento")[0], sit = idx("situacao")[0], days = idx("dias")[0];
+        const link = idx("link")[0], seg = idx("segmento")[0], sit = idx("situacao")[0], days = idx("dias")[0], sla = idx("sla")[0];
         const texts = idx("colunas").map(x => make(x, "texto"));
         if (link) this.cols.push(make(link, "link", s.textos.link.value || clean(link.c.displayName)));
         this.cols.push(...texts.slice(0, 2));
@@ -131,13 +131,14 @@ export class Visual implements IVisual {
         if (sit) this.cols.push(make(sit, "situacao"));
         this.cols.push(...texts.slice(2));
         if (days) this.cols.push(make(days, "dias", s.textos.colDias.value || clean(days.c.displayName)));
+        if (sla) this.cols.push(make(sla, "sla", s.textos.colSla.value || clean(sla.c.displayName)));
         this.hasDays = !!days;
 
         const seen = new Set<string>();
         table.rows.forEach((r, i) => {
             const segment = seg ? asText(r[seg.i]) : "";
             if (seg && segment && !seen.has(segment)) { seen.add(segment); this.segments.push(segment); }
-            const textParts = this.cols.filter(c => c.kind !== "link" && c.kind !== "dias").map(c => fmtCell(r[c.src], c.isDate));
+            const textParts = this.cols.filter(c => c.kind !== "link" && c.kind !== "dias" && c.kind !== "sla").map(c => fmtCell(r[c.src], c.isDate));
             this.rows.push({
                 index: i, cells: r, text: normalize(textParts.join(" ")), segment,
                 days: days ? num(r[days.i]) : null,
@@ -253,7 +254,7 @@ export class Visual implements IVisual {
         const table = el("table", "xp-nm__table");
         const hr = el("tr", "");
         for (const c of this.cols) {
-            const th = el("th", c.kind === "dias" || (c.kind === "texto" && c.isDate) ? "xp-nm__r" : "");
+            const th = el("th", c.kind === "dias" || c.kind === "sla" || (c.kind === "texto" && c.isDate) ? "xp-nm__r" : "");
             if (c.kind === "link") { th.textContent = c.title; hr.appendChild(th); continue; }
             const on = this.sort && this.sort.key === c.key;
             const b = el("button", "xp-nm__sort" + (on ? " xp-nm__sort--on" : ""), c.title);
@@ -299,7 +300,7 @@ export class Visual implements IVisual {
                         a.addEventListener("click", e => { e.stopPropagation(); this.host.launchUrl(url); });
                         td.appendChild(a);
                     } else td.textContent = asText(v) || "—";
-                } else if (c.kind === "dias") {
+                } else if (c.kind === "dias" || c.kind === "sla") {
                     td.className = "xp-nm__r";
                     const d = num(v);
                     if (d === null) td.textContent = "—";
@@ -343,7 +344,7 @@ export class Visual implements IVisual {
             lines.push(this.cols.map(c => {
                 const v = r.cells[c.src];
                 if (c.kind === "link") return this.url(v) || asText(v);
-                if (c.kind === "dias") { const d = num(v); return d === null ? "" : String(d).replace(".", ","); }
+                if (c.kind === "dias" || c.kind === "sla") { const d = num(v); return d === null ? "" : String(d).replace(".", ","); }
                 if (typeof v === "number" && !c.isDate) return String(v).replace(".", ",");
                 return fmtCell(v, c.isDate);
             }));

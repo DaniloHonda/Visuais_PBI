@@ -29,6 +29,12 @@
             "name": "dias",
             "kind": "Measure",
             "description": "Ex.: dias na etapa. Ordena a lista e ganha cor acima dos limites."
+        },
+        {
+            "displayName": "SLA total",
+            "name": "sla",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | SLA Atual (dias). Aparece depois de Dias, com as mesmas cores."
         }
     ],
     "dataViewMappings": [
@@ -48,6 +54,9 @@
                         "max": 1
                     },
                     "dias": {
+                        "max": 1
+                    },
+                    "sla": {
                         "max": 1
                     }
                 }
@@ -78,6 +87,11 @@
                         {
                             "bind": {
                                 "to": "dias"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "sla"
                             }
                         }
                     ],
@@ -119,6 +133,11 @@
                     }
                 },
                 "unidade": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "colSla": {
                     "type": {
                         "text": true
                     }

@@ -52,3 +52,19 @@ Importe por cima da 1.0.0: campos e formatação continuam.
 - **Carrega tudo:** até 100 mil aplicações, em blocos de 10 mil (Formatar → Comportamento → Máximo de aplicações carregadas).
 - **Exportar:** CSV que abre no Excel, com a busca e os botões aplicados (precisa de "downloads de visuais personalizados" liberado pelo admin; se não estiver, aparece "Use ⋯ → Exportar dados"). Pode ser desligado em Comportamento.
 - Busca, botões e ordenação voltam a lista para as primeiras 100 linhas.
+
+## Atualização 1.2.0 · coluna SLA total (`dist/XP - Tabela nominal 1.2.0.pbiviz`)
+![1.2.0](16-nominal-offer-1.2-preview.png)
+Campo novo **SLA total** (medida), depois de Dias, com as mesmas cores (âmbar > 30, coral > 45). Medida (Exibição de consulta DAX):
+```DAX
+DEFINE
+    // SLA de quem está em andamento: do início do ciclo (entrada no pool, se veio de pool; senão a candidatura) até hoje,
+    // menos os dias no Silver Medalist. Mesma regra da coluna SLA (dias) da Nominal.
+    MEASURE '_Medidas'[Esteira | SLA Atual (dias)] =
+        VAR Ini = MIN( '13_ETAPA_RECRUTAMENTO'[ciclo_inicio] )
+        VAR Pausa = MAX( '13_ETAPA_RECRUTAMENTO'[dias_pausa_sla] )
+        RETURN
+        IF( NOT ISBLANK( Ini ) && NOT ISBLANK( [Esteira | Dias na Etapa Atual] ),
+            MAX( 0, INT( TODAY() - Ini ) - Pausa ) )
+EVALUATE ROW( "medidas", 1 )
+```

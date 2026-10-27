@@ -11,10 +11,11 @@ class TextosCard extends Card {
     todos = new formattingSettings.TextInput({ name: "todos", displayName: "Botão de todos", value: "Todas", placeholder: "" });
     link = new formattingSettings.TextInput({ name: "link", displayName: "Título da coluna do link", value: "Greenhouse", placeholder: "" });
     colDias = new formattingSettings.TextInput({ name: "colDias", displayName: "Título da coluna de dias", value: "Dias na etapa", placeholder: "nome da medida" });
+    colSla = new formattingSettings.TextInput({ name: "colSla", displayName: "Título da coluna de SLA", value: "SLA total", placeholder: "nome da medida" });
     unidade = new formattingSettings.TextInput({ name: "unidade", displayName: "Unidade dos dias", value: "d", placeholder: "" });
     name = "textos";
     displayName = "Textos";
-    slices = [this.total, this.busca, this.todos, this.link, this.colDias, this.unidade];
+    slices = [this.total, this.busca, this.todos, this.link, this.colDias, this.colSla, this.unidade];
 }
 
 class LinkCard extends Card {
