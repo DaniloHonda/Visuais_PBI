@@ -1,0 +1,31 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Filtros ativos (texto)",
+            "name": "texto",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Filtros Ativos (\"Rótulo|valor;;Rótulo|valor\")"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [ { "texto": { "max": 1 } } ],
+            "single": { "role": "texto" }
+        }
+    ],
+    "objects": {
+        "textos": {
+            "properties": {
+                "vazio": { "type": { "text": true } }
+            }
+        },
+        "cores": {
+            "properties": {
+                "fundo": { "type": { "fill": { "solid": { "color": true } } } },
+                "borda": { "type": { "fill": { "solid": { "color": true } } } },
+                "texto": { "type": { "fill": { "solid": { "color": true } } } }
+            }
+        }
+    },
+    "privileges": []
+}

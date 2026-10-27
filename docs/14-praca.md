@@ -105,3 +105,5 @@ Recrutador com a largura toda: a tabela sai do modo compacto e mostra todas as c
 1. Filtrar uma esteira: só aparecem as etapas dela, na ordem do processo.
 2. Coluna Aprovados de cada etapa = Aprovados da mesma etapa em "Entradas e aprovações por etapa".
 3. Botão Grupo: Aprovados de cada grupo = soma das etapas do grupo.
+
+> Com o painel de filtros (doc 57), todo o conteúdo da Report sobe 139 px: praça Y 2583 · recrutador Y 3247 · Pré Offer e Offer Y 3771 · página 1900 × 4305.
