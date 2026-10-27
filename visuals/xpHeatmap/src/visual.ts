@@ -214,11 +214,20 @@ export class Visual implements IVisual {
     private baseRows(): Row[] { return this.byGroup ? this.groupRows() : this.rows; }
 
     // Colunas visíveis: com "Só com movimento", some a coluna sem valor e sem base em nenhuma linha.
+    // Com "Colunas: maior valor primeiro", a coluna com mais valor (ex.: mais aprovados) vem antes; empate mantém a ordem original.
     private visibleCols(rows: Row[]): number[] {
-        const all = this.columns.map((_, i) => i);
-        if (!this.onlyMoving || !this.settings.comportamento.ocultarColunas.value) return all;
-        const keep = all.filter(i => rows.some(r => (r.values[i] || 0) > 0 || (r.bases[i] || 0) > 0));
-        return keep.length ? keep : all;
+        let cols = this.columns.map((_, i) => i);
+        if (this.onlyMoving && this.settings.comportamento.ocultarColunas.value) {
+            const keep = cols.filter(i => rows.some(r => (r.values[i] || 0) > 0 || (r.bases[i] || 0) > 0));
+            if (keep.length) cols = keep;
+        }
+        if (this.settings.comportamento.colunasPorTotal.value) {
+            const sum = (i: number) => rows.reduce((t, r) => t + (r.values[i] || 0), 0);
+            const tot = new Map<number, number>();
+            cols.forEach(i => tot.set(i, sum(i)));
+            cols = cols.slice().sort((a, b) => ((tot.get(b) || 0) - (tot.get(a) || 0)) || (a - b));
+        }
+        return cols;
     }
 
     private alertIndex(): number {

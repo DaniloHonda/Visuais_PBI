@@ -49,7 +49,7 @@ CONCATENATEX(
 ---
 
 ## 1.3.0 · Etapas nas linhas, praças nas colunas (27/10)
-Pacote: `dist/XP - Matriz de calor 1.3.0.pbiviz` (importar por cima da 1.2.0; a matriz de tempo parado continua igual).
+Pacote: `dist/XP - Matriz de calor 1.3.1.pbiviz` (importar por cima da 1.2.0 ou 1.3.0; a matriz de tempo parado continua igual).
 Prévia: `docs/14-praca-1.3-preview.png` (números fictícios).
 
 ### Novidades do visual
@@ -87,6 +87,7 @@ EVALUATE ROW( "medidas", 1 )
 | Taxa (com base) | Abrir em / Comparar com a | Taxa vs. média / **Média da linha** |
 | Taxa (com base) | Nota no rodapé | Taxa = aprovados ÷ (aprovados + rejeitados) · teal = acima da média da etapa · coral = abaixo · cinza = na média · sem cor = menos de 30 casos |
 | Coluna de alerta | Destacar a última coluna | desligado |
+| Comportamento | Colunas: maior valor primeiro (1.3.1) | **ligado** (praças com mais aprovados à esquerda; muda com o filtro) |
 
 ### Página Report · layout "mínima mudança"
 Fundo novo `backgrounds/BG - Esteiras_Report.svg` (página **1900 × 4444**: Exibir → Tamanho da página → Personalizado, altura 4444).

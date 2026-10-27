@@ -25,9 +25,10 @@ class ComportamentoCard extends Card {
     mostrarTotal = new formattingSettings.ToggleSwitch({ name: "mostrarTotal", displayName: "Mostrar coluna de total", value: true });
     botaoGrupo = new formattingSettings.ToggleSwitch({ name: "botaoGrupo", displayName: "Mostrar botão linha | grupo", value: true });
     ocultarColunas = new formattingSettings.ToggleSwitch({ name: "ocultarColunas", displayName: "\"Só com movimento\" esconde colunas vazias", value: true });
+    colunasPorTotal = new formattingSettings.ToggleSwitch({ name: "colunasPorTotal", displayName: "Colunas: maior valor primeiro", value: false });
     name = "comportamento";
     displayName = "Comportamento";
-    slices = [this.busca, this.soMovimento, this.modoPct, this.mostrarTotal, this.botaoGrupo, this.ocultarColunas];
+    slices = [this.busca, this.soMovimento, this.modoPct, this.mostrarTotal, this.botaoGrupo, this.ocultarColunas, this.colunasPorTotal];
 }
 
 class AlertaCard extends Card {
