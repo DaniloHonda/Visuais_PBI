@@ -1,0 +1,59 @@
+// =====================================================================
+// 56 · Painel de filtros: medidas da barra de resumo (chips)
+// Exibição de consulta DAX → Executar → "Atualizar o modelo com alterações".
+// Confira o nome das colunas (escritas em minúsculas com _ , como recruiter_name).
+// Chip = "Rótulo|valor", separados por ";;" (só os filtros em uso, na ordem do painel).
+// =====================================================================
+DEFINE
+    MEASURE '_Medidas'[Esteira | Filtros Ativos] =
+        VAR PerOn = ISFILTERED( _dCALENDARIO[Data] )
+        VAR Per = IF( PerOn, "Período|" & FORMAT( MIN( _dCALENDARIO[Data] ), "dd/mm" ) & " – " & FORMAT( MAX( _dCALENDARIO[Data] ), "dd/mm" ) )
+        VAR Est = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[esteira] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[esteira] )
+            RETURN "Esteira|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[esteira] ), COUNTROWS( Sel ) & " selecionadas" ) )
+        VAR Rec = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[recruiter_name] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[recruiter_name] )
+            RETURN "Recrutador|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[recruiter_name] ), COUNTROWS( Sel ) & " selecionados" ) )
+        VAR Hm = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[hiring_manager_name] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[hiring_manager_name] )
+            RETURN "Hiring Manager|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[hiring_manager_name] ), COUNTROWS( Sel ) & " selecionados" ) )
+        VAR Src = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[sourcer_name] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[sourcer_name] )
+            RETURN "Sourcer|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[sourcer_name] ), COUNTROWS( Sel ) & " selecionados" ) )
+        VAR Etp = IF( ISFILTERED( dEtapa[stage_name] ),
+            VAR Sel = FILTERS( dEtapa[stage_name] )
+            RETURN "Etapa|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, dEtapa[stage_name] ), COUNTROWS( Sel ) & " selecionadas" ) )
+        VAR Prc = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[office_name] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[office_name] )
+            RETURN "Praça|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[office_name] ), COUNTROWS( Sel ) & " selecionadas" ) )
+        VAR Bk = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[requisition_id] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[requisition_id] )
+            RETURN "BK|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[requisition_id] ), COUNTROWS( Sel ) & " selecionados" ) )
+        VAR Esp = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[department_name] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[department_name] )
+            RETURN "Especialidade|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[department_name] ), COUNTROWS( Sel ) & " selecionadas" ) )
+        VAR Per = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[persona] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[persona] )
+            RETURN "Persona|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[persona] ), COUNTROWS( Sel ) & " selecionadas" ) )
+        VAR Lista = { ( 1, Per ), ( 2, Est ), ( 3, Rec ), ( 4, Hm ), ( 5, Src ), ( 6, Etp ), ( 7, Prc ), ( 8, Bk ), ( 9, Esp ), ( 10, Per ) }
+        RETURN
+        CONCATENATEX( FILTER( Lista, NOT ISBLANK( [Value2] ) ), [Value2], ";;", [Value1], ASC )
+
+    MEASURE '_Medidas'[Esteira | Filtros Qtde] =
+        INT( ISFILTERED( _dCALENDARIO[Data] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[esteira] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[recruiter_name] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[hiring_manager_name] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[sourcer_name] ) )
+        + INT( ISFILTERED( dEtapa[stage_name] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[office_name] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[requisition_id] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[department_name] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[persona] ) )
+
+    MEASURE '_Medidas'[Esteira | Filtros Botão] =
+        VAR N = [Esteira | Filtros Qtde]
+        RETURN "☰  Filtros" & IF( N > 0, " (" & N & ")" )
+
+EVALUATE
+ROW( "chips", [Esteira | Filtros Ativos], "qtde", [Esteira | Filtros Qtde] )
