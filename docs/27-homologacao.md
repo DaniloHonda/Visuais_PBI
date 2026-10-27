@@ -140,4 +140,5 @@ Etapa 6 (mockups para aprovar): `docs/33-mockup-dados-do-dash.png` e `docs/33-mo
 - **Desconsideradas** (fora de todos os números, filtro do relatório `considerar`): **Duplicate** (chega sem motivo: mesma pessoa em duas vagas com e-mail ou telefone diferente, unificada depois), **Movimentação entre vagas** e **Posição cancelada**.
 - **Declínio do candidato** (o candidato recusou, em qualquer etapa): Anywhere (fora da praça, fora de SP, não quer híbrido/presencial), remuneração (inclusive composição e acima da faixa), desconfortável com a meta, recebeu outra oferta, sem interesse na carreira, desistência no meio do processo, desistência pós-hired, motivos pessoais, preferiu outra posição na XP. Off limits, AAI/B2B, background check etc. = rejeição (Avaliação).
 - **Desrejeitados e Silver Medalist**: os dias na etapa "Stand-by | Silver medalist" **pausam o SLA** (não contam); quando volta ao processo, o SLA volta a contar e soma no total.
-- Tipos agora: Avaliação · Administrativo (Limpeza de Pool, Silver Medalist) · Declínio do candidato · Desconsiderada · Contratada em outra vaga.
+- Off limits, AAI/B2B e o motivo "Silver Medalist" = rejeição (Avaliação), confirmado com a recrutadora.
+- Tipos agora: Avaliação · Administrativo (Limpeza de Pool, Move interno) · Declínio do candidato · Desconsiderada · Contratada em outra vaga.

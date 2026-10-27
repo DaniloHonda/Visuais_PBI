@@ -27,7 +27,7 @@ DATATABLE(
         { "Motivos pessoais",                "Declínio do candidato", 2 },
         { "Preferiu outra posição",          "Declínio do candidato", 2 },
         { "Limpeza de Pool",                 "Administrativo",        3 },
-        { "Silver Medalist",                 "Administrativo",        3 },
+        { "Silver Medalist",                 "Avaliação",             3 },
         { "Move interno",                    "Administrativo",        3 },
         { "Empresa off limits",              "Avaliação",             4 },
         { "AAI/B2B",                         "Avaliação",             4 },
