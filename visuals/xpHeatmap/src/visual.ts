@@ -21,8 +21,10 @@ interface Row {
     values: (number | null)[];
     bases: (number | null)[];
     total: number;
-    rowId: ISelectionId;
-    cellIds: ISelectionId[];
+    ordem: number | null;
+    grupo: string;
+    rowIds: ISelectionId[];
+    cellIds: ISelectionId[][];
 }
 
 // Ordem: coluna (índice, -1 = total) e direção; null = ordem original.
@@ -53,6 +55,8 @@ export class Visual implements IVisual {
     private colRates: (number | null)[] = [];
     private sort: Sort = null;
     private height = 0;
+    private hasGrupo = false;
+    private byGroup = false;
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
@@ -118,6 +122,15 @@ export class Visual implements IVisual {
         const baseFor = cols.map(c => baseCols.find(b => String(b.source.groupName) === String(c.source.groupName)) || null);
         // Texto de detalhe da coluna (ex.: etapas do grupo): primeiro valor preenchido do grupo.
         const detCols = cat.values.filter(v => v.source.roles && v.source.roles["detalhe"]);
+        // Ordem e grupo da linha: medidas repetidas em cada coluna; vale o primeiro valor preenchido.
+        const ordCols = cat.values.filter(v => v.source.roles && v.source.roles["ordem"]);
+        const grpCols = cat.values.filter(v => v.source.roles && v.source.roles["grupo"]);
+        this.hasGrupo = grpCols.length > 0;
+        if (!this.hasGrupo) this.byGroup = false;
+        const first = (list: powerbi.DataViewValueColumn[], i: number) => {
+            for (const c of list) { const v = c.values[i]; if (v !== null && v !== undefined && String(v).trim() !== "") return v; }
+            return null;
+        };
         this.colDetails = cols.map(c => {
             const d = detCols.find(x => String(x.source.groupName) === String(c.source.groupName));
             const v = d ? d.values.find(x => x !== null && x !== undefined && String(x).trim() !== "") : null;
@@ -127,14 +140,18 @@ export class Visual implements IVisual {
             const raw = rowsCat.values[i];
             const values = cols.map(c => num(c.values[i]));
             const bases = baseFor.map(b => (b ? num(b.values[i]) : null));
+            const g = first(grpCols, i);
+            const rowId = this.host.createSelectionIdBuilder().withCategory(rowsCat, i).createSelectionId();
             this.rows.push({
                 index: i,
                 label: raw === null || raw === undefined || raw === "" ? "(vazio)" : String(raw),
                 values,
                 bases,
                 total: values.reduce((t: number, v) => t + (v || 0), 0),
-                rowId: this.host.createSelectionIdBuilder().withCategory(rowsCat, i).createSelectionId(),
-                cellIds: cols.map(c => this.host.createSelectionIdBuilder().withCategory(rowsCat, i).withSeries(cat.values, c).createSelectionId())
+                ordem: num(first(ordCols, i)),
+                grupo: g === null ? "" : String(g).trim(),
+                rowIds: [rowId],
+                cellIds: cols.map(c => [this.host.createSelectionIdBuilder().withCategory(rowsCat, i).withSeries(cat.values, c).createSelectionId()])
             });
         }
     }
@@ -146,17 +163,68 @@ export class Visual implements IVisual {
         return { r: den > 0 ? a / den : null, n: den };
     }
 
-    private computeColRates() {
+    private computeColRates(rows: Row[]) {
         this.colRates = this.columns.map((_, i) => {
             let a = 0, b = 0;
-            for (const r of this.rows) { a += r.values[i] || 0; b += r.bases[i] || 0; }
+            for (const r of rows) { a += r.values[i] || 0; b += r.bases[i] || 0; }
             return this.rate(a, b).r;
         });
+    }
+
+    private byRow(): boolean { return String(this.settings.taxa.comparar.value.value) === "linha"; }
+
+    // Taxa da linha inteira (todas as colunas): a "média da etapa" quando a comparação é pela linha.
+    private rowRate(r: Row): number | null {
+        let a = 0, b = 0;
+        r.values.forEach((v, i) => { a += v || 0; b += r.bases[i] || 0; });
+        return this.rate(a, b).r;
+    }
+
+    private avgFor(r: Row, i: number): number | null { return this.byRow() ? this.rowRate(r) : this.colRates[i]; }
+
+    // Ordem fixa: pela medida de ordem (sem ordem vai para o fim), empate pela ordem que veio do Power BI.
+    private ordered(list: Row[]): Row[] {
+        const k = (r: Row) => (r.ordem === null ? Number.MAX_SAFE_INTEGER : r.ordem);
+        return list.slice().sort((a, b) => (k(a) - k(b)) || (a.index - b.index));
+    }
+
+    // Visão por grupo: soma as linhas de cada grupo, na ordem da primeira linha do grupo.
+    private groupRows(): Row[] {
+        const map = new Map<string, Row>();
+        const out: Row[] = [];
+        for (const r of this.ordered(this.rows)) {
+            const key = r.grupo || "(sem grupo)";
+            let g = map.get(key);
+            if (!g) {
+                g = { index: out.length, label: key, values: r.values.map(() => null), bases: r.bases.map(() => null), total: 0,
+                    ordem: r.ordem, grupo: key, rowIds: [], cellIds: r.cellIds.map(() => []) };
+                map.set(key, g);
+                out.push(g);
+            }
+            const grp = g;
+            r.values.forEach((v, i) => { if (v !== null) grp.values[i] = (grp.values[i] || 0) + v; });
+            r.bases.forEach((v, i) => { if (v !== null) grp.bases[i] = (grp.bases[i] || 0) + v; });
+            grp.total += r.total;
+            grp.rowIds.push(...r.rowIds);
+            r.cellIds.forEach((ids, i) => grp.cellIds[i].push(...ids));
+        }
+        return out;
+    }
+
+    private baseRows(): Row[] { return this.byGroup ? this.groupRows() : this.rows; }
+
+    // Colunas visíveis: com "Só com movimento", some a coluna sem valor e sem base em nenhuma linha.
+    private visibleCols(rows: Row[]): number[] {
+        const all = this.columns.map((_, i) => i);
+        if (!this.onlyMoving || !this.settings.comportamento.ocultarColunas.value) return all;
+        const keep = all.filter(i => rows.some(r => (r.values[i] || 0) > 0 || (r.bases[i] || 0) > 0));
+        return keep.length ? keep : all;
     }
 
     private alertIndex(): number {
         if (this.mode === "taxa") return -1;
         const s = this.settings.alerta;
+        if (this.byRow()) return -1;
         const name = (s.coluna.value || "").trim().toLowerCase();
         if (name) {
             const i = this.columns.findIndex(c => c.trim().toLowerCase() === name);
@@ -186,6 +254,25 @@ export class Visual implements IVisual {
         moving.addEventListener("click", () => { this.onlyMoving = !this.onlyMoving; this.renderToolbar(); this.renderTable(); });
         this.toolbar.appendChild(moving);
 
+        if (this.hasGrupo && this.settings.comportamento.botaoGrupo.value) {
+            const gseg = el("div", "xp-hm__seg");
+            const opts: [boolean, string][] = [[false, this.settings.textos.colLinhas.value || this.rowName], [true, this.settings.textos.rotuloGrupo.value || "Grupo"]];
+            for (const [g, label] of opts) {
+                const b = el("button", "xp-hm__opt" + (this.byGroup === g ? " xp-hm__opt--on" : ""), label);
+                b.setAttribute("aria-pressed", String(this.byGroup === g));
+                b.addEventListener("click", () => {
+                    if (this.byGroup === g) return;
+                    this.byGroup = g;
+                    this.sort = null;
+                    this.selectionManager.clear();
+                    this.renderToolbar();
+                    this.renderTable();
+                });
+                gseg.appendChild(b);
+            }
+            this.toolbar.appendChild(gseg);
+        }
+
         const seg = el("div", "xp-hm__seg");
         const modes: [Mode, string][] = [["num", this.settings.taxa.rotuloNumeros.value || "Números"]];
         if (this.settings.taxa.mostrarPct.value) modes.push(["pct", "% da linha"]);
@@ -199,24 +286,29 @@ export class Visual implements IVisual {
         this.toolbar.appendChild(seg);
 
         if (this.sort) {
-            const reset = el("button", "xp-hm__btn", "Ordem original");
+            const reset = el("button", "xp-hm__btn", this.hasOrdem() ? "Ordem do processo" : "Ordem original");
             reset.addEventListener("click", () => { this.sort = null; this.renderToolbar(); this.renderTable(); });
             this.toolbar.appendChild(reset);
         }
     }
 
+    private hasOrdem(): boolean { return this.rows.some(r => r.ordem !== null); }
+
     private visibleRows(): Row[] {
         const q = normalize(this.query);
-        let list = this.rows.filter(r => (!this.onlyMoving || r.total > 0) && (!q || normalize(r.label).indexOf(q) >= 0));
+        let list = this.ordered(this.baseRows()).filter(r => (!this.onlyMoving || r.total > 0) && (!q || normalize(r.label).indexOf(q) >= 0));
         const sort = this.sort;
         if (sort) {
             const key = (r: Row) => {
+                if (sort.col === -2) { const x = this.rowRate(r); return x === null ? -1 : x; }
                 if (sort.col < 0) return r.total;
                 if (this.mode === "taxa") { const x = this.rate(r.values[sort.col], r.bases[sort.col]).r; return x === null ? -1 : x; }
                 const v = r.values[sort.col] || 0;
                 return this.mode === "pct" ? (r.total ? v / r.total : 0) : v;
             };
-            list = list.slice().sort((a, b) => (key(a) === key(b) ? a.index - b.index : (key(a) - key(b)) * (sort.desc ? -1 : 1)));
+            const pos = new Map<Row, number>();
+            list.forEach((r, n) => pos.set(r, n));
+            list = list.slice().sort((a, b) => (key(a) === key(b) ? (pos.get(a) || 0) - (pos.get(b) || 0) : (key(a) - key(b)) * (sort.desc ? -1 : 1)));
         }
         return list;
     }
@@ -242,21 +334,28 @@ export class Visual implements IVisual {
             return;
         }
 
-        this.computeColRates();
+        const base = this.baseRows();
+        this.computeColRates(base);
         const list = this.visibleRows();
+        const cols = this.visibleCols(base);
         const showTotal = s.comportamento.mostrarTotal.value;
+        const rowAvg = this.mode === "taxa" && this.byRow();
+        // Títulos de grupo entre as linhas: só na ordem do processo, sem busca de grupo e fora da visão por grupo.
+        const showGroups = this.hasGrupo && !this.byGroup && !this.sort;
         // Escala da cor: maior valor visível (ou maior % da linha).
         let max = 0;
-        for (const r of list) r.values.forEach(v => { const x = this.cellValue(v, r); if (x > max) max = x; });
+        for (const r of list) cols.forEach(i => { const x = this.cellValue(r.values[i], r); if (x > max) max = x; });
 
         const table = el("table", "xp-hm__table");
         const head = el("tr", "");
-        const th0 = el("th", "xp-hm__th-name", s.textos.colLinhas.value || this.rowName);
-        head.appendChild(th0);
-        const headers = this.columns.map((c, i) => [c, i] as [string, number]);
+        const rowTitle = this.byGroup ? (s.textos.rotuloGrupo.value || "Grupo") : (s.textos.colLinhas.value || this.rowName);
+        head.appendChild(el("th", "xp-hm__th-name", rowTitle));
+        const headers: [string, number][] = [];
+        if (rowAvg) headers.push([s.textos.rotuloMediaCol.value || "Média", -2]);
+        cols.forEach(i => headers.push([this.columns[i], i]));
         if (showTotal) headers.push([s.textos.rotuloTotal.value || "Total", -1]);
         for (const [label, i] of headers) {
-            const th = el("th", (alert >= 0 && i === alert ? "xp-hm__th-alert" : "") + (i < 0 ? " xp-hm__th-total" : ""));
+            const th = el("th", (alert >= 0 && i === alert ? "xp-hm__th-alert" : "") + (i === -1 ? " xp-hm__th-total" : "") + (i === -2 ? " xp-hm__th-avg" : ""));
             const b = el("button", "xp-hm__sort" + (this.sort && this.sort.col === i ? " xp-hm__sort--on" : ""), label);
             if (this.sort && this.sort.col === i) b.appendChild(el("span", "", this.sort.desc ? " ↓" : " ↑"));
             b.title = "Ordenar por " + label;
@@ -286,6 +385,8 @@ export class Visual implements IVisual {
                 info.addEventListener("click", e => e.stopPropagation());
                 th.appendChild(info);
             }
+            // Colunas de valor com a mesma largura (a sobra fica com o nome da linha).
+            if (i >= 0) th.style.width = Math.floor(64 / Math.max(1, cols.length)) + "%";
             th.setAttribute("aria-sort", this.sort && this.sort.col === i ? (this.sort.desc ? "descending" : "ascending") : "none");
             head.appendChild(th);
         }
@@ -305,16 +406,30 @@ export class Visual implements IVisual {
         const light = s.cores.clara.value.value, mid = s.cores.meio.value.value, dark = s.cores.escura.value.value;
         // Degradê em três pontos (claro → meio → escuro), escala raiz para os valores pequenos aparecerem.
         const shade = (t: number) => (t < 0.5 ? mixOklab(light, mid, t * 2) : mixOklab(mid, dark, (t - 0.5) * 2));
+        let lastGroup: string | null = null;
         for (const r of list) {
+            if (showGroups && r.grupo !== lastGroup) {
+                lastGroup = r.grupo;
+                const gtr = el("tr", "xp-hm__grp");
+                const gtd = el("td", "", r.grupo || "Sem grupo");
+                gtd.setAttribute("colspan", String(headers.length + 1));
+                gtr.appendChild(gtd);
+                tbody.appendChild(gtr);
+            }
             const tr = el("tr", "");
             const name = el("td", "xp-hm__name");
             name.tabIndex = 0;
             highlight(name, r.label, q);
             name.title = r.label;
-            this.bindSelect(name, r.rowId);
-            this.cellEls.push({ el: name, ids: [r.rowId] });
+            this.bindSelect(name, r.rowIds);
+            this.cellEls.push({ el: name, ids: r.rowIds });
             tr.appendChild(name);
-            r.values.forEach((v, i) => {
+            if (rowAvg) {
+                const avg = this.rowRate(r);
+                tr.appendChild(el("td", "xp-hm__avg-col", avg === null ? "—" : Math.round(avg * 100) + "%"));
+            }
+            cols.forEach(i => {
+                const v = r.values[i];
                 const x = this.cellValue(v, r);
                 const td = el("td", "xp-hm__cell" + (i === alert && x > 0 ? " xp-hm__cell--alert" : ""));
                 if (this.mode === "taxa") {
@@ -331,16 +446,16 @@ export class Visual implements IVisual {
                 td.addEventListener("mousemove", (e: MouseEvent) => this.showTip(e, r, i));
                 td.addEventListener("mouseleave", () => { this.tip.style.display = "none"; });
                 this.bindSelect(td, r.cellIds[i]);
-                this.cellEls.push({ el: td, ids: [r.cellIds[i], r.rowId] });
+                this.cellEls.push({ el: td, ids: r.cellIds[i].concat(r.rowIds) });
                 tr.appendChild(td);
             });
             if (showTotal) tr.appendChild(el("td", "xp-hm__total", INT.format(r.total)));
             tbody.appendChild(tr);
         }
-        if (this.mode === "taxa" && list.length) {
+        if (this.mode === "taxa" && list.length && !rowAvg) {
             const tr = el("tr", "xp-hm__avg");
             tr.appendChild(el("td", "xp-hm__name", s.taxa.rotuloMedia.value || "Média"));
-            this.colRates.forEach(c => tr.appendChild(el("td", "xp-hm__avg-cell", c === null ? "—" : Math.round(c * 100) + "%")));
+            cols.forEach(i => { const c = this.colRates[i]; tr.appendChild(el("td", "xp-hm__avg-cell", c === null ? "—" : Math.round(c * 100) + "%")); });
             if (showTotal) tr.appendChild(el("td", "xp-hm__total", ""));
             tbody.appendChild(tr);
         }
@@ -358,7 +473,7 @@ export class Visual implements IVisual {
     private paintRate(td: HTMLElement, r: Row, i: number) {
         const t = this.settings.taxa;
         const { r: rate, n } = this.rate(r.values[i], r.bases[i]);
-        const avg = this.colRates[i];
+        const avg = this.avgFor(r, i);
         if (rate === null) { td.classList.add("xp-hm__cell--zero"); td.textContent = "—"; return; }
         td.appendChild(document.createTextNode(Math.round(rate * 100) + "%"));
         if (n < t.minimo.value || avg === null) {
@@ -382,12 +497,12 @@ export class Visual implements IVisual {
         if (this.mode === "taxa") {
             const t = this.settings.taxa;
             const { r: rate, n } = this.rate(r.values[i], r.bases[i]);
-            const avg = this.colRates[i];
+            const avg = this.avgFor(r, i);
             this.tip.appendChild(el("div", "xp-hm__tip-head", `${r.label} · ${this.columns[i]}`));
             this.tip.appendChild(el("div", "", rate === null ? "Sem decisões" : `${Math.round(rate * 100)}% (${INT.format(v)} de ${INT.format(n)})`));
             if (avg !== null && rate !== null) {
                 const d = Math.round((rate - avg) * 100);
-                this.tip.appendChild(el("div", "xp-hm__tip-sub", `Média da coluna: ${Math.round(avg * 100)}% · ${d === 0 ? "na média" : Math.abs(d) + " p.p. " + (d > 0 ? "acima" : "abaixo")}`));
+                this.tip.appendChild(el("div", "xp-hm__tip-sub", `${this.byRow() ? "Média da linha" : "Média da coluna"}: ${Math.round(avg * 100)}% · ${d === 0 ? "na média" : Math.abs(d) + " p.p. " + (d > 0 ? "acima" : "abaixo")}`));
             }
             if (rate !== null && n < t.minimo.value) this.tip.appendChild(el("div", "xp-hm__tip-sub", `Poucos casos (menos de ${t.minimo.value}): sem cor`));
             this.placeTip(e);
@@ -410,14 +525,15 @@ export class Visual implements IVisual {
         this.tip.style.top = Math.max(0, y) + "px";
     }
 
-    private bindSelect(node: HTMLElement, id: ISelectionId) {
+    private bindSelect(node: HTMLElement, ids: ISelectionId[]) {
+        const id: ISelectionId | ISelectionId[] = ids.length === 1 ? ids[0] : ids;
         const pick = (multi: boolean) => this.selectionManager.select(id, multi).then(ids => this.paintSelection(ids as ISelectionId[]));
         node.addEventListener("click", (e: MouseEvent) => { e.stopPropagation(); pick(e.ctrlKey || e.metaKey); });
         node.addEventListener("keydown", (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(e.ctrlKey || e.metaKey); } });
         node.addEventListener("contextmenu", (e: MouseEvent) => {
             e.stopPropagation();
             e.preventDefault();
-            this.selectionManager.showContextMenu(id, { x: e.clientX, y: e.clientY });
+            this.selectionManager.showContextMenu(ids[0] || {}, { x: e.clientX, y: e.clientY });
         });
     }
 

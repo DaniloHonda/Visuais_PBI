@@ -29,6 +29,18 @@
             "name": "detalhe",
             "kind": "Measure",
             "description": "Texto mostrado no ⓘ do título da coluna. Ex.: Esteira | Etapas do Grupo"
+        },
+        {
+            "displayName": "Ordem das linhas (opcional)",
+            "name": "ordem",
+            "kind": "Measure",
+            "description": "Número da ordem de cada linha. Ex.: Esteira | Ordem da Etapa. As linhas ficam sempre nessa ordem."
+        },
+        {
+            "displayName": "Grupo da linha (opcional)",
+            "name": "grupo",
+            "kind": "Measure",
+            "description": "Texto do grupo de cada linha. Ex.: Esteira | Grupo da Etapa. Liga os títulos de grupo e o botão Etapa | Grupo."
         }
     ],
     "dataViewMappings": [
@@ -48,6 +60,12 @@
                         "max": 1
                     },
                     "detalhe": {
+                        "max": 1
+                    },
+                    "ordem": {
+                        "max": 1
+                    },
+                    "grupo": {
                         "max": 1
                     }
                 }
@@ -80,6 +98,16 @@
                             {
                                 "bind": {
                                     "to": "detalhe"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "ordem"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "grupo"
                                 }
                             }
                         ],
@@ -115,6 +143,16 @@
                     "type": {
                         "text": true
                     }
+                },
+                "rotuloGrupo": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "rotuloMediaCol": {
+                    "type": {
+                        "text": true
+                    }
                 }
             }
         },
@@ -136,6 +174,16 @@
                     }
                 },
                 "busca": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "botaoGrupo": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "ocultarColunas": {
                     "type": {
                         "bool": true
                     }
@@ -264,6 +312,11 @@
                 "rodape": {
                     "type": {
                         "text": true
+                    }
+                },
+                "comparar": {
+                    "type": {
+                        "enumeration": []
                     }
                 }
             }
