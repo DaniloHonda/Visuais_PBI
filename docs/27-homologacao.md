@@ -134,3 +134,10 @@ Etapa 6 (mockups para aprovar): `docs/33-mockup-dados-do-dash.png` e `docs/33-mo
 - Etapa pulada (sem data de entrada) não conta como aprovada nem como entrada.
 - Etapa de onde a aplicação voltou para trás = "Voltou" (não é aprovação). Re-entrada na mesma etapa: vale a última passagem.
 - "Aprovados" (gráficos por etapa) é por coorte: data da candidatura no período. "Evolução" usa a data do movimento (saída da etapa).
+
+## Decisões com os recrutadores (27/10/2026) · aplicadas em `docs/51-regras-recrutadores.dax`
+- **Etapas Senior, Pleno, Pool Qualificados, Stand-by**: as vagas estão sendo padronizadas; por enquanto são etapas **corretas** → saem dos alertas.
+- **Desconsideradas** (fora de todos os números, filtro do relatório `considerar`): **Duplicate** (chega sem motivo: mesma pessoa em duas vagas com e-mail ou telefone diferente, unificada depois), **Movimentação entre vagas** e **Posição cancelada**.
+- **Declínio do candidato** (o candidato recusou, em qualquer etapa): Anywhere (fora da praça, fora de SP, não quer híbrido/presencial), remuneração (inclusive composição e acima da faixa), desconfortável com a meta, recebeu outra oferta, sem interesse na carreira, desistência no meio do processo, desistência pós-hired, motivos pessoais, preferiu outra posição na XP. Off limits, AAI/B2B, background check etc. = rejeição (Avaliação).
+- **Desrejeitados e Silver Medalist**: os dias na etapa "Stand-by | Silver medalist" **pausam o SLA** (não contam); quando volta ao processo, o SLA volta a contar e soma no total.
+- Tipos agora: Avaliação · Administrativo (Limpeza de Pool, Silver Medalist) · Declínio do candidato · Desconsiderada · Contratada em outra vaga.

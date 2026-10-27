@@ -43,7 +43,8 @@ const PILL: Record<string, string> = {
     "declinou": "dec", "declinio da offer": "dec", "contratada": "hired", "contratada via outra vaga": "out", "saiu para outra vaga": "out",
     "avaliacao": "bad", "desistencia do candidato": "dec", "administrativo": "off", "sem motivo na base": "off", "a classificar": "off",
     "direto": "ok", "via pool": "out", "dentro do pool": "bad", "ate 45 dias": "now", "parada ha mais de 45 dias": "bad",
-    "aprovou": "ok", "aprovou e foi rejeitada": "back", "a realizar": "now", "sem resultado": "off"
+    "aprovou": "ok", "aprovou e foi rejeitada": "back", "a realizar": "now", "sem resultado": "off",
+    "declinio do candidato": "dec", "desconsiderada": "off"
 };
 const PILL_COLS = ["situação", "resultado na etapa", "tipo", "tipo de encerramento", "origem", "faixa", "movimento", "resultado da entrevista"];
 // Colunas de dias (dias na etapa, SLA…) ganham selo cinza / âmbar / coral pelos limites do painel "Dias".

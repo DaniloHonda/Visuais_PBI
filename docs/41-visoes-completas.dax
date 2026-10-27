@@ -13,7 +13,8 @@
 // para bater com a lista. A quantidade de passagens/entrevistas aparece numa coluna da lista.
 //
 // SLA (dias), em todas as visões: início do ciclo (entrada no pool, se veio de pool; senão a candidatura)
-// até a contratação, a rejeição ou hoje (em andamento). Para contratadas é igual a sla_esteira_dias.
+// até a contratação, a rejeição ou hoje (em andamento), menos os dias no Silver Medalist (pausa; docs/51).
+// Para contratadas é igual a sla_esteira_dias.
 // =====================================================================
 DEFINE
     // ---------- contagens das 3 visões novas (em aplicações) ----------
@@ -168,7 +169,7 @@ DEFINE
             VAR RejEm  = MAX( '13_ETAPA_RECRUTAMENTO'[rejected_at] )
             VAR Saida  = SWITCH( Sit, "Contratada", Contr, "Rejeitada", RejEm, "Declinou", RejEm, "Contratada via outra vaga", RejEm )
             VAR Sla    = IF( Sit = "Contratada", ROUND( MAX( '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ), 0 ),
-                             IF( NOT ISBLANK( Ciclo ), INT( COALESCE( Saida, TODAY() ) - Ciclo ) ) )
+                             IF( NOT ISBLANK( Ciclo ), MAX( 0, INT( COALESCE( Saida, TODAY() ) - Ciclo ) - MAX( '13_ETAPA_RECRUTAMENTO'[dias_pausa_sla] ) ) ) )
             VAR tSla   = "||SLA (dias)=" & IF( ISBLANK( Sla ), "", "#" & Sla )
             VAR dCand  = IF( ISBLANK( Cand ), "", "@" & FORMAT( Cand, F ) )
             VAR Base   = "||Situação=" & Sit & "||Etapa atual=" & EtAt & "||Candidatura=" & dCand & tSla
@@ -358,7 +359,7 @@ DEFINE
                 "Contratadas",          "Direto;Via pool;Dentro do pool",
                 "Em andamento",         "Até 45 dias;Parada há mais de 45 dias",
                 "Entradas por etapa",   "Aprovado;Rejeitado;Em andamento;Voltou;Saiu para outra vaga",
-                "Rejeitados e motivos", "Avaliação;Desistência do candidato;Declínio da offer;Administrativo;Sem motivo na base;A classificar",
+                "Rejeitados e motivos", "Avaliação;Declínio do candidato;Administrativo;A classificar",
                 "Andamento por faixa",  "0–2 d;3–7 d;8–15 d;16–30 d;31–45 d;> 45 d",
                 "SLA por etapa",        "0–2 d;3–7 d;8–15 d;16–30 d;31–45 d;> 45 d",
                 "Evolução",             "Aprovou;Rejeitada;Aprovou e foi rejeitada",

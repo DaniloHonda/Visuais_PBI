@@ -13,7 +13,7 @@ Visualizações → ⋯ → Importar um visual de um arquivo → os 3 arquivos. 
 |---|---|---|---|---|---|
 | Com algum alerta | 310 | DQ Com Alerta | DQ Com Alerta Texto | DQ Com Alerta Insight | DQ Com Alerta Status |
 | Voltou de etapa | 700 | DQ Voltou | DQ Voltou Texto | DQ Voltou Insight | DQ Voltou Status |
-| Sem motivo na base | 1090 | DQ Sem Motivo | DQ Sem Motivo Texto | DQ Sem Motivo Insight | DQ Sem Motivo Status |
+| Desconsideradas | 1090 | DQ Desconsideradas | DQ Desconsideradas Texto | DQ Desconsideradas Insight | (vazio) |
 | Contratada no pool | 1480 | DQ No Pool | DQ No Pool Texto | DQ No Pool Insight | DQ No Pool Status |
 
 (todas as medidas começam com `Esteira | `). Período do valor: `Esteira | Período Selecionado` (igual aos cards do Resumo).

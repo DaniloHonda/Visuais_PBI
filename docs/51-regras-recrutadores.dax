@@ -1,0 +1,218 @@
+// =====================================================================
+// 51 · Regras combinadas com os recrutadores (27/10/2026)
+//   1. Etapas Senior, Pleno, Pool Qualificados…: estão corretas (as vagas estão sendo padronizadas) → deixam de ser alerta.
+//   2. Duplicate (chega SEM motivo), Movimentação entre vagas e Posição cancelada: DESCONSIDERADAS → saem de todos os números.
+//   3. Declínio = o candidato recusou (lista dos recrutadores: Anywhere, remuneração, meta, outra oferta, sem interesse,
+//      desistência, motivos pessoais, preferiu outra posição…) em qualquer prefixo. Off limits, AAI/B2B etc. = rejeição.
+//   4. SLA pausa no Silver Medalist: os dias na etapa "Stand-by | Silver medalist" não contam no SLA.
+// Ordem: A (tabelas e colunas) → B (filtro do relatório) → C (rodar o docs/41 inteiro) → D (medidas) → E (conferência)
+// =====================================================================
+
+// A1 · Modelagem → trocar a fórmula de dMotivoTipo. "contém" = o texto aparece no motivo (maiúscula/minúscula tanto faz).
+// prioridade: quando dois textos aparecem no mesmo motivo, vale o de menor número.
+dMotivoTipo =
+DATATABLE(
+    "motivo", STRING, "tipo", STRING, "prioridade", INTEGER,
+    {
+        { "(vazio)",                         "Desconsiderada",        1 },
+        { "Duplicate",                       "Desconsiderada",        1 },
+        { "Movimentação entre vagas",        "Desconsiderada",        1 },
+        { "Posição cancelada",               "Desconsiderada",        1 },
+        { "Anywhere",                        "Declínio do candidato", 2 },
+        { "Remuneração",                     "Declínio do candidato", 2 },
+        { "desconfortável com a meta",       "Declínio do candidato", 2 },
+        { "Recebeu outra oferta",            "Declínio do candidato", 2 },
+        { "Sem interesse",                   "Declínio do candidato", 2 },
+        { "Desistência",                     "Declínio do candidato", 2 },
+        { "Motivos pessoais",                "Declínio do candidato", 2 },
+        { "Preferiu outra posição",          "Declínio do candidato", 2 },
+        { "Limpeza de Pool",                 "Administrativo",        3 },
+        { "Silver Medalist",                 "Administrativo",        3 },
+        { "Move interno",                    "Administrativo",        3 },
+        { "Empresa off limits",              "Avaliação",             4 },
+        { "AAI/B2B",                         "Avaliação",             4 },
+        { "Background Check",                "Avaliação",             4 },
+        { "Problemas de documentação",       "Avaliação",             4 }
+    }
+)
+
+// A2 · 13_ETAPA_RECRUTAMENTO → trocar a fórmula de tipo_encerramento
+tipo_encerramento =
+IF(
+    '13_ETAPA_RECRUTAMENTO'[status] = "rejected",
+    IF( '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga], "Contratada em outra vaga",
+        VAR M =
+            CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ),
+                ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ) )
+        VAR Limpo = TRIM( SUBSTITUTE( SUBSTITUTE( SUBSTITUTE( M, UNICHAR( 160 ), " " ), UNICHAR( 10 ), "" ), UNICHAR( 13 ), "" ) )
+        VAR Vazio = ISBLANK( Limpo ) || Limpo = ""
+        VAR Achados =
+            IF( Vazio,
+                FILTER( dMotivoTipo, dMotivoTipo[motivo] = "(vazio)" ),
+                FILTER( dMotivoTipo, dMotivoTipo[motivo] <> "(vazio)" && CONTAINSSTRING( Limpo, dMotivoTipo[motivo] ) ) )
+        VAR Excecao = MAXX( TOPN( 1, Achados, dMotivoTipo[prioridade], ASC ), dMotivoTipo[tipo] )
+        VAR Padrao =
+            SWITCH( TRUE(),
+                LEFT( Limpo, 7 ) = "[Offer]", "Declínio do candidato",
+                LEFT( Limpo, 11 ) IN { "[Aplicação]", "[Avaliação]" }, "Avaliação",
+                LEFT( Limpo, 14 ) = "[Qualificação]", "Avaliação",
+                "A classificar" )
+        RETURN COALESCE( Excecao, Padrao ) )
+)
+
+// A3 · 13_ETAPA_RECRUTAMENTO → trocar a fórmula de situacao_app (declínio agora é "Declínio do candidato")
+situacao_app =
+SWITCH( TRUE(),
+    '13_ETAPA_RECRUTAMENTO'[status] = "in_process", "Em andamento",
+    '13_ETAPA_RECRUTAMENTO'[status] = "hired", "Contratada",
+    '13_ETAPA_RECRUTAMENTO'[saiu_para_vaga], "Contratada via outra vaga",
+    '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio do candidato", "Declinou",
+    '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Desconsiderada", "Desconsiderada",
+    '13_ETAPA_RECRUTAMENTO'[status] = "rejected", "Rejeitada"
+)
+
+// A4 · 13_ETAPA_RECRUTAMENTO → Nova coluna · FALSO = aplicação fora do dash (duplicada, movimentação entre vagas, posição cancelada)
+considerar =
+NOT ( '13_ETAPA_RECRUTAMENTO'[status] = "rejected" && '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Desconsiderada" )
+
+// A5 · 13_ETAPA_RECRUTAMENTO → Nova coluna · dias da aplicação parados no Silver Medalist (pausa do SLA)
+dias_pausa_sla =
+CALCULATE(
+    SUM( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+    ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+    '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+    CONTAINSSTRING( '13_ETAPA_RECRUTAMENTO'[stage_name], "Silver medalist" )
+) + 0
+
+// A6 · 13_ETAPA_RECRUTAMENTO → trocar a fórmula de sla_esteira_dias (desconta a pausa)
+sla_esteira_dias =
+IF( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+    MAX( 0, ( '13_ETAPA_RECRUTAMENTO'[data_contratacao] - '13_ETAPA_RECRUTAMENTO'[ciclo_inicio] ) * 1.0
+            - '13_ETAPA_RECRUTAMENTO'[dias_pausa_sla] ) )
+
+// A7 · Modelagem → trocar a fórmula de dAlerta (saem "Etapa de configuração" e "Rejeitada sem motivo")
+dAlerta =
+DATATABLE(
+    "alerta", STRING, "grupo", STRING, "ordem", INTEGER,
+    "descricao", STRING, "onde_corrigir", STRING, "atencao", DOUBLE, "critico", DOUBLE,
+    {
+        { "Contratada dentro do pool", "Processo", 1,
+          "A contratação foi registrada na própria vaga de pool, em vez de mover a pessoa para a vaga final. A origem e o SLA da contratação ficam errados.",
+          "Greenhouse: mover a contratação para a vaga final (recrutador).", 0, 0 },
+        { "Voltou de etapa", "Processo", 2,
+          "A aplicação saiu de uma etapa e foi para uma etapa anterior do fluxo. O tempo conta no SLA e a etapa de onde voltou não conta como aprovação.",
+          "Processo: alinhar com o recrutador se foi ajuste de cadastro ou retrabalho.", 0.05, 0.10 },
+        { "Etapa sem nome", "Dado", 3,
+          "A etapa existe na base, mas veio sem nome. Conta no SLA, mas não aparece nos gráficos por etapa.",
+          "Engenharia: nome da etapa na tabela de etapas (job_stages).", 0.005, 0.01 },
+        { "Etapa antes da candidatura", "Dado", 4,
+          "Uma etapa tem entrada mais de 1 dia antes da candidatura. Indica data errada ou migração na origem.",
+          "Engenharia: datas (timestamps) da tabela de etapas.", 0.001, 0.005 },
+        { "Etapas em dobro na origem", "Dado", 5,
+          "A mesma etapa veio repetida na origem. O dash usa uma passagem só e ignora as cópias.",
+          "Engenharia: etapas duplicadas na tabela de etapas.", 0.02, 0.05 }
+    }
+)
+// Depois: dAlerta[alerta] → Classificar por coluna → ordem.
+
+// A8 · 13_ETAPA_RECRUTAMENTO → trocar a fórmula de alertas (sem "Etapa de configuração" e sem "Rejeitada sem motivo")
+alertas =
+IF(
+    NOT '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual],
+    BLANK(),
+    VAR Voltas =
+        CALCULATE( COUNTA( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Voltou" )
+    VAR SemNome =
+        CALCULATE( COUNTBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 )
+    VAR PrimEnt =
+        CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 )
+    VAR Copias =
+        CALCULATE( COUNT( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 0 )
+    VAR L =
+        IF( '13_ETAPA_RECRUTAMENTO'[origem_contratacao] = "Dentro do pool", "Contratada dentro do pool · ", "" )
+        & IF( Voltas > 0, "Voltou de etapa (" & Voltas & "×) · ", "" )
+        & IF( SemNome > 0, "Etapa sem nome · ", "" )
+        & IF( PrimEnt < '13_ETAPA_RECRUTAMENTO'[data_aplicacao] - 1, "Etapa antes da candidatura · ", "" )
+        & IF( Copias > 0, "Etapas em dobro na origem · ", "" )
+    RETURN IF( L = "", BLANK(), LEFT( L, LEN( L ) - 3 ) )
+)
+
+// B · Filtro do relatório inteiro (tira as desconsideradas de TODAS as páginas)
+//   Painel Filtros → "Filtros em todas as páginas" → arrastar 13_ETAPA_RECRUTAMENTO[considerar] → marcar só Verdadeiro
+//   → cadeado (bloquear) e olho (ocultar), para ninguém desligar sem querer.
+
+// C · Rodar de novo o docs/41-visoes-completas.dax INTEIRO (SLA com pausa e as novas abas de motivo).
+
+// D · Medidas (Exibição de consulta DAX → colar daqui até o fim → Executar → "Atualizar o modelo com alterações")
+DEFINE
+    // Candidato recusou (qualquer etapa) e o subconjunto que recusou a offer.
+    MEASURE '_Medidas'[Esteira | Declínios do Candidato] =
+        CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio do candidato" ) )
+    MEASURE '_Medidas'[Esteira | Declinados (Offer)] =
+        CALCULATE( [Esteira | Rejeitados],
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio do candidato" ),
+            KEEPFILTERS( LEFT( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name], 7 ) = "[Offer]" ) )
+    // Rejeição pela XP = rejeitados menos quem recusou.
+    MEASURE '_Medidas'[Esteira | Rejeitados (Empresa)] =
+        [Esteira | Rejeitados] - COALESCE( [Esteira | Declínios do Candidato], 0 )
+
+    MEASURE '_Medidas'[Esteira | Nominal Situação] =
+        VAR NoPer = NOT ISBLANK( [Esteira | Candidatos] )
+        VAR Ativo = NOT ISBLANK( [Esteira | Ativos Agora] )
+        VAR St    = LOWER( MAX( '13_ETAPA_RECRUTAMENTO'[status] ) )
+        VAR Dec   = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio do candidato" ) )
+        RETURN
+        SWITCH( TRUE(),
+            NOT NoPer, BLANK(),
+            Ativo, "Em andamento",
+            St = "hired", "Contratada",
+            St = "rejected" && Dec > 0, "Declinou",
+            St = "rejected", "Rejeitada",
+            "Outro" )
+
+    // Card da Data Quality no lugar de "Sem motivo na base": quantas aplicações ficaram fora do dash.
+    MEASURE '_Medidas'[Esteira | DQ Desconsideradas] =
+        CALCULATE( [Esteira | Candidatos], REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[considerar] ),
+            '13_ETAPA_RECRUTAMENTO'[considerar] = FALSE() )
+    MEASURE '_Medidas'[Esteira | DQ Desconsideradas Texto] =
+        "fora de todos os números do dash"
+    MEASURE '_Medidas'[Esteira | DQ Desconsideradas Insight] =
+        VAR Base = CALCULATE( [Esteira | Candidatos], REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[considerar] ) )
+        RETURN "duplicadas, movimentação entre vagas e posição cancelada · "
+            & FORMAT( DIVIDE( [Esteira | DQ Desconsideradas], Base ), "0.0%" ) & " das aplicações"
+
+EVALUATE ROW( "medidas", 7 )
+
+// E1 · Tipos de encerramento (com as desconsideradas, que o filtro do relatório tira do dash)
+EVALUATE
+ADDCOLUMNS(
+    VALUES( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] ),
+    "apps", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ) )
+)
+ORDER BY [apps] DESC
+
+// E2 · Motivos ainda "A classificar" (devem ser 0; se aparecer algum, incluir na dMotivoTipo)
+EVALUATE
+TOPN( 15,
+    ADDCOLUMNS(
+        CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] ),
+            '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "A classificar" ),
+        "apps", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ) ) ),
+    [apps], DESC )
+
+// E3 · SLA com a pausa do Silver Medalist (contratadas)
+EVALUATE
+ROW(
+    "contratadas", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[status] = "hired" ),
+    "com pausa", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[status] = "hired", '13_ETAPA_RECRUTAMENTO'[dias_pausa_sla] > 0 ),
+    "sla mediano", [Esteira | SLA da Esteira (Mediana)]
+)
