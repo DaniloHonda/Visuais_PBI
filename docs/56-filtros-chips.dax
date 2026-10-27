@@ -35,7 +35,10 @@ DEFINE
         VAR Per = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[persona] ),
             VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[persona] )
             RETURN "Persona|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[persona] ), COUNTROWS( Sel ) & " selecionadas" ) )
-        VAR Lista = { ( 1, Per ), ( 2, Est ), ( 3, Rec ), ( 4, Hm ), ( 5, Src ), ( 6, Etp ), ( 7, Prc ), ( 8, Bk ), ( 9, Esp ), ( 10, Per ) }
+        VAR Vag = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[job_name] ),
+            VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[job_name] )
+            RETURN "Vaga|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[job_name] ), COUNTROWS( Sel ) & " selecionadas" ) )
+        VAR Lista = { ( 1, Per ), ( 2, Est ), ( 3, Rec ), ( 4, Hm ), ( 5, Src ), ( 6, Etp ), ( 7, Prc ), ( 8, Bk ), ( 9, Esp ), ( 10, Per ), ( 11, Vag ) }
         RETURN
         CONCATENATEX( FILTER( Lista, NOT ISBLANK( [Value2] ) ), [Value2], ";;", [Value1], ASC )
 
@@ -50,6 +53,7 @@ DEFINE
         + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[requisition_id] ) )
         + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[department_name] ) )
         + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[persona] ) )
+        + INT( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[job_name] ) )
 
     MEASURE '_Medidas'[Esteira | Filtros Botão] =
         VAR N = [Esteira | Filtros Qtde]
