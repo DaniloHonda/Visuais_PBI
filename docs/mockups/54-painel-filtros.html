@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#E9EBEB;font-family:Segoe UI,Arial,sans-serif;color:#1A1A1A}
+.wrap{display:flex;gap:30px;padding:30px}
+.st{width:930px}.st h2{font-size:20px;margin:0 0 4px}.st .d{font-size:13.5px;color:#555;margin-bottom:12px;height:38px}
+.pg{position:relative;width:930px;height:640px;background:#F0F0F0;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.side{position:absolute;left:0;top:0;bottom:0;width:70px;background:#121212}
+.hd{position:absolute;left:90px;top:18px;font-size:22px;font-weight:700}.hd small{display:block;font-size:11px;color:#6B6B6B;font-weight:400}
+.bar{position:absolute;left:90px;right:20px;top:78px;height:54px;background:#fff;border-radius:12px;display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.btn{background:#067D84;color:#fff;font-weight:600;font-size:13px;border-radius:9px;padding:8px 14px;white-space:nowrap}
+.btn.o{background:#fff;color:#067D84;border:1px solid #067D84}
+.chip{font-size:12px;border:1px solid #CFE3E4;background:#EEF7F7;color:#03474C;border-radius:14px;padding:4px 10px;white-space:nowrap}
+.chip b{font-weight:600}.mut{font-size:12px;color:#067D84;margin-left:auto;white-space:nowrap}
+.card{position:absolute;left:90px;right:20px;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:12px 14px;font-weight:600;font-size:14px}
+.card .ln{position:absolute;left:14px;right:14px;bottom:16px;height:90px;background:linear-gradient(170deg,transparent 48%,#9FCFD2 49%,#9FCFD2 51%,transparent 52%)}
+.pill{display:inline-block;font-size:11px;font-weight:600;border:1px solid #A9B4B6;border-radius:8px;padding:3px 8px;margin-right:4px;color:#3C3C3C;background:#fff}
+.ov{position:absolute;left:70px;right:0;top:140px;bottom:0;background:rgba(18,18,18,.25)}
+.pn{position:absolute;left:90px;right:20px;top:140px;height:440px;background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:16px 18px;box-sizing:border-box}
+.pn h3{margin:0 0 12px;font-size:15px}
+.g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.bx{border:1px solid #A9B4B6;border-radius:9px;padding:5px 9px;font-size:12px;height:36px;box-sizing:border-box;position:relative}
+.bx i{display:block;font-style:normal;font-size:9px;font-weight:700;color:#5E5E5E;letter-spacing:.04em}
+.bx.on{border-color:#067D84;background:#F2FAFA}
+.dd{position:absolute;left:0;top:40px;width:240px;background:#fff;border:1px solid #A9B4B6;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.14);padding:8px;z-index:3;font-size:12px}
+.dd .s{border:1px solid #067D84;border-radius:7px;padding:5px 8px;color:#888;margin-bottom:6px}
+.dd div.it{display:flex;justify-content:space-between;padding:4px 2px}.dd span.c{color:#888}
+.cb{display:inline-block;width:11px;height:11px;border:1.5px solid #888;border-radius:3px;margin-right:6px;vertical-align:-1px}.cb.k{background:#067D84;border-color:#067D84}
+.ft{position:absolute;left:18px;right:18px;bottom:14px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B6B6B}
+.note{background:#fff;border-radius:12px;padding:12px 16px;font-size:13px;line-height:1.5;margin-top:12px}
+</style></head><body><div class="wrap">
+<div class="st"><h2>Fechado: só a barra de resumo (44–54 px)</h2><div class="d">Nada fica por cima dos gráficos. Os chips mostram o que está filtrado; "Limpar filtros" tira tudo.</div>
+<div class="pg"><div class="side"></div><div class="hd">Esteiras<small>Deep dive da esteira</small></div>
+<div class="bar"><span class="btn">☰ Filtros (3)</span><span class="chip"><b>Período</b> 01/10 – 25/10</span><span class="chip"><b>Esteira</b> B2C - XP Future</span><span class="chip"><b>Recrutador</b> 2 selecionados</span><span class="mut">Limpar filtros</span></div>
+<div class="card" style="top:146px;height:220px">Evolução da esteira<div style="margin-top:10px"><span class="pill">Movimentações</span><span class="pill">Agenda</span></div><div class="ln"></div></div>
+<div class="card" style="top:380px;height:240px">Entradas e aprovações por etapa</div></div>
+<div class="note">Os chips são uma medida de texto (um por filtro ativo). O botão "Filtros" é um botão nativo com indicador que só mostra e esconde o painel: não mexe nos filtros.</div></div>
+<div class="st"><h2>Aberto: painel de filtros por cima da página</h2><div class="d">Nossos visuais de sempre (Período e Segmentação, lista suspensa), sem moldura do Power BI. A lista abre dentro do painel.</div>
+<div class="pg"><div class="side"></div><div class="hd">Esteiras<small>Deep dive da esteira</small></div>
+<div class="bar"><span class="btn o">✕ Fechar filtros</span><span class="chip"><b>Período</b> 01/10 – 25/10</span><span class="chip"><b>Esteira</b> B2C - XP Future</span><span class="chip"><b>Recrutador</b> 2 selecionados</span><span class="mut">Limpar filtros</span></div>
+<div class="card" style="top:146px;height:220px">Evolução da esteira</div><div class="card" style="top:380px;height:240px">Entradas e aprovações por etapa</div>
+<div class="ov"></div>
+<div class="pn"><h3>Filtros</h3><div class="g">
+<div class="bx on"><i>PERÍODO</i>01/10/2026 – 25/10/2026</div><div class="bx on"><i>ESTEIRA</i>B2C - XP Future</div><div class="bx on"><i>RECRUTADOR</i>2 selecionados
+<div class="dd"><div class="s">Buscar recrutador</div><div class="it"><span><span class="cb k"></span>Leticia G. Paschoal</span><span class="c">1.658</span></div><div class="it"><span><span class="cb k"></span>Bruno Bonfati</span><span class="c">1.243</span></div><div class="it"><span><span class="cb"></span>Natalia C. Nascimento</span><span class="c">1.153</span></div><div class="it"><span><span class="cb"></span>Carolina V. Valentim</span><span class="c">948</span></div><div class="it"><span><span class="cb"></span>Elisa A. Goncalves</span><span class="c">874</span></div></div></div><div class="bx"><i>BK</i>Todos</div>
+<div class="bx"><i>SOURCER</i>Todos</div><div class="bx"><i>ETAPA</i>Todas</div><div class="bx"><i>ESPECIALIDADE</i>Todas</div><div class="bx"><i>PERSONA</i>Todas</div>
+<div class="bx"><i>PRAÇA</i>Todas</div></div>
+<div class="ft"><span>Os filtros valem na hora, para as páginas sincronizadas.</span><span class="btn">Ver resultado</span></div></div></div>
+<div class="note">Painel com altura ~440: cada filtro tem espaço para a lista abrir sem sair do painel. "Ver resultado" e "Fechar filtros" fazem a mesma coisa (escondem o painel).</div></div>
+</div></body></html>
