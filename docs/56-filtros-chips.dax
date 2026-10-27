@@ -7,7 +7,7 @@
 DEFINE
     MEASURE '_Medidas'[Esteira | Filtros Ativos] =
         VAR PerOn = ISFILTERED( _dCALENDARIO[Data] )
-        VAR Per = IF( PerOn, "Período|" & FORMAT( MIN( _dCALENDARIO[Data] ), "dd/mm" ) & " – " & FORMAT( MAX( _dCALENDARIO[Data] ), "dd/mm" ) )
+        VAR Prd = IF( PerOn, "Período|" & FORMAT( MIN( _dCALENDARIO[Data] ), "dd/mm" ) & " – " & FORMAT( MAX( _dCALENDARIO[Data] ), "dd/mm" ) )
         VAR Est = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[esteira] ),
             VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[esteira] )
             RETURN "Esteira|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[esteira] ), COUNTROWS( Sel ) & " selecionadas" ) )
@@ -32,13 +32,13 @@ DEFINE
         VAR Esp = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[department_name] ),
             VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[department_name] )
             RETURN "Especialidade|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[department_name] ), COUNTROWS( Sel ) & " selecionadas" ) )
-        VAR Per = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[persona] ),
+        VAR Pso = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[persona] ),
             VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[persona] )
             RETURN "Persona|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[persona] ), COUNTROWS( Sel ) & " selecionadas" ) )
         VAR Vag = IF( ISFILTERED( '13_ETAPA_RECRUTAMENTO'[job_name] ),
             VAR Sel = FILTERS( '13_ETAPA_RECRUTAMENTO'[job_name] )
             RETURN "Vaga|" & IF( COUNTROWS( Sel ) = 1, MAXX( Sel, '13_ETAPA_RECRUTAMENTO'[job_name] ), COUNTROWS( Sel ) & " selecionadas" ) )
-        VAR Lista = { ( 1, Per ), ( 2, Est ), ( 3, Rec ), ( 4, Hm ), ( 5, Src ), ( 6, Etp ), ( 7, Prc ), ( 8, Bk ), ( 9, Esp ), ( 10, Per ), ( 11, Vag ) }
+        VAR Lista = { ( 1, Prd ), ( 2, Est ), ( 3, Rec ), ( 4, Hm ), ( 5, Src ), ( 6, Etp ), ( 7, Prc ), ( 8, Bk ), ( 9, Esp ), ( 10, Pso ), ( 11, Vag ) }
         RETURN
         CONCATENATEX( FILTER( Lista, NOT ISBLANK( [Value2] ) ), [Value2], ";;", [Value1], ASC )
 
