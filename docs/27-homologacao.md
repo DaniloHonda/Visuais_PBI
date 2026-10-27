@@ -142,3 +142,5 @@ Etapa 6 (mockups para aprovar): `docs/33-mockup-dados-do-dash.png` e `docs/33-mo
 - **Desrejeitados e Silver Medalist**: os dias na etapa "Stand-by | Silver medalist" **pausam o SLA** (não contam); quando volta ao processo, o SLA volta a contar e soma no total.
 - Off limits, AAI/B2B e o motivo "Silver Medalist" = rejeição (Avaliação), confirmado com a recrutadora.
 - Tipos agora: Avaliação · Administrativo (Limpeza de Pool, Move interno) · Declínio do candidato · Desconsiderada · Contratada em outra vaga.
+
+**Regras dos recrutadores conferidas (27/10/2026, `docs/51`):** Avaliação 53.533 · Desconsiderada 6.259 · Declínio do candidato 5.726 · Administrativo 4.478 · Contratada em outra vaga 131 = **70.127** rejeitadas (igual a antes) · nenhum motivo "A classificar" · 677 contratadas, **4** com pausa no Silver Medalist · SLA mediano **15 d** (sem mudança). Saíram de Avaliação para Declínio ~4,4 mil (Anywhere, remuneração etc. nas etapas de aplicação, avaliação e qualificação). Com o filtro `considerar`, as aplicações do dash passam a ser 122.394 − 6.259 = **116.135**.
