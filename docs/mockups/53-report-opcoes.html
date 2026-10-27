@@ -1,0 +1,91 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#F4F5F5;font-family:Segoe UI,Arial,sans-serif;color:#1A1A1A}
+.pg{width:1900px;padding:40px;box-sizing:border-box}
+h1{font-size:30px;margin:0 0 6px}h2{font-size:22px;margin:36px 0 6px}.sub{color:#6B6B6B;font-size:15px;margin-bottom:18px}
+.card{background:#fff;border:1px solid #E6E6E6;border-radius:22px;padding:22px 26px}
+.row{display:flex;gap:24px}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:10px;background:#E3F1F2;color:#067D84;margin-left:8px;vertical-align:middle}
+.seg{display:inline-flex;border:1px solid #A9B4B6;border-radius:10px;overflow:hidden;font-size:13px}.seg span{padding:5px 14px}.seg .on{background:#067D84;color:#fff}
+table{border-collapse:separate;border-spacing:3px;font-size:13.5px;width:100%}
+th{font-weight:600;color:#6B6B6B;text-align:center;padding:6px 4px;font-size:13px}
+th.l,td.l{text-align:left;white-space:nowrap}td{text-align:center;padding:7px 4px;border-radius:6px}
+td.g{color:#6B6B6B;font-size:12px;text-align:left}
+.up2{background:#067D84;color:#fff}.up1{background:#9FCFD2}.mid{background:#EEF0F0}.dn1{background:#F4C2BD}.dn2{background:#E05A4F;color:#fff}.na{color:#B0B0B0;background:#FAFAFA}
+.grp td{background:none;color:#067D84;font-weight:600;font-size:12px;text-align:left;padding:10px 0 2px}
+.note{font-size:12.5px;color:#6B6B6B;margin-top:10px}
+.lay{width:560px}.lay .card{padding:16px}
+.wf{position:relative;background:#F4F5F5;border-radius:12px;height:620px;margin-top:10px}
+.b{position:absolute;background:#fff;border:1.5px solid #CFD6D7;border-radius:8px;font-size:11.5px;padding:5px 7px;box-sizing:border-box;color:#3A3A3A;line-height:1.25}
+.b.new{border-color:#067D84;background:#E9F5F6}.b.chg{border-color:#E3A33B;background:#FDF5E7}
+.sec{position:absolute;left:0;font-size:10.5px;color:#067D84;font-weight:700;letter-spacing:.4px}
+ul{margin:8px 0 0 18px;padding:0;font-size:13px;line-height:1.5}
+.leg span{display:inline-block;width:14px;height:10px;border-radius:3px;margin:0 4px 0 12px;vertical-align:middle}
+</style></head><body><div class="pg">
+<h1>Report · aprovados por praça em cada etapa + organização da página</h1>
+<div class="sub">Prévia com números fictícios. Cores iguais às do dash: teal = taxa acima da média da etapa, coral = abaixo, cinza = na média (± 2 p.p.).</div>
+
+<h2>1 · A matriz nova: etapas nas linhas, praças nas colunas <span class="tag">recomendada</span></h2>
+<div class="sub">Nome real da etapa. Só aparecem as etapas com movimento no filtro: filtrando uma esteira, ficam só as etapas dela. O botão Etapa | Grupo mantém a visão compactada para quem quiser.</div>
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+<div style="font-weight:600;font-size:18px">Aprovados por praça em cada etapa</div>
+<div><span class="seg"><span class="on">Etapa</span><span>Grupo</span></span>&nbsp;&nbsp;<span class="seg"><span class="on">Taxa vs. média</span><span>Números</span></span></div></div>
+<table>
+<tr><th class="l">Etapa</th><th>Média da etapa</th><th>São Paulo</th><th>Rio de Janeiro</th><th>Belo Horizonte</th><th>Porto Alegre</th><th>Curitiba</th><th>Remoto</th><th>Aprovados</th></tr>
+<tr class="grp"><td colspan="9">Triagem</td></tr>
+<tr><td class="l">Revisão de aplicação</td><td class="g">38%</td><td class="mid">39% +1</td><td class="dn1">31% −7</td><td class="up1">44% +6</td><td class="mid">37% −1</td><td class="na">22%</td><td class="up2">55% +17</td><td>4.812</td></tr>
+<tr><td class="l">Phone Screening</td><td class="g">61%</td><td class="mid">62% +1</td><td class="mid">60% −1</td><td class="dn1">54% −7</td><td class="up1">67% +6</td><td class="na">70%</td><td class="dn2">41% −20</td><td>1.903</td></tr>
+<tr class="grp"><td colspan="9">Avaliações</td></tr>
+<tr><td class="l">Avaliação técnica</td><td class="g">52%</td><td class="up1">57% +5</td><td class="dn2">36% −16</td><td class="mid">51% −1</td><td class="na">60%</td><td class="na">—</td><td class="up1">59% +7</td><td>812</td></tr>
+<tr class="grp"><td colspan="9">Entrevistas</td></tr>
+<tr><td class="l">Entrevista R&amp;S</td><td class="g">58%</td><td class="mid">59% +1</td><td class="up1">64% +6</td><td class="dn1">50% −8</td><td class="mid">57% −1</td><td class="na">48%</td><td class="mid">60% +2</td><td>1.077</td></tr>
+<tr><td class="l">Entrevista com Head</td><td class="g">66%</td><td class="mid">65% −1</td><td class="up2">82% +16</td><td class="dn1">58% −8</td><td class="na">—</td><td class="na">—</td><td class="na">75%</td><td>402</td></tr>
+<tr class="grp"><td colspan="9">Checagens e Offer</td></tr>
+<tr><td class="l">Background Check</td><td class="g">91%</td><td class="mid">92% +1</td><td class="mid">90% −1</td><td class="na">88%</td><td class="na">—</td><td class="na">—</td><td class="na">100%</td><td>297</td></tr>
+<tr><td class="l">Offer</td><td class="g">84%</td><td class="mid">85% +1</td><td class="dn1">77% −7</td><td class="na">80%</td><td class="na">—</td><td class="na">—</td><td class="na">90%</td><td>214</td></tr>
+</table>
+<div class="note leg">Célula cinza clara = menos de 30 aprovados + rejeitados (pouco caso para comparar). Clique na célula filtra praça + etapa. Etapas sem movimento no filtro somem.<span style="background:#067D84"></span>bem acima<span style="background:#9FCFD2"></span>acima<span style="background:#EEF0F0"></span>na média<span style="background:#F4C2BD"></span>abaixo<span style="background:#E05A4F"></span>bem abaixo</div>
+</div>
+<div class="row" style="margin-top:14px;font-size:14px"><div class="card" style="flex:1"><b>Por que virar a matriz?</b><ul><li>Nome de etapa é longo e são até 29; praças são poucas. Linha cresce para baixo com rolagem natural, coluna não.</li><li>Cada área usa um conjunto diferente de etapas: com "só com movimento", a matriz mostra só as etapas que existem no filtro.</li><li>Os títulos de grupo entre as linhas mantêm a leitura macro sem esconder as etapas.</li></ul></div>
+<div class="card" style="flex:1"><b>Alternativa (se preferir manter praças nas linhas)</b><ul><li>Etapas nas colunas, com rolagem lateral e a 1ª coluna fixa.</li><li>Funciona bem quando há filtro de esteira (poucas etapas), mas sem filtro vira uma tabela larga com 20+ colunas.</li><li>Nos dois casos o visual precisa de uma versão nova (Matriz de calor 1.3.0): títulos de grupo, botão Etapa | Grupo.</li></ul></div></div>
+
+<h2>2 · Organização da página Report</h2>
+<div class="sub">Hoje: Evolução · Entradas por etapa (largura toda, 540 de altura) · pares de 736 px · Praça e Recrutador lado a lado (400 de altura) · Pré Offer e Offer. Azul = visual que muda de lugar ou tamanho; âmbar = visual novo ou com versão nova.</div>
+<div class="row">
+<div class="lay"><div class="card"><b>A · Por pergunta</b> <span class="tag">recomendada</span>
+<div class="wf">
+<div class="sec" style="top:2px">QUANDO</div><div class="b" style="left:0;top:16px;width:100%;height:56px">Evolução da esteira</div>
+<div class="sec" style="top:80px">ONDE (ETAPAS)</div><div class="b" style="left:0;top:94px;width:100%;height:80px">Entradas e aprovações por etapa</div>
+<div class="b" style="left:0;top:180px;width:49%;height:62px">Rejeitados por etapa</div><div class="b" style="left:51%;top:180px;width:49%;height:62px">Motivos de saída por etapa</div>
+<div class="b" style="left:0;top:248px;width:49%;height:62px">SLA por etapa</div><div class="b" style="left:51%;top:248px;width:49%;height:62px">Andamento por etapa</div>
+<div class="sec" style="top:318px">COM QUEM</div>
+<div class="b chg" style="left:0;top:332px;width:100%;height:96px">Aprovados por praça em cada etapa (matriz nova, largura toda)</div>
+<div class="b new" style="left:0;top:434px;width:100%;height:80px">Aprovados por recrutador (largura toda: todas as colunas, igual à de etapas)</div>
+<div class="sec" style="top:522px">RETA FINAL</div><div class="b" style="left:0;top:536px;width:100%;height:70px">Aplicações em Pré Offer e Offer</div>
+</div>
+<ul><li>Junta o que responde a mesma pergunta: perdas (Rejeitados + Motivos) e tempo (SLA + Andamento).</li><li>Praça e Recrutador ganham a largura toda: o recrutador mostra as mesmas colunas da tabela de etapas.</li><li>Página fica ~500 px mais alta.</li></ul></div></div>
+
+<div class="lay"><div class="card"><b>B · Um bloco com botões de recorte</b>
+<div class="wf">
+<div class="b" style="left:0;top:16px;width:100%;height:56px">Evolução da esteira</div>
+<div class="b chg" style="left:0;top:80px;width:100%;height:130px">Entradas e aprovações por <b>[Etapa | Recrutador | Praça]</b><br>uma tabela só, botões no topo trocam o recorte das linhas</div>
+<div class="b chg" style="left:0;top:216px;width:100%;height:96px">Aprovados por praça em cada etapa (matriz nova)</div>
+<div class="b" style="left:0;top:318px;width:49%;height:62px">Rejeitados por etapa</div><div class="b" style="left:51%;top:318px;width:49%;height:62px">Motivos de saída</div>
+<div class="b" style="left:0;top:386px;width:49%;height:62px">SLA por etapa</div><div class="b" style="left:51%;top:386px;width:49%;height:62px">Andamento por etapa</div>
+<div class="b" style="left:0;top:454px;width:100%;height:70px">Aplicações em Pré Offer e Offer</div>
+</div>
+<ul><li>Recrutador e praça usam o espaço grande da tabela de etapas.</li><li>Página fica menor que hoje.</li><li>Cuidado: por etapa a tabela mostra participantes da etapa; por recrutador, aplicações e contratadas. Precisa de versão nova da Tabela por etapa e o rótulo das colunas troca junto com o botão.</li></ul></div></div>
+
+<div class="lay"><div class="card"><b>C · Mínima mudança</b>
+<div class="wf">
+<div class="b" style="left:0;top:16px;width:100%;height:56px">Evolução da esteira</div>
+<div class="b chg" style="left:0;top:80px;width:100%;height:66px">Entradas e aprovações por etapa (altura 540 → 420)</div>
+<div class="b" style="left:0;top:152px;width:49%;height:62px">Andamento por etapa</div><div class="b" style="left:51%;top:152px;width:49%;height:62px">Rejeitados por etapa</div>
+<div class="b" style="left:0;top:220px;width:49%;height:80px">SLA por etapa</div><div class="b" style="left:51%;top:220px;width:49%;height:80px">Motivos de saída</div>
+<div class="b chg" style="left:0;top:306px;width:100%;height:96px">Aprovados por praça em cada etapa (matriz nova, largura toda)</div>
+<div class="b new" style="left:0;top:408px;width:100%;height:70px">Aprovados por recrutador (largura toda)</div>
+<div class="b" style="left:0;top:484px;width:100%;height:70px">Aplicações em Pré Offer e Offer</div>
+</div>
+<ul><li>Mantém a ordem de hoje; só tira Praça e Recrutador do lado a lado.</li><li>Menos trabalho: só reposicionar e trocar o fundo.</li><li>Não junta os pares por pergunta.</li></ul></div></div>
+</div>
+</div></body></html>
