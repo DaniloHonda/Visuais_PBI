@@ -46,10 +46,12 @@ IF(
                 ALLEXCEPT( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id] ) )
         VAR Limpo = TRIM( SUBSTITUTE( SUBSTITUTE( SUBSTITUTE( M, UNICHAR( 160 ), " " ), UNICHAR( 10 ), "" ), UNICHAR( 13 ), "" ) )
         VAR Vazio = ISBLANK( Limpo ) || Limpo = ""
+        // Um FILTER só (IF não pode devolver tabela no DAX).
         VAR Achados =
-            IF( Vazio,
-                FILTER( dMotivoTipo, dMotivoTipo[motivo] = "(vazio)" ),
-                FILTER( dMotivoTipo, dMotivoTipo[motivo] <> "(vazio)" && CONTAINSSTRING( Limpo, dMotivoTipo[motivo] ) ) )
+            FILTER( dMotivoTipo,
+                IF( Vazio,
+                    dMotivoTipo[motivo] = "(vazio)",
+                    dMotivoTipo[motivo] <> "(vazio)" && CONTAINSSTRING( Limpo, dMotivoTipo[motivo] ) ) )
         VAR Excecao = MAXX( TOPN( 1, Achados, dMotivoTipo[prioridade], ASC ), dMotivoTipo[tipo] )
         VAR Padrao =
             SWITCH( TRUE(),
