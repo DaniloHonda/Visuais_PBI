@@ -1,7 +1,13 @@
 .xp-ch {
-    position: absolute; inset: 0; display: flex; align-items: center; gap: 8px; overflow: hidden;
+    position: absolute; inset: 0; display: flex; align-items: center; gap: 14px;
     white-space: nowrap; font-size: 13px; color: #121212;
 }
+.xp-ch__btn {
+    flex: 0 0 auto; box-sizing: border-box; height: 40px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--xp-ch-accent); color: #FFFFFF; border-radius: 10px; font-weight: 600; font-size: 14px;
+}
+.xp-ch__ico { font-size: 15px; }
+.xp-ch__strip { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; overflow: hidden; }
 .xp-ch__chip {
     flex: 0 0 auto; border: 1px solid var(--xp-ch-border); background: var(--xp-ch-bg); color: var(--xp-ch-text);
     border-radius: 14px; padding: 5px 12px; line-height: 1.2;
@@ -9,3 +15,5 @@
 }
 .xp-ch__more { font-weight: 600; cursor: help; }
 .xp-ch__empty { color: #6B6B6B; font-size: 13px; }
+.xp-ch__clear { flex: 0 0 auto; text-align: right; color: var(--xp-ch-accent); font-size: 13px; font-weight: 600; }
+.xp-ch__clear--off { color: #B0B0B0; font-weight: 400; }

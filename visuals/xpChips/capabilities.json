@@ -5,25 +5,107 @@
             "name": "texto",
             "kind": "Measure",
             "description": "Ex.: Esteira | Filtros Ativos (\"Rótulo|valor;;Rótulo|valor\")"
+        },
+        {
+            "displayName": "Quantidade de filtros (opcional)",
+            "name": "qtde",
+            "kind": "Measure",
+            "description": "Ex.: Esteira | Filtros Qtde. Sem ela, conta as pílulas."
         }
     ],
     "dataViewMappings": [
         {
-            "conditions": [ { "texto": { "max": 1 } } ],
-            "single": { "role": "texto" }
+            "conditions": [
+                {
+                    "texto": {
+                        "max": 1
+                    },
+                    "qtde": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "texto"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "qtde"
+                            }
+                        }
+                    ]
+                }
+            }
         }
     ],
     "objects": {
         "textos": {
             "properties": {
-                "vazio": { "type": { "text": true } }
+                "vazio": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "botao": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "limpar": {
+                    "type": {
+                        "text": true
+                    }
+                }
             }
         },
         "cores": {
             "properties": {
-                "fundo": { "type": { "fill": { "solid": { "color": true } } } },
-                "borda": { "type": { "fill": { "solid": { "color": true } } } },
-                "texto": { "type": { "fill": { "solid": { "color": true } } } }
+                "fundo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borda": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "texto": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "layout": {
+            "properties": {
+                "larguraBotao": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "larguraLimpar": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
             }
         }
     },

@@ -1,7 +1,7 @@
 # 57 · Painel de filtros (página Resumo primeiro)
 
 Prévia: `docs/mockups/55-painel-filtros-v2.png` · chips: `docs/57-resumo-filtros-preview.png`.
-Pacote novo: `dist/XP - Resumo de filtros 1.0.0.pbiviz`. Medidas: `docs/56-filtros-chips.dax` (já criadas).
+Pacote novo: `dist/XP - Barra de filtros 1.1.0.pbiviz`. Medidas: `docs/56-filtros-chips.dax` (já criadas).
 Fundos novos (faixa de 64 px, conteúdo 139 px acima): `backgrounds/BG - Esteiras_Resumo|Report|Nominal|DataQuality.svg`
 (gerados por `tools/gen_bg_faixa_filtros.py`). Alturas: Resumo 2011 · Report 4305 · Nominal 1581 · Data Quality 1581.
 
@@ -13,12 +13,15 @@ Visual oculto não ocupa espaço nem bloqueia clique. Os indicadores só mostram
 2. Selecione todos os visuais abaixo dos filtros (cards, funil, barras…) → **Ctrl+G** (agrupar) → Formatar → Propriedades → **Y = Y atual − 139**
    (ex.: 362 → 223) → **Ctrl+Shift+G** (desagrupar).
 
-## 2. Faixa (sempre visível)
+## 2. Faixa (sempre visível) · XP · Barra de filtros 1.1.0
+Um visual nosso desenha tudo: botão "☰ Filtros (n)", pílulas dos filtros em uso e "Limpar filtros".
+Visual personalizado não aciona indicadores, então os cliques vêm de **2 botões nativos transparentes** por cima.
 | Item | Como criar | X | Y | L | A | Formatar |
 |---|---|---|---|---|---|---|
-| Botão Filtros | Inserir → Botões → Em branco | 316 | 147 | 150 | 40 | Texto: **fx → Esteira \| Filtros Botão**, Segoe UI Semibold 14, branco · Preenchimento #067D84 · cantos 10 · sem borda · Ação: Indicador → **Filtros · aberto** |
-| Resumo de filtros | visual XP · Resumo de filtros | 480 | 147 | 1230 | 40 | Campo: `Esteira \| Filtros Ativos` · Título e Plano de fundo desligados |
-| Limpar filtros | Inserir → Botões → Em branco | 1730 | 147 | 126 | 40 | Texto "Limpar filtros" 13, #067D84, à direita · sem preenchimento · Ação: Indicador → **Filtros · limpar** |
+| Barra de filtros | visual XP · Barra de filtros | 316 | 141 | 1540 | 52 | Campos: Filtros ativos = `Esteira \| Filtros Ativos` · Quantidade = `Esteira \| Filtros Qtde` · Título e Plano de fundo desligados · Layout: botão 150, limpar 126 |
+| Clique "Filtros" | Botão → Em branco | 316 | 147 | 150 | 40 | Preenchimento **desligado**, borda desligada · Ao passar o mouse: preenchimento branco, transparência 85% · Ação: Indicador → **Filtros · aberto** · Dica: "Abrir filtros" |
+| Clique "Limpar" | Botão → Em branco | 1730 | 147 | 126 | 40 | igual · Ação: Indicador → **Filtros · limpar** · Dica: "Limpar todos os filtros" |
+Os dois botões ficam **acima** da barra na Seleção (Organizar → Trazer para frente).
 
 ## 3. Painel (grupo "Painel de filtros")
 | Item | Como criar | X | Y | L | A | Formatar |

@@ -1,11 +1,11 @@
 {
     "visual": {
         "name": "xpChips",
-        "displayName": "XP · Resumo de filtros",
+        "displayName": "XP · Barra de filtros",
         "guid": "xpChips7E2B91C4A05D4F6E8B3C1D2E9F7A6B54",
         "visualClassName": "Visual",
-        "version": "1.0.0.0",
-        "description": "Mostra os filtros em uso como pílulas (\"Rótulo|valor\" separados por \";;\"). Padrão visual XP.",
+        "version": "1.1.0.0",
+        "description": "Barra de filtros: botão Filtros (n), pílulas dos filtros em uso e Limpar filtros. Os cliques vêm de botões nativos transparentes por cima (\"Rótulo|valor\" separados por \";;\"). Padrão visual XP.",
         "supportUrl": "https://github.com/",
         "gitHubUrl": ""
     },
@@ -22,5 +22,5 @@
     "capabilities": "capabilities.json",
     "dependencies": null,
     "stringResources": [],
-    "version": "1.0.0.0"
+    "version": "1.1.0.0"
 }
