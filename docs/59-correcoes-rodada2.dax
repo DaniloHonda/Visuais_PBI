@@ -220,3 +220,94 @@ SAMPLE( 8,
         '13_ETAPA_RECRUTAMENTO'[status] = "hired",
         '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE() ),
     '13_ETAPA_RECRUTAMENTO'[application_id], ASC )
+
+// C7 · SLA das contratadas por faixa (há contratações em 1–4 dias: aplicação criada no fim do processo?)
+EVALUATE
+VAR H =
+    CALCULATETABLE(
+        SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ),
+        '13_ETAPA_RECRUTAMENTO'[status] = "hired",
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE() )
+RETURN
+ROW(
+    "até 5 d", COUNTROWS( FILTER( H, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] <= 5 ) ),
+    "6–15", COUNTROWS( FILTER( H, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] > 5 && '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] <= 15 ) ),
+    "16–30", COUNTROWS( FILTER( H, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] > 15 && '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] <= 30 ) ),
+    "31–45", COUNTROWS( FILTER( H, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] > 30 && '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] <= 45 ) ),
+    "> 45", COUNTROWS( FILTER( H, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] > 45 ) ),
+    "total", COUNTROWS( H )
+)
+
+// C8 · 6 desconsideradas SEM motivo na Revisão de aplicação: abrir no Greenhouse e ver se são Duplicate mesmo
+// (são 3.931: se forem reprovação de verdade, a Revisão reprova mais do que o dash mostra)
+EVALUATE
+TOPN( 6,
+    CALCULATETABLE(
+        SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[job_name] ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = FALSE(),
+        '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] = BLANK(),
+        '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[stage_name] = "Revisão de aplicação",
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE() ),
+    '13_ETAPA_RECRUTAMENTO'[application_id], DESC )
+
+// C9 · Persona na etapa Mindsight e PI Cognitivo · VAGAS · jul–ago (para trocar a etapa, mude Etp)
+EVALUATE
+VAR Etp = "Mindsight e PI Cognitivo"
+VAR Base =
+    CALCULATETABLE(
+        ADDCOLUMNS(
+            VALUES( '13_ETAPA_RECRUTAMENTO'[persona] ),
+            "part", [Esteira | Participantes],
+            "aprov", [Esteira | Aprovados],
+            "rej aval", CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Avaliação" ) ),
+            "declin", [Esteira | Declínios do Candidato],
+            "med d", [Esteira | Dias na Etapa (Mediana)]
+        ),
+        dEtapa[stage_name] = Etp,
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(),
+        dOrganograma[eh_pool] = "Vaga",
+        '_dCALENDARIO'[Data] >= DATE( 2026, 7, 1 ),
+        '_dCALENDARIO'[Data] <= DATE( 2026, 8, 31 )
+    )
+RETURN
+SELECTCOLUMNS(
+    TOPN( 12, FILTER( Base, [part] >= 30 ), [part], DESC ),
+    "persona", '13_ETAPA_RECRUTAMENTO'[persona], "part", [part], "aprov", [aprov],
+    "rej aval", [rej aval] + 0, "declin", [declin] + 0,
+    "conv aval", ROUND( DIVIDE( [aprov], [aprov] + [rej aval] ) * 100, 0 ),
+    "med d", [med d]
+)
+ORDER BY [part] DESC
+
+// C10 · Persona na Entrevista com Hiring Team · VAGAS · jul–ago
+EVALUATE
+VAR Etp = "Entrevista com Hiring Team"
+VAR Base =
+    CALCULATETABLE(
+        ADDCOLUMNS(
+            VALUES( '13_ETAPA_RECRUTAMENTO'[persona] ),
+            "part", [Esteira | Participantes],
+            "aprov", [Esteira | Aprovados],
+            "rej aval", CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Avaliação" ) ),
+            "declin", [Esteira | Declínios do Candidato],
+            "med d", [Esteira | Dias na Etapa (Mediana)]
+        ),
+        dEtapa[stage_name] = Etp,
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(),
+        dOrganograma[eh_pool] = "Vaga",
+        '_dCALENDARIO'[Data] >= DATE( 2026, 7, 1 ),
+        '_dCALENDARIO'[Data] <= DATE( 2026, 8, 31 )
+    )
+RETURN
+SELECTCOLUMNS(
+    TOPN( 12, FILTER( Base, [part] >= 20 ), [part], DESC ),
+    "persona", '13_ETAPA_RECRUTAMENTO'[persona], "part", [part], "aprov", [aprov],
+    "rej aval", [rej aval] + 0, "declin", [declin] + 0,
+    "conv aval", ROUND( DIVIDE( [aprov], [aprov] + [rej aval] ) * 100, 0 ),
+    "med d", [med d]
+)
+ORDER BY [part] DESC

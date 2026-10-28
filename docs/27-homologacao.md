@@ -166,3 +166,16 @@ Riscos de conclusão errada mapeados (do mais grave ao menos grave):
 - **Q3 · filtro de Etapa quebra os cards:** com Etapa = Offer, Aplicações = **115.875** contra **935** que passaram pela Offer; Entrevista R&S 1.740 × 39. Correção: `Esteira | Candidatos` exige data de entrada (`docs/59`, parte B).
 - **Q4 · cobertura:** Vaga 51.770 apps (8.605 sem esteira; 675 contratadas) · Pool 60.309 (60.297 sem esteira; 16.487 persona Geral; 1 contratada) · fora da Jobs 4.056 (sem esteira). Total 116.135. Análise por esteira só existe para vagas; contratação é praticamente 100% vaga.
 - **Q5 · maturidade (todas as aplicações):** jul 30.102 · 27% em andamento · 220 contr · 1,0% · SLA 17,5 · ago 37.088 · 46% · 186 · 0,9% · 15 · set 32.312 · 48% · 194 · 1,2% · 14 · out 16.633 · 65% · 77 · 1,3% · 15. Nem julho fechou: o estoque "em andamento" é sobretudo pool. Rodar por vaga (C1).
+
+### Resultados da rodada 1, parte 2 (28/10/2026)
+**Q6 · Vagas, candidaturas jul–ago** (part · aprov · rej aval · declin · adm · conv aval · med d · P90):
+Revisão 27.293 · 20.151 · 4.953 · 701 · 34 · **80%** · 0 · 20 — Mindsight - Fit cultural 636 · 16 · 40 · 2 · – · 29% · 0 · 9 —
+**Mindsight e PI Cognitivo 22.460 · 1.856 · 12.133 · 82 · 912 · 13% · 19 · 46** (~7,5 mil ainda na etapa) — Priorizados IA 1.238 · 119 · 586 · 6 · 2 · 17% · 11 · 38 —
+Qualificação 110 · 77 · 13 · 17 · 2 · 86% · 5 · 70 — Triagem 862 · 132 · 186 · 7 · 297 · 42% · 24 · 68 — Phone Screening 1.082 · 560 · 276 · 35 · 23 · 67% · 5 · 30 —
+Confirmados na dinâmica 41 · 34% — Etapa com Recrutamento 141 · 62% · 4 · 45 — Vídeo Entrevista 138 · 29 · 97 · 23% · 14 · 33 —
+Background Check 582 · 97% · 0 · 5 — Short List 125 · 86% — Entrevista com supervisor 98 · 81% · 5 · 38 — Avaliação técnica 138 · 94% · 6 · 15 —
+Entrevista com coordenador 56 · 94% · 2 · 8 — **Entrevista com Hiring Team 594 · 192 · 221 · 20 · 43 · 46% · 9 · 36** — Entrevista com Head 35 · 97% · 4 · 10 —
+Análise de Crédito 460 · 99% · 0 · 7 — Pleno 69 — Pré Offer 38 · 100% · 10 · 27 — Senior 87 — Offer 501 · 400 · 5 · **47 declínios** · 99% · 3 · 17.
+**Q7 · regra A × B (todas as aplicações):** robustas: Revisão 21.515 → 19.926 (−7%), Mindsight e PI 24.650 → 25.227 (+2%). **Sensíveis:** Priorizados IA 1.023 → 2.205 (+116%), Phone Screening 1.559 → 1.858 (+19%), Avaliação técnica 252 → 55 (−78%), Senior 397 → 876 (+121%), Offer 7 → 39.
+**Q8 · desconsideradas por etapa:** Revisão de aplicação **4.526 (3.931 sem motivo)** · Mindsight e PI 1.451 (126) · Phone Screening 79 (34) · Triagem 52 · Priorizados IA 37 · Hiring Team 22 · Etapa com Recrutamento 18 · Senior 14.
+**Q9 · amostra de contratadas (SLA):** 2 · 38 · 13 · 40 · 4 · 38 · 10 · 1 dias. Três contratações em até 4 dias (212294288002, 299181429002, 306084492002): conferir se a aplicação foi criada no fim do processo.
