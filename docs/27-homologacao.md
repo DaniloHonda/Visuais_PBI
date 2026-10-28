@@ -144,3 +144,18 @@ Etapa 6 (mockups para aprovar): `docs/33-mockup-dados-do-dash.png` e `docs/33-mo
 - Tipos agora: Avaliação · Administrativo (Limpeza de Pool, Move interno) · Declínio do candidato · Desconsiderada · Contratada em outra vaga.
 
 **Regras dos recrutadores conferidas (27/10/2026, `docs/51`):** Avaliação 53.533 · Desconsiderada 6.259 · Declínio do candidato 5.726 · Administrativo 4.478 · Contratada em outra vaga 131 = **70.127** rejeitadas (igual a antes) · nenhum motivo "A classificar" · 677 contratadas, **4** com pausa no Silver Medalist · SLA mediano **15 d** (sem mudança). Saíram de Avaliação para Declínio ~4,4 mil (Anywhere, remuneração etc. nas etapas de aplicação, avaliação e qualificação). Com o filtro `considerar`, as aplicações do dash passam a ser 122.394 − 6.259 = **116.135**.
+
+## Homologação final para a análise de etapas (28/10/2026) · consultas em `docs/58-homologacao-final.dax`
+Riscos de conclusão errada mapeados (do mais grave ao menos grave):
+1. **Conversão da etapa mistura três coisas**: reprovação pela XP (avaliação), desistência do candidato e encerramento administrativo (limpeza de pool). Para "qual etapa filtra", usar só a avaliação (Q6, `conv aval`).
+2. **Etapa da reprovação (decisão pendente)**: 3.529 aplicações voltaram para uma etapa anterior antes de serem reprovadas; a reprovação conta na etapa registrada e a etapa onde a decisão foi tomada vira "Voltou". Pares: Mindsight → Revisão 1.019, Priorizados IA → Mindsight 673, Phone Screening → Revisão 453 (Q7).
+3. **Pool × vaga**: 54% das aplicações são de pool, sem esteira e muitas com persona "Geral"; analisar separado (Q4, Q6 com Tipo).
+4. **Coorte aberta**: meses recentes ainda em andamento; conversão e SLA só em jul–ago (Q5). SLA das contratadas é viesado para baixo (só quem já terminou; base desde 01/07).
+5. **Filtro de Etapa nos cards**: a 13 tem linhas de etapas não alcançadas; com Etapa filtrada, Aplicações/Contratadas podem contar vagas que têm a etapa (Q3).
+6. **Filtro de Especialidade**: confirmar que o campo usado (Department Name) é da 13 ou de tabela ligada a ela (Q2).
+7. **Vagas de teste/cópia/template** ("[TESTE TESTANDO]" 5.146 aplicações em out/24) (Q1).
+8. **Desconsideradas sem motivo**: se concentradas numa etapa de avaliação, a conversão dela fica otimista (Q8).
+9. **Ordem das etapas varia por vaga**: funil "chegaram até a etapa ou além" usa a ordem da `dEtapa`; preferir participantes por etapa.
+10. **Nomes diferentes para a mesma etapa** (Mindsight - Fit cultural / [Manual] Mindsight / Mindsight e PI Cognitivo; Bar Raiser / Entrevista com Bar Raiser…): somar por família antes de concluir.
+11. **Etapas automáticas** (mediana 0 d): tempo não é custo do recrutador; o custo é a desistência.
+12. **Amostras pequenas** (677 contratadas): mínimo de 30 decisões por célula.
