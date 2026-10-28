@@ -11,13 +11,26 @@
 //      "[Template 2025] …" e "Teste - B2B" = 5.169 aplicações. As "Cópia de …" (25) ficam: podem ser vagas reais.
 // ---------------------------------------------------------------------
 vaga_teste =
-VAR J = '13_ETAPA_RECRUTAMENTO'[job_name]
+VAR J = UPPER( COALESCE( '13_ETAPA_RECRUTAMENTO'[job_name], "" ) )
 RETURN
-    CONTAINSSTRING( J, "[TESTE" )
-        || CONTAINSSTRING( J, "NÃO RECRUTAR" )
-        || CONTAINSSTRING( J, "NAO RECRUTAR" )
-        || CONTAINSSTRING( J, "[TEMPLATE" )
-        || LEFT( J, 7 ) = "Teste -"
+    IF(
+        LEFT( J, 6 ) = "[TESTE"
+            || LEFT( J, 9 ) = "[TEMPLATE"
+            || LEFT( J, 7 ) = "TESTE -"
+            || SEARCH( "NÃO RECRUTAR", J, 1, 0 ) > 0
+            || SEARCH( "NAO RECRUTAR", J, 1, 0 ) > 0,
+        TRUE(),
+        FALSE()
+    )
+
+// A1b · Conferência da coluna (Exibição de consulta DAX). Esperado: "verdadeiro" > 0, "falso" = quase tudo, "vazio" = 0
+// EVALUATE
+// ROW(
+//     "verdadeiro", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[vaga_teste] = TRUE() ),
+//     "falso", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE() ),
+//     "vazio", CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ), ISBLANK( '13_ETAPA_RECRUTAMENTO'[vaga_teste] ) ),
+//     "apps teste", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[vaga_teste] = TRUE() )
+// )
 
 // A2 · Painel Filtros → "Filtros em todas as páginas" → arrastar 13_ETAPA_RECRUTAMENTO[vaga_teste]
 //      → marcar só **Falso** → cadeado (bloquear) e olho (ocultar). Igual ao filtro "considerar".
