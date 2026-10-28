@@ -1,0 +1,222 @@
+// =====================================================================
+// 59 · Correções da homologação final + rodada 2 das consultas (28/10/2026)
+// Ordem: PARTE A (coluna, à mão) → PARTE B (medida, consulta DAX) → PARTE C (consultas, consulta DAX, pode rodar tudo junto).
+// =====================================================================
+
+
+// ---------------------------------------------------------------------
+// PARTE A · Vagas de teste e modelo fora do dash
+// A1 · Exibição de tabela → 13_ETAPA_RECRUTAMENTO → Nova coluna → colar → Enter
+//      Pega: [TESTE TESTANDO] Campo BU para pool (5.146), "(TESTE - NÃO RECRUTAR)", "Teste (Não Recrutar)",
+//      "[Template 2025] …" e "Teste - B2B" = 5.169 aplicações. As "Cópia de …" (25) ficam: podem ser vagas reais.
+// ---------------------------------------------------------------------
+vaga_teste =
+VAR J = '13_ETAPA_RECRUTAMENTO'[job_name]
+RETURN
+    CONTAINSSTRING( J, "[TESTE" )
+        || CONTAINSSTRING( J, "NÃO RECRUTAR" )
+        || CONTAINSSTRING( J, "NAO RECRUTAR" )
+        || CONTAINSSTRING( J, "[TEMPLATE" )
+        || LEFT( J, 7 ) = "Teste -"
+
+// A2 · Painel Filtros → "Filtros em todas as páginas" → arrastar 13_ETAPA_RECRUTAMENTO[vaga_teste]
+//      → marcar só **Falso** → cadeado (bloquear) e olho (ocultar). Igual ao filtro "considerar".
+
+
+// ---------------------------------------------------------------------
+// PARTE B · "Aplicações" passa a contar só aplicações que passaram pela etapa filtrada
+// Hoje, com a Etapa filtrada (ex.: Offer), o card mostra 115.875 em vez de 935: a 13 tem linha para etapas
+// não alcançadas. Sem filtro de etapa, o número NÃO muda (toda aplicação tem pelo menos uma entrada).
+// Colar este bloco sozinho → Executar → conferir: "novo" = "antigo" → "Atualizar o modelo com alterações".
+// Contratadas, Rejeitadas, Conversão e Aplicações por contratação usam esta medida e são corrigidas junto.
+// ---------------------------------------------------------------------
+DEFINE
+    MEASURE '_Medidas'[Esteira | Candidatos] =
+        VAR Ini = MIN('_dCALENDARIO'[Data])
+        VAR Fim = MAX('_dCALENDARIO'[Data]) + 1
+        RETURN
+        CALCULATE(
+            DISTINCTCOUNT('13_ETAPA_RECRUTAMENTO'[application_id]),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_entrada_stage]) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <  Fim )
+        )
+EVALUATE
+CALCULATETABLE(
+    ROW(
+        "novo", [Esteira | Candidatos],
+        "antigo", CALCULATE( DISTINCTCOUNT('13_ETAPA_RECRUTAMENTO'[application_id]),
+            KEEPFILTERS( NOT ISBLANK('13_ETAPA_RECRUTAMENTO'[data_aplicacao]) ) ),
+        "novo Offer", CALCULATE( [Esteira | Candidatos], dEtapa[stage_name] = "Offer" ),
+        "contr Offer", CALCULATE( [Esteira | Contratados], dEtapa[stage_name] = "Offer" )
+    ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+    '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE()
+)
+
+
+// ---------------------------------------------------------------------
+// PARTE C · Rodada 2 (depois de A e B). Pode colar tudo e Executar: sai um resultado por consulta.
+// ---------------------------------------------------------------------
+
+// C0 · Números base sem as vagas de teste. Esperado: check = 0; apps ≈ 116.135 − 5.169
+EVALUATE
+CALCULATETABLE(
+    ROW(
+        "apps", [Esteira | Candidatos],
+        "contr", [Esteira | Contratados],
+        "rej", [Esteira | Rejeitados no Processo],
+        "andam", [Esteira | Ativos Agora],
+        "outra vaga", [Esteira | Saíram para Outra Vaga],
+        "check", [Esteira | Check Coorte],
+        "conv %", ROUND( [Esteira | Conversão Esteira %] * 100, 1 ),
+        "sla", [Esteira | SLA da Esteira (Mediana)]
+    ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+    '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE()
+)
+
+// C1 · Maturidade só das VAGAS (sem pool): % em andamento, conversão e SLA por mês de candidatura
+EVALUATE
+VAR Meses =
+    DATATABLE( "mes", STRING, "ini", DATETIME, "fim", DATETIME,
+        { { "jul", "2026-07-01", "2026-07-31" }, { "ago", "2026-08-01", "2026-08-31" },
+          { "set", "2026-09-01", "2026-09-30" }, { "out", "2026-10-01", "2026-10-31" } } )
+RETURN
+SELECTCOLUMNS( Meses, "mes", [mes],
+    "apps", VAR I = [ini] VAR F = [fim] RETURN
+        CALCULATE( [Esteira | Candidatos], '_dCALENDARIO'[Data] >= I, '_dCALENDARIO'[Data] <= F,
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(), dOrganograma[eh_pool] = "Vaga" ),
+    "% andam", VAR I = [ini] VAR F = [fim] RETURN
+        CALCULATE( ROUND( DIVIDE( [Esteira | Ativos Agora], [Esteira | Candidatos] ) * 100, 0 ), '_dCALENDARIO'[Data] >= I, '_dCALENDARIO'[Data] <= F,
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(), dOrganograma[eh_pool] = "Vaga" ),
+    "contr", VAR I = [ini] VAR F = [fim] RETURN
+        CALCULATE( [Esteira | Contratados], '_dCALENDARIO'[Data] >= I, '_dCALENDARIO'[Data] <= F,
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(), dOrganograma[eh_pool] = "Vaga" ),
+    "conv %", VAR I = [ini] VAR F = [fim] RETURN
+        CALCULATE( ROUND( [Esteira | Conversão Esteira %] * 100, 1 ), '_dCALENDARIO'[Data] >= I, '_dCALENDARIO'[Data] <= F,
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(), dOrganograma[eh_pool] = "Vaga" ),
+    "sla", VAR I = [ini] VAR F = [fim] RETURN
+        CALCULATE( [Esteira | SLA da Esteira (Mediana)], '_dCALENDARIO'[Data] >= I, '_dCALENDARIO'[Data] <= F,
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(), dOrganograma[eh_pool] = "Vaga" )
+)
+
+// C2 · Tabela-mãe por etapa · VAGAS · candidaturas de jul–ago
+// rej aval = reprovado pela XP · declin = candidato desistiu/recusou · adm = limpeza de pool, move interno
+// conv aval = aprov ÷ (aprov + rej aval) · med d / p90 d = dias na etapa (passagens concluídas)
+EVALUATE
+VAR Base =
+    CALCULATETABLE(
+        ADDCOLUMNS(
+            VALUES( dEtapa[stage_name] ),
+            "ord", CALCULATE( MIN( dEtapa[ordem] ) ),
+            "part", [Esteira | Participantes],
+            "aprov", [Esteira | Aprovados],
+            "rej aval", CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Avaliação" ) ),
+            "declin", [Esteira | Declínios do Candidato],
+            "adm", CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Administrativo" ) ),
+            "med d", [Esteira | Dias na Etapa (Mediana)],
+            "p90 d", [Esteira | Dias na Etapa (P90)]
+        ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(),
+        dOrganograma[eh_pool] = "Vaga",
+        '_dCALENDARIO'[Data] >= DATE( 2026, 7, 1 ),
+        '_dCALENDARIO'[Data] <= DATE( 2026, 8, 31 )
+    )
+RETURN
+SELECTCOLUMNS(
+    FILTER( Base, [part] >= 30 ),
+    "ord", [ord], "etapa", dEtapa[stage_name], "part", [part], "aprov", [aprov],
+    "rej aval", [rej aval] + 0, "declin", [declin] + 0, "adm", [adm] + 0,
+    "conv aval", ROUND( DIVIDE( [aprov], [aprov] + [rej aval] ) * 100, 0 ),
+    "med d", [med d], "p90 d", [p90 d]
+)
+ORDER BY [ord]
+
+// C3 · Tabela-mãe por etapa · POOLS · candidaturas de jul–ago
+EVALUATE
+VAR Base =
+    CALCULATETABLE(
+        ADDCOLUMNS(
+            VALUES( dEtapa[stage_name] ),
+            "ord", CALCULATE( MIN( dEtapa[ordem] ) ),
+            "part", [Esteira | Participantes],
+            "aprov", [Esteira | Aprovados],
+            "rej aval", CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Avaliação" ) ),
+            "declin", [Esteira | Declínios do Candidato],
+            "adm", CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Administrativo" ) ),
+            "med d", [Esteira | Dias na Etapa (Mediana)],
+            "p90 d", [Esteira | Dias na Etapa (P90)]
+        ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE(),
+        dOrganograma[eh_pool] = "Pool",
+        '_dCALENDARIO'[Data] >= DATE( 2026, 7, 1 ),
+        '_dCALENDARIO'[Data] <= DATE( 2026, 8, 31 )
+    )
+RETURN
+SELECTCOLUMNS(
+    FILTER( Base, [part] >= 30 ),
+    "ord", [ord], "etapa", dEtapa[stage_name], "part", [part], "aprov", [aprov],
+    "rej aval", [rej aval] + 0, "declin", [declin] + 0, "adm", [adm] + 0,
+    "conv aval", ROUND( DIVIDE( [aprov], [aprov] + [rej aval] ) * 100, 0 ),
+    "med d", [med d], "p90 d", [p90 d]
+)
+ORDER BY [ord]
+
+// C4 · Sensibilidade da etapa da reprovação (regra A = etapa registrada · B ≈ etapa mais avançada) · VAGAS + POOLS
+EVALUATE
+VAR AppsVoltou =
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Voltou",
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE() )
+VAR Base =
+    CALCULATETABLE(
+        ADDCOLUMNS(
+            VALUES( dEtapa[stage_name] ),
+            "ord", CALCULATE( MIN( dEtapa[ordem] ) ),
+            "rej A", CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Avaliação" ) ),
+            "sai p/ B", CALCULATE( [Esteira | Rejeitados], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Avaliação" ),
+                KEEPFILTERS( TREATAS( AppsVoltou, '13_ETAPA_RECRUTAMENTO'[application_id] ) ) ),
+            "entra p/ B", CALCULATE( [Esteira | Voltaram], KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[status] = "rejected" ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Avaliação" ) )
+        ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE()
+    )
+RETURN
+SELECTCOLUMNS(
+    FILTER( Base, [rej A] >= 30 || [entra p/ B] >= 30 ),
+    "ord", [ord], "etapa", dEtapa[stage_name], "rej A", [rej A] + 0,
+    "sai p/ B", [sai p/ B] + 0, "entra p/ B", [entra p/ B] + 0,
+    "rej B ≈", [rej A] - [sai p/ B] + [entra p/ B]
+)
+ORDER BY [ord]
+
+// C5 · Desconsideradas (fora do dash): em que etapa estavam e quantas sem motivo
+EVALUATE
+TOPN( 8,
+    CALCULATETABLE(
+        ADDCOLUMNS(
+            VALUES( dEtapa[stage_name] ),
+            "descons", CALCULATE( [Esteira | Rejeitados], '13_ETAPA_RECRUTAMENTO'[considerar] = FALSE() ),
+            "sem motivo", CALCULATE( [Esteira | Rejeitados], '13_ETAPA_RECRUTAMENTO'[considerar] = FALSE(),
+                '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] = BLANK() )
+        ),
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE() ),
+    [descons], DESC )
+
+// C6 · 8 contratadas para conferir o SLA no Greenhouse (início do ciclo → contratação)
+EVALUATE
+SAMPLE( 8,
+    CALCULATETABLE(
+        SUMMARIZE( '13_ETAPA_RECRUTAMENTO',
+            '13_ETAPA_RECRUTAMENTO'[application_id],
+            '13_ETAPA_RECRUTAMENTO'[ciclo_inicio],
+            '13_ETAPA_RECRUTAMENTO'[data_contratacao],
+            '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ),
+        '13_ETAPA_RECRUTAMENTO'[status] = "hired",
+        '13_ETAPA_RECRUTAMENTO'[vaga_teste] = FALSE() ),
+    '13_ETAPA_RECRUTAMENTO'[application_id], ASC )

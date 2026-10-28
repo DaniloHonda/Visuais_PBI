@@ -159,3 +159,10 @@ Riscos de conclusão errada mapeados (do mais grave ao menos grave):
 10. **Nomes diferentes para a mesma etapa** (Mindsight - Fit cultural / [Manual] Mindsight / Mindsight e PI Cognitivo; Bar Raiser / Entrevista com Bar Raiser…): somar por família antes de concluir.
 11. **Etapas automáticas** (mediana 0 d): tempo não é custo do recrutador; o custo é a desistência.
 12. **Amostras pequenas** (677 contratadas): mínimo de 30 decisões por célula.
+
+### Resultados da rodada 1 (28/10/2026, base atualizada)
+- **Q1 · vagas de teste ainda no dash:** "[TESTE TESTANDO] Campo BU para pool" **5.146** + "Teste - B2B" 17 + "(TESTE - NÃO RECRUTAR)" 3 + "Teste (Não Recrutar)" 1 + "[Template 2025]" 2 = **5.169**; "Cópia de …" 25 (mantidas: podem ser vagas reais). Correção: coluna `vaga_teste` + filtro do relatório (`docs/59`).
+- **Q2 · filtros de recorte:** persona, especialidade (`13[especialidade]`), esteira, praça, recrutador e vaga = **1,00** (filtram certo). Conferir que a segmentação Especialidade usa `13[especialidade]`.
+- **Q3 · filtro de Etapa quebra os cards:** com Etapa = Offer, Aplicações = **115.875** contra **935** que passaram pela Offer; Entrevista R&S 1.740 × 39. Correção: `Esteira | Candidatos` exige data de entrada (`docs/59`, parte B).
+- **Q4 · cobertura:** Vaga 51.770 apps (8.605 sem esteira; 675 contratadas) · Pool 60.309 (60.297 sem esteira; 16.487 persona Geral; 1 contratada) · fora da Jobs 4.056 (sem esteira). Total 116.135. Análise por esteira só existe para vagas; contratação é praticamente 100% vaga.
+- **Q5 · maturidade (todas as aplicações):** jul 30.102 · 27% em andamento · 220 contr · 1,0% · SLA 17,5 · ago 37.088 · 46% · 186 · 0,9% · 15 · set 32.312 · 48% · 194 · 1,2% · 14 · out 16.633 · 65% · 77 · 1,3% · 15. Nem julho fechou: o estoque "em andamento" é sobretudo pool. Rodar por vaga (C1).
