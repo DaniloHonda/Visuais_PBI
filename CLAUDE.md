@@ -8,6 +8,7 @@ Registro da homologação e das regras de negócio: `docs/27-homologacao.md`.
 - Uma parte de cada vez, com conferência no meio. **Imagem ou prévia antes** de gerar qualquer `.pbiviz`.
 - Passo a passo com cliques, posições (X, Y, L, A) e cores. Números em pt-BR. Escrever "aplicações".
 - Medidas pela Exibição de consulta DAX no formato `DEFINE MEASURE … EVALUATE` → Executar → "Atualizar o modelo com alterações".
+- **DAX sempre como texto no chat** (bloco de código para copiar), **nunca como arquivo anexo**. O `.dax` pode ficar no repositório, mas o que ele usa é o texto da mensagem.
 - Nunca pedir token ou senha no chat.
 - Não afirmar que algo foi conferido sem a foto do resultado: dizer o que falta conferir.
 
