@@ -1,0 +1,54 @@
+// 69 · Lista "Aplicações em Pré Offer e Offer" (Report) no modo Fotografia · mesmo texto da conversa (03/11/2026)
+// Fotografia: quem estava em Pré Offer / Offer em D (de qualquer data de candidatura), com os dias na etapa e o SLA contados até D.
+// Candidatura: igual a antes (Dias na Etapa Atual e SLA Atual). Recrutador, vaga, praça e situação são os de hoje.
+DEFINE
+    MEASURE '_Medidas'[Esteira | Foto Dias na Etapa] =
+        VAR D = [Esteira | Data da Fotografia]
+        VAR Fim = D + 1
+        VAR Entrada =
+            CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                    ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Fim ) ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                    '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Fim ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                    ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) ) )
+        RETURN IF( NOT ISBLANK( Entrada ), INT( D - Entrada ) )
+
+    MEASURE '_Medidas'[Esteira | Foto SLA (dias)] =
+        VAR D = [Esteira | Data da Fotografia]
+        VAR Ini = MIN( '13_ETAPA_RECRUTAMENTO'[ciclo_inicio] )
+        VAR Pausa = MAX( '13_ETAPA_RECRUTAMENTO'[dias_pausa_sla] )
+        RETURN
+        IF( NOT ISBLANK( Ini ) && NOT ISBLANK( [Esteira | Foto Dias na Etapa] ),
+            MAX( 0, INT( D - Ini ) - Pausa ) )
+
+    MEASURE '_Medidas'[Esteira | Reta Final Dias na Etapa] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Dias na Etapa], [Esteira | Dias na Etapa Atual] )
+    MEASURE '_Medidas'[Esteira | Reta Final SLA (dias)] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto SLA (dias)], [Esteira | SLA Atual (dias)] )
+
+// Conferência · Pré Offer e Offer em 25/10: aplicações (como no "Onde estão"), linhas da lista, acima de 45 dias e o maior
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS(
+        FILTER( SUMMARIZE( dEtapa, dEtapa[ordem], dEtapa[stage_name] ), dEtapa[stage_name] IN { "Pré Offer", "Offer" } ),
+        "apps", [Esteira | Foto Em Andamento],
+        "linhas", CALCULATE( COUNTROWS( FILTER(
+            SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            NOT ISBLANK( [Esteira | Reta Final Dias na Etapa] ) ) ) ),
+        "> 45 d", CALCULATE( COUNTROWS( FILTER(
+            SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            [Esteira | Reta Final Dias na Etapa] > 45 ) ) ),
+        "maior", CALCULATE( MAXX(
+            SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+            [Esteira | Reta Final Dias na Etapa] ) ) ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+ORDER BY dEtapa[ordem]

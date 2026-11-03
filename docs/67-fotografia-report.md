@@ -31,3 +31,8 @@ Partes: (1) Alternador 1.1.0 sincronizado na Report · (2) medidas · (3) troca 
 Achado na foto do Resumo (03/11): "Onde a esteira perde" mostra as mesmas partes nos dois modos (2.436 · 2.197 · 3.447 no Mindsight e PI
 Cognitivo): as partes da barra ainda não foram trocadas para Etapa Aprovados / Rejeitados / Em Andamento.
 Pendente (parte 4): título "Acima hoje" é fixo no XP · Tabela de SLA 1.0.0.
+
+## Parte 5 · Pré Offer e Offer (`docs/69-fotografia-reta-final.dax`)
+Dias → `Esteira | Reta Final Dias na Etapa` · SLA total → `Esteira | Reta Final SLA (dias)`. Na Fotografia: quem estava lá em D,
+com dias e SLA até D. (`Esteira | Nominal Dias na Etapa` já existe na página Nominal: não reaproveitar o nome.)
+Situação em 03/11: Danilo trocou os campos dos visuais 2 a 8 (sem foto das conferências da parte 2 ainda).
