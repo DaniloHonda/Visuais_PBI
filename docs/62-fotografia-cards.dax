@@ -1,0 +1,200 @@
+// 62 · Cards do Resumo no modo Fotografia (03/11/2026) · mesmo texto enviado na conversa
+DEFINE
+    // ---------- Fotografia: estoque no fim do dia D (último dia do período, no máximo hoje)
+    MEASURE '_Medidas'[Esteira | Foto Existentes] =
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Foto Em Andamento] =
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        VAR PorEtapa = ISFILTERED( dEtapa[stage_name] ) || ISFILTERED( '13_ETAPA_RECRUTAMENTO'[stage_name] )
+        RETURN
+        IF( PorEtapa,
+            // com etapa filtrada: só quem estava NAQUELA etapa no dia D
+            CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                    ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Fim ) ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                    '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Fim ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                    ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) ) ),
+            // sem etapa filtrada: toda aplicação que ainda não tinha sido contratada nem rejeitada em D
+            CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                    ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Fim ) ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                    '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Fim ) ) ) )
+
+    MEASURE '_Medidas'[Esteira | Foto Paradas 45] =
+        VAR D = [Esteira | Data da Fotografia]
+        VAR Fim = D + 1
+        RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ),
+            KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Fim ) ),
+            KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Fim ) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < D - 45 ),
+            KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) ) )
+
+    // ---------- Fluxo: o que aconteceu entre o início do período (no mínimo 01/07) e D
+    MEASURE '_Medidas'[Esteira | Fluxo Contratadas] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[status] = "hired" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo Aprovações] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo Reprovações] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo Taxa de Aprovação] =
+        VAR A = [Esteira | Fluxo Aprovações]
+        VAR R = [Esteira | Fluxo Reprovações]
+        RETURN DIVIDE( A, A + R )
+
+    MEASURE '_Medidas'[Esteira | Fluxo SLA Contratações] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        VAR Contratacoes =
+            CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ),
+                KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] < Fim ) )
+        RETURN MEDIANX( Contratacoes, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] )
+
+    // ---------- Valor de cada card nos dois modos
+    MEASURE '_Medidas'[Esteira | Card Aplicações] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Existentes], [Esteira | Candidatos] )
+    MEASURE '_Medidas'[Esteira | Card Contratados] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Contratadas], [Esteira | Contratados] )
+    MEASURE '_Medidas'[Esteira | Card Em Andamento] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Em Andamento], [Esteira | Ativos Agora] )
+    MEASURE '_Medidas'[Esteira | Card Conversão] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Taxa de Aprovação], [Esteira | Conversão Esteira %] )
+    MEASURE '_Medidas'[Esteira | Card SLA] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo SLA Contratações], [Esteira | SLA da Esteira (Mediana)] )
+    MEASURE '_Medidas'[Esteira | Card Período Estoque] =
+        IF( [Esteira | Modo] = "Fotografia",
+            "em " & FORMAT( [Esteira | Data da Fotografia], "dd/mmm", "pt-BR" ),
+            [Esteira | Período Selecionado] )
+
+    // ---------- Textos dos cards (mesmo nome de antes: os cards não precisam ser mexidos)
+    MEASURE '_Medidas'[Esteira | Texto Candidatos] =
+        IF( [Esteira | Modo] = "Fotografia",
+            "Criadas até " & FORMAT( [Esteira | Data da Fotografia], "dd/mm" ) & " (base desde 01/07)",
+            "Aplicações com candidatura no período" )
+    MEASURE '_Medidas'[Esteira | Texto Contratados] =
+        IF( [Esteira | Modo] = "Fotografia", "Pela data da contratação, no período", "Das aplicações com candidatura no período" )
+    MEASURE '_Medidas'[Esteira | Texto Em Andamento] =
+        IF( [Esteira | Modo] = "Fotografia",
+            FORMAT( COALESCE( [Esteira | Foto Paradas 45], 0 ), "#,0" ) & " paradas há mais de 45 dias em "
+                & FORMAT( [Esteira | Data da Fotografia], "dd/mm" ),
+            FORMAT( COALESCE( [Esteira | Ativos Acima de 45 Dias], 0 ), "#,0" ) & " paradas há mais de 45 dias" )
+    MEASURE '_Medidas'[Esteira | Texto Conversão] =
+        IF( [Esteira | Modo] = "Fotografia",
+            "Taxa de aprovação: " & FORMAT( COALESCE( [Esteira | Fluxo Aprovações], 0 ), "#,0" ) & " aprovações e "
+                & FORMAT( COALESCE( [Esteira | Fluxo Reprovações], 0 ), "#,0" ) & " reprovações nas etapas, no período",
+            FORMAT( [Esteira | Contratados], "#,0" ) & " contratados de "
+                & FORMAT( [Esteira | Contratados] + [Esteira | Rejeitados no Processo], "#,0" ) & " decididos" )
+    MEASURE '_Medidas'[Esteira | Texto SLA] =
+        IF( [Esteira | Modo] = "Fotografia", "Mediana das contratadas no período", "Mediana da candidatura à contratação, aplicações do período" )
+
+    // ---------- Comparações e acumulado: vazios na Fotografia (o Card 1.4.0 esconde o bloco)
+    MEASURE '_Medidas'[Esteira | Candidatos (mês atual)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Candidatos], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), Hoje ) ) )
+    MEASURE '_Medidas'[Esteira | Candidatos (mês anterior)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Candidatos], DATESBETWEEN( '_dCALENDARIO'[Data], EDATE( DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), -1 ), EDATE( Hoje, -1 ) ) ) )
+    MEASURE '_Medidas'[Esteira | Candidatos (YTD)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Candidatos], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), 1, 1 ), Hoje ) ) )
+    MEASURE '_Medidas'[Esteira | Contratados (mês atual)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Contratados], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), Hoje ) ) )
+    MEASURE '_Medidas'[Esteira | Contratados (mês anterior)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Contratados], DATESBETWEEN( '_dCALENDARIO'[Data], EDATE( DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), -1 ), EDATE( Hoje, -1 ) ) ) )
+    MEASURE '_Medidas'[Esteira | Contratados (YTD)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Contratados], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), 1, 1 ), Hoje ) ) )
+    MEASURE '_Medidas'[Esteira | Conversão Esteira % (mês atual)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Conversão Esteira %], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), Hoje ) ) )
+    MEASURE '_Medidas'[Esteira | Conversão Esteira % (mês anterior)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Conversão Esteira %], DATESBETWEEN( '_dCALENDARIO'[Data], EDATE( DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), -1 ), EDATE( Hoje, -1 ) ) ) )
+    MEASURE '_Medidas'[Esteira | Conversão Esteira % (YTD)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | Conversão Esteira %], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), 1, 1 ), Hoje ) ) )
+    MEASURE '_Medidas'[Esteira | SLA da Esteira (Mediana) (mês atual)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | SLA da Esteira (Mediana)], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), Hoje ) ) )
+    MEASURE '_Medidas'[Esteira | SLA da Esteira (Mediana) (mês anterior)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | SLA da Esteira (Mediana)], DATESBETWEEN( '_dCALENDARIO'[Data], EDATE( DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), -1 ), EDATE( Hoje, -1 ) ) ) )
+    MEASURE '_Medidas'[Esteira | SLA da Esteira (Mediana) (YTD)] =
+        VAR Hoje = TODAY()
+        RETURN IF( [Esteira | Modo] = "Fotografia", BLANK(),
+            CALCULATE( [Esteira | SLA da Esteira (Mediana)], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), 1, 1 ), Hoje ) ) )
+
+// Conferência: os dois modos lado a lado, período 01/10 a 25/10 (igual à sua tela).
+// Linha Candidatura deve repetir os cards de hoje (17.642 · 86 · 10.501 · 1,2% · 15,5).
+EVALUATE
+CALCULATETABLE(
+    ADDCOLUMNS(
+        VALUES( dModo[modo] ),
+        "apps", [Esteira | Card Aplicações],
+        "contr", [Esteira | Card Contratados],
+        "andam", [Esteira | Card Em Andamento],
+        "conv %", ROUND( [Esteira | Card Conversão] * 100, 1 ),
+        "sla", [Esteira | Card SLA],
+        "selo", [Esteira | Card Período Estoque]
+    ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ),
+    '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 )
+)
