@@ -1,0 +1,82 @@
+// 64 · Funil no modo Fotografia = funil congelado no último dia (caso A) · mesmo texto enviado na conversa (03/11/2026)
+// Mesmo grupo do modo Candidatura (aplicações que entraram no período), mas contando só o que tinha acontecido até o
+// último dia do período (D = Data da Fotografia). Período que termina hoje → igual ao modo Candidatura.
+// As medidas são redefinidas no lugar: funil e cards "por contratação" não precisam trocar campo.
+// Os avisos passam a voltar vazios (o cinza some); o campo Aviso pode ficar no visual.
+DEFINE
+    // Contratadas do mesmo grupo: na Fotografia, só as contratadas até D
+    MEASURE '_Medidas'[Esteira | Funil Contratadas] =
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        IF( [Esteira | Modo] = "Fotografia",
+            CALCULATE( [Esteira | Contratados],
+                KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] < Fim ) ),
+            [Esteira | Contratados] )
+
+    // Chegou até a etapa (ou além); na Fotografia, só entradas até D
+    MEASURE '_Medidas'[Esteira | Funil Aplicações] =
+        VAR Ordem = SELECTEDVALUE( dFunil[ordem_passo] )
+        VAR Ini = MIN( '_dCALENDARIO'[Data] )
+        VAR Fim = MAX( '_dCALENDARIO'[Data] ) + 1
+        VAR FimFoto = IF( [Esteira | Modo] = "Fotografia", [Esteira | Data da Fotografia] + 1, DATE( 9999, 12, 31 ) )
+        RETURN
+        SWITCH( TRUE(),
+            ISBLANK( Ordem ), BLANK(),
+            Ordem = 999, [Esteira | Funil Contratadas],
+            CALCULATE(
+                DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ),
+                KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < FimFoto ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[ordem_etapa] >= Ordem ),
+                REMOVEFILTERS( dEtapa ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] )
+            ) + 0
+        )
+
+    MEASURE '_Medidas'[Esteira | Aplicações por Contratação] =
+        DIVIDE( [Esteira | Candidatos], [Esteira | Funil Contratadas] )
+    MEASURE '_Medidas'[Esteira | Recrutador por Contratação] =
+        DIVIDE( [Esteira | Chegaram ao Recrutador], [Esteira | Funil Contratadas] )
+
+    MEASURE '_Medidas'[Esteira | Texto Aplicações por Contratação] =
+        FORMAT( [Esteira | Candidatos], "#,0" ) & " aplicações para "
+            & FORMAT( [Esteira | Funil Contratadas], "#,0" ) & " contratações"
+            & IF( [Esteira | Modo] = "Fotografia", " até " & FORMAT( [Esteira | Data da Fotografia], "dd/mmm", "pt-BR" ), "" )
+    MEASURE '_Medidas'[Esteira | Texto Recrutador por Contratação] =
+        FORMAT( [Esteira | Chegaram ao Recrutador], "#,0" ) & " chegaram ao recrutador para "
+            & FORMAT( [Esteira | Funil Contratadas], "#,0" ) & " contratações"
+            & IF( [Esteira | Modo] = "Fotografia", " até " & FORMAT( [Esteira | Data da Fotografia], "dd/mmm", "pt-BR" ), "" )
+
+    // O cinza sai: o funil passa a existir nos dois modos
+    MEASURE '_Medidas'[Esteira | Aviso Só Candidatura] = BLANK()
+    MEASURE '_Medidas'[Esteira | Aviso Por Contratação] = BLANK()
+
+// Conferência 1 · funil de setembro nos dois modos
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 9, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 9, 30 ) )
+VAR T =
+    CALCULATETABLE(
+        ADDCOLUMNS( SUMMARIZE( dFunil, dFunil[ordem_passo], dFunil[passo] ),
+            "cand", CALCULATE( [Esteira | Funil Aplicações], TREATAS( { "Candidatura" }, dModo[modo] ) ),
+            "foto", CALCULATE( [Esteira | Funil Aplicações], TREATAS( { "Fotografia" }, dModo[modo] ) ) ),
+        Cal, '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+RETURN
+FILTER( T, [cand] > 0 )
+ORDER BY dFunil[ordem_passo]
+
+// Conferência 2 · cards "por contratação" nos dois modos
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 9, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 9, 30 ) )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS( VALUES( dModo[modo] ),
+        "apps", [Esteira | Candidatos],
+        "contr", [Esteira | Funil Contratadas],
+        "por contr", [Esteira | Aplicações por Contratação],
+        "texto", [Esteira | Texto Aplicações por Contratação] ),
+    Cal, '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )

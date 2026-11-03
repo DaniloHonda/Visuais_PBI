@@ -36,3 +36,11 @@ Funil e "por contratação" acinzentados (Funil 1.3.0, Card de KPI 1.5.0, Barras
 Visto em foto do Danilo: botão, Aplicações 117.161 em 25/10, 25.028 paradas há mais de 45 dias em 25/10, taxa com 17.884 aprovações
 e 16.622 reprovações (01–25/10). Falta conferir em foto os gráficos depois da troca de campos.
 Não feito: Report, Nominal, Data Quality, página Conceitos; comparação "foto × foto" (vs 30 dias antes).
+
+## Funil na Fotografia (decidido em 03/11/2026: caso A)
+Funil **congelado no último dia**: o mesmo grupo do modo Candidatura (aplicações que entraram no período), contando só o que tinha
+acontecido até D (entrada na etapa ≤ D; contratada até D). É funil de verdade (mesmo grupo do início ao fim), então "aplicações por
+contratação" também vale, com o texto "… contratações até dd/mmm". O cinza sai (avisos voltam vazios). Medidas: `docs/64-funil-fotografia.dax`.
+Pontos a deixar claros na tela: (1) período que termina hoje → igual ao modo Candidatura; (2) quem entrou nos últimos dias do período
+ainda não teve tempo de avançar, então o funil e a relação por contratação parecem piores do que vão ficar.
+Alternativa descartada (B · chegadas por etapa no período): grupos diferentes em cada barra, não é funil.
