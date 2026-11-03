@@ -24,3 +24,9 @@ Colunas novas na Fotografia: Situação no dia, Etapa no dia, Situação hoje; D
 contagem = na lista em todas as visões visíveis: Aplicações 117.161 · Contratadas 208 · Em andamento 51.222 · Funil 117.161 ·
 Entradas por etapa 66.114 · Rejeitados e motivos 16.622 · Andamento por faixa 51.222 · SLA por etapa 28.430 (941 ms).
 Por recrutador (9ª linha) ficou fora da foto. Falta: foto da parte B e parte C.
+
+## Conferência da parte B (fotos, 03/11)
+Rodou (1,35 s). "Em andamento": 290507619002 parada > 45 d em Phone Screening (90 dias em 25/10), 287492680002 até 45 d
+(Phone Screening, 4 dias), 221786095002 sem etapa no dia (lacuna). "Entradas por etapa": a 287492680002 saiu como "Triagem"
+com saída 21/10 e "Em andamento" — mistura de duas passagens com a mesma entrada (21/10) no TOPN. Correção: desempate por
+passagem aberta primeiro (saída vazia) e depois pela etapa (linha `VAR PassUlt` do B3).

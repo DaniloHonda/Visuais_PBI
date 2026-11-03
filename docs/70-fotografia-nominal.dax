@@ -218,7 +218,9 @@ DEFINE
                              && NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
                              && '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim
                              && ( ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) ) )
-                    VAR PassUlt = TOPN( 1, PassRel, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], DESC )
+                    VAR PassUlt = TOPN( 1, PassRel, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], DESC,
+                        COALESCE( '13_ETAPA_RECRUTAMENTO'[data_saida_stage], DATE( 9999, 12, 31 ) ), DESC,
+                        '13_ETAPA_RECRUTAMENTO'[stage_name], DESC )
                     VAR EtP  = MAXX( PassUlt, '13_ETAPA_RECRUTAMENTO'[stage_name] )
                     VAR EntP = MAXX( PassUlt, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
                     VAR SaiP0 = MAXX( PassUlt, '13_ETAPA_RECRUTAMENTO'[data_saida_stage] )
@@ -311,42 +313,42 @@ DEFINE
                     " em " & CONCATENATEX( VALUES( dEtapa[stage_name] ), dEtapa[stage_name], ", " ), "" )
                 VAR Faixas = "0–2 d;3–7 d;8–15 d;16–30 d;31–45 d;> 45 d"
                 VAR Frase = SWITCH( V,
-                    "Aplicações",           "aplicações que existiam em " & Dt & " (base desde 01/07)",
-                    "Contratadas",          "contratadas" & PerTxt & " (pela data da contratação)",
-                    "Em andamento",         "aplicações em andamento em " & Dt & EtTxt,
-                    "Funil",                "aplicações que existiam em " & Dt & " e até onde tinham chegado",
-                    "Entradas por etapa",   "aplicações que estiveram" & IF( EtTxt = "", " em alguma etapa", EtTxt ) & PerTxt,
+                    "Aplicações", "aplicações que existiam em " & Dt & " (base desde 01/07)",
+                    "Contratadas", "contratadas" & PerTxt & " (pela data da contratação)",
+                    "Em andamento", "aplicações em andamento em " & Dt & EtTxt,
+                    "Funil", "aplicações que existiam em " & Dt & " e até onde tinham chegado",
+                    "Entradas por etapa", "aplicações que estiveram" & IF( EtTxt = "", " em alguma etapa", EtTxt ) & PerTxt,
                     "Rejeitados e motivos", "aplicações rejeitadas" & EtTxt & PerTxt,
-                    "Andamento por faixa",  "aplicações em andamento em " & Dt & ", por dias parada na etapa",
-                    "SLA por etapa",        "aplicações com etapa concluída" & EtTxt & PerTxt & " · "
+                    "Andamento por faixa", "aplicações em andamento em " & Dt & ", por dias parada na etapa",
+                    "SLA por etapa", "aplicações com etapa concluída" & EtTxt & PerTxt & " · "
                                                 & FORMAT( [Esteira | Fluxo Base SLA], "#,0" ) & " passagens",
-                    "Por recrutador",       "aplicações que existiam em " & Dt,
+                    "Por recrutador", "aplicações que existiam em " & Dt,
                     "aplicações" )
                 VAR Origem = SWITCH( V,
-                    "Aplicações",           "card Aplicações",
-                    "Contratadas",          "card Contratadas",
-                    "Em andamento",         "card Em andamento",
-                    "Funil",                "Funil",
-                    "Entradas por etapa",   "Entradas e aprovações por etapa",
+                    "Aplicações", "card Aplicações",
+                    "Contratadas", "card Contratadas",
+                    "Em andamento", "card Em andamento",
+                    "Funil", "Funil",
+                    "Entradas por etapa", "Entradas e aprovações por etapa",
                     "Rejeitados e motivos", "Rejeitados por etapa e Motivos de saída",
-                    "Andamento por faixa",  "Aplicações em andamento por etapa",
-                    "SLA por etapa",        "SLA por etapa",
-                    "Por recrutador",       "Aprovados por recrutador",
+                    "Andamento por faixa", "Aplicações em andamento por etapa",
+                    "SLA por etapa", "SLA por etapa",
+                    "Por recrutador", "Aprovados por recrutador",
                     "" )
                 VAR Segs = SWITCH( V,
-                    "Contratadas",          "Direto;Via pool;Dentro do pool",
-                    "Em andamento",         "Até 45 dias;Parada há mais de 45 dias;Sem etapa no dia",
-                    "Entradas por etapa",   "Aprovado;Rejeitado;Em andamento;Voltou;Saiu para outra vaga",
+                    "Contratadas", "Direto;Via pool;Dentro do pool",
+                    "Em andamento", "Até 45 dias;Parada há mais de 45 dias;Sem etapa no dia",
+                    "Entradas por etapa", "Aprovado;Rejeitado;Em andamento;Voltou;Saiu para outra vaga",
                     "Rejeitados e motivos", "Avaliação;Declínio do candidato;Administrativo;A classificar",
-                    "Andamento por faixa",  Faixas & ";Sem etapa no dia",
-                    "SLA por etapa",        Faixas,
+                    "Andamento por faixa", Faixas & ";Sem etapa no dia",
+                    "SLA por etapa", Faixas,
                     "Em andamento;Contratada;Contratada via outra vaga;Rejeitada;Declinou" )
                 VAR Ordem = SWITCH( V,
-                    "Em andamento",         "Dias na etapa",
-                    "Andamento por faixa",  "Dias na etapa",
+                    "Em andamento", "Dias na etapa",
+                    "Andamento por faixa", "Dias na etapa",
                     "Rejeitados e motivos", "Dias na etapa",
-                    "Entradas por etapa",   "Dias na etapa",
-                    "SLA por etapa",        "Dias nas etapas",
+                    "Entradas por etapa", "Dias na etapa",
+                    "SLA por etapa", "Dias nas etapas",
                     "SLA (dias)" )
                 RETURN
                 "visao=" & V & "||n=" & N & "||frase=" & Frase & "||origem=" & Origem & "||segs=" & Segs & "||ordem=" & Ordem,
