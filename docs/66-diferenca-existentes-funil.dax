@@ -1,0 +1,71 @@
+// 66 · Por que Aplicações (117.161 em 25/10) ≠ topo do funil na Fotografia (116.679)? · 03/11/2026 · mesmo texto da conversa
+// Aplicações (Foto Existentes) = criadas até D com qualquer entrada de etapa (sem limite de data na entrada, qualquer etapa).
+// Topo do funil = criadas até D com entrada ATÉ D numa etapa que tem ordem na dEtapa.
+// D1 separa a diferença em 3 motivos (a soma fecha com "diferença"). D2 mostra as etapas do motivo "etapa sem ordem".
+
+// D1 · Tamanho de cada motivo
+EVALUATE
+VAR Fim = DATE( 2026, 10, 25 ) + 1
+VAR O1 = MIN( dFunil[ordem_passo] )
+VAR Exist =
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+        '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim )
+VAR NoFunil =
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim,
+        '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= DATE( 1900, 1, 1 ),
+        '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim,
+        '13_ETAPA_RECRUTAMENTO'[ordem_etapa] >= O1 )
+VAR Dif = EXCEPT( Exist, NoFunil )
+VAR ComCand =
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), Dif,
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] ) )
+VAR ComEntrada =
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), ComCand,
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim )
+RETURN
+ROW(
+    "existentes", COUNTROWS( Exist ) + 0,
+    "no funil", COUNTROWS( NoFunil ) + 0,
+    "diferença", COUNTROWS( Dif ) + 0,
+    "sem data cand", COUNTROWS( Dif ) - COUNTROWS( ComCand ) + 0,
+    "entrada após D", COUNTROWS( ComCand ) - COUNTROWS( ComEntrada ) + 0,
+    "etapa sem ordem", COUNTROWS( ComEntrada ) + 0 )
+
+// D2 · Em que etapas estão as aplicações do motivo "etapa sem ordem" (ordem vazia = etapa que não está na dEtapa)
+EVALUATE
+VAR Fim = DATE( 2026, 10, 25 ) + 1
+VAR O1 = MIN( dFunil[ordem_passo] )
+VAR Exist =
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+        '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim )
+VAR NoFunil =
+    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim,
+        '13_ETAPA_RECRUTAMENTO'[data_aplicacao] >= DATE( 1900, 1, 1 ),
+        '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim,
+        '13_ETAPA_RECRUTAMENTO'[ordem_etapa] >= O1 )
+VAR Dif = EXCEPT( Exist, NoFunil )
+RETURN
+TOPN( 10,
+    CALCULATETABLE(
+        ADDCOLUMNS( VALUES( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+            "apps", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ) ),
+            "ordem", CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[ordem_etapa] ) ) ),
+        Dif,
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim ),
+    [apps], DESC )
+ORDER BY [apps] DESC
