@@ -41,3 +41,10 @@ Menu: Aplicações 11.650 (Resumo: 17.642), Contratadas 73 (86), Em andamento 18
 "174 aplicações rejeitadas **em Phone Screening**" com a segmentação Etapa em "Todos". Causa: filtro escondido em dEtapa = Phone Screening,
 sobra do Detalhamento (campos de Detalhamento da página com "Manter todos os filtros"). Tirar os campos de Detalhamento, os filtros
 da página, o botão Voltar e o campo "Visão alvo" do menu; conferir indicadores.
+
+## Lentidão (03/11)
+Números batendo depois de tirar o filtro do Detalhamento, mas a tabela demora muito (ex.: Entrevistas, 1.057).
+Causas prováveis: (1) o Contexto é calculado em cada linha e conta a visão inteira (n=, e na Entrevistas o total de entrevistas);
+(2) o filtro do visual ainda é `Visão Na Lista` (Candidatura) → na Fotografia a lista sai errada; (3) na Fotografia as listas são
+grandes (51 mil a 117 mil) e a tabela carrega tudo em blocos de 10 mil. Passo 1: `docs/72-nominal-desempenho.dax` (Contexto Leve),
+filtro do visual → `Visão Na Lista Modo`, máximo carregado 20.000, medir no Analisador de desempenho.
