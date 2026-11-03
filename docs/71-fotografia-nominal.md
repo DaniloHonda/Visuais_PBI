@@ -35,3 +35,9 @@ passagem aberta primeiro (saída vazia) e depois pela etapa (linha `VAR PassUlt`
 Em andamento n=51.222 "aplicações em andamento em 25/10" · Entradas por etapa n=66.114 "…de 01/10 a 25/10" ·
 SLA por etapa n=28.430 "…· 38.918 passagens"; segs e ordem certos (178 ms). Falta: foto da correção do desempate (B3) e a página
 depois da troca de campos.
+
+## Números baixos na Nominal (foto, 03/11, modo Candidatura 01–25/10)
+Menu: Aplicações 11.650 (Resumo: 17.642), Contratadas 73 (86), Em andamento 185, Rejeitados 174 — e o cabeçalho diz
+"174 aplicações rejeitadas **em Phone Screening**" com a segmentação Etapa em "Todos". Causa: filtro escondido em dEtapa = Phone Screening,
+sobra do Detalhamento (campos de Detalhamento da página com "Manter todos os filtros"). Tirar os campos de Detalhamento, os filtros
+da página, o botão Voltar e o campo "Visão alvo" do menu; conferir indicadores.
