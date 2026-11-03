@@ -1,0 +1,54 @@
+// 63c · Consumo do SLA por etapa no modo Fotografia (mesmo texto enviado na conversa, 03/11/2026)
+DEFINE
+    MEASURE '_Medidas'[Esteira | Fluxo Dias na Etapa (Contratações)] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        VAR Contratadas =
+            CALCULATETABLE(
+                VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                REMOVEFILTERS( dEtapa ),
+                REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[status] = "hired" ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] < Fim ) )
+        VAR Dias =
+            CALCULATE( SUM( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                TREATAS( Contratadas, '13_ETAPA_RECRUTAMENTO'[application_id] ) )
+        RETURN DIVIDE( Dias, COUNTROWS( Contratadas ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo SLA Média Contratações] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        VAR Contratacoes =
+            CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[application_id], '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ),
+                KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_contratacao] < Fim ) )
+        RETURN AVERAGEX( Contratacoes, '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] )
+
+    MEASURE '_Medidas'[Esteira | Consumo Peso] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Dias na Etapa (Contratações)], [Esteira | Dias na Etapa (Contratações)] )
+    MEASURE '_Medidas'[Esteira | Consumo Total] =
+        IF( [Esteira | Modo] = "Fotografia",
+            CALCULATE( [Esteira | Fluxo SLA Contratações], REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ),
+            [Esteira | SLA (sem etapa)] )
+    MEASURE '_Medidas'[Esteira | Consumo Total Média] =
+        IF( [Esteira | Modo] = "Fotografia",
+            CALCULATE( [Esteira | Fluxo SLA Média Contratações], REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ),
+            [Esteira | SLA Média (sem etapa)] )
+
+EVALUATE
+CALCULATETABLE(
+    ADDCOLUMNS(
+        VALUES( dModo[modo] ),
+        "total", [Esteira | Consumo Total],
+        "média", [Esteira | Consumo Total Média],
+        "peso Revisão", CALCULATE( [Esteira | Consumo Peso], dEtapa[stage_name] = "Revisão de aplicação" ),
+        "peso Offer", CALCULATE( [Esteira | Consumo Peso], dEtapa[stage_name] = "Offer" )
+    ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ),
+    '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 )
+)
