@@ -1,0 +1,344 @@
+// 70 · Página Nominal no modo Fotografia (menu de visões + uma tabela nominal) · mesmo texto da conversa (03/11/2026)
+// Sem Detalhamento a partir dos gráficos (decisão do Danilo): a página tem só o menu (uma visão por gráfico) e a tabela.
+// Medidas novas "… Modo": no modo Candidatura devolvem as de antes (Visão Contagem / Dados / Contexto, docs/41);
+// na Fotografia, cada visão lista as aplicações por trás do número do gráfico no modo Fotografia.
+// Evolução, Entrevistas e Alertas são iguais nos dois modos (já contam pela data do evento).
+// Colunas da Fotografia: "Situação no dia", "Etapa no dia", "Dias na etapa" e "SLA (dias)" contados até D, e "Situação hoje".
+DEFINE
+    // ---------- contagens novas ----------
+    MEASURE '_Medidas'[Esteira | Fluxo Aplicações com Etapa Concluída] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+
+    // Entradas por etapa: entrou, foi aprovada ou rejeitada no período, ou estava na etapa em D (as partes do gráfico)
+    MEASURE '_Medidas'[Esteira | Foto Aplicações na Etapa] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        VAR Entraram =
+            CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim ) )
+        VAR Aprovaram =
+            CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+        VAR Rejeitadas =
+            CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Ini ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] < Fim ) )
+        VAR NaEtapa =
+            CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                    ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Fim ) ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                    '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Fim ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim ),
+                KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                    ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) ) )
+        RETURN COUNTROWS( DISTINCT( UNION( Entraram, Aprovaram, Rejeitadas, NaEtapa ) ) )
+
+    // ---------- número de cada visão no menu ----------
+    MEASURE '_Medidas'[Esteira | Visão Contagem Modo] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        IF( [Esteira | Modo] = "Fotografia" && NOT ( V IN { "Evolução", "Entrevistas", "Alertas" } ),
+            SWITCH( V,
+                "Aplicações",           [Esteira | Foto Existentes],
+                "Funil",                [Esteira | Foto Existentes],
+                "Por recrutador",       [Esteira | Foto Existentes],
+                "Contratadas",          [Esteira | Fluxo Contratadas],
+                "Em andamento",         [Esteira | Foto Em Andamento],
+                "Andamento por faixa",  [Esteira | Foto Em Andamento],
+                "Rejeitados e motivos", [Esteira | Fluxo Reprovações],
+                "Entradas por etapa",   [Esteira | Foto Aplicações na Etapa],
+                "SLA por etapa",        [Esteira | Fluxo Aplicações com Etapa Concluída] ),
+            [Esteira | Visão Contagem] )
+
+    // ---------- a aplicação da linha entra na lista? (as mesmas medidas do número: lista e menu sempre batem) ----------
+    MEASURE '_Medidas'[Esteira | Visão Na Lista Foto] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        SWITCH( V,
+            "Aplicações",           IF( [Esteira | Foto Existentes] > 0, 1 ),
+            "Funil",                IF( [Esteira | Foto Existentes] > 0, 1 ),
+            "Por recrutador",       IF( [Esteira | Foto Existentes] > 0, 1 ),
+            "Contratadas",          IF( [Esteira | Fluxo Contratadas] > 0, 1 ),
+            "Em andamento",         IF( [Esteira | Foto Em Andamento] > 0, 1 ),
+            "Andamento por faixa",  IF( [Esteira | Foto Em Andamento] > 0, 1 ),
+            "Rejeitados e motivos", IF( [Esteira | Fluxo Reprovações] > 0, 1 ),
+            "Entradas por etapa",   IF( [Esteira | Foto Aplicações na Etapa] > 0, 1 ),
+            "SLA por etapa",        IF( [Esteira | Fluxo Aplicações com Etapa Concluída] > 0, 1 ) )
+
+    MEASURE '_Medidas'[Esteira | Visão Na Lista Modo] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        IF( [Esteira | Modo] = "Fotografia" && NOT ( V IN { "Evolução", "Entrevistas", "Alertas" } ),
+            [Esteira | Visão Na Lista Foto], [Esteira | Visão Na Lista] )
+
+    // ---------- uma linha da tabela na Fotografia ----------
+    MEASURE '_Medidas'[Esteira | Visão Dados Foto] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        IF( [Esteira | Visão Na Lista Foto] = 1,
+            VAR F = "yyyy-mm-dd"
+            VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+            VAR D = [Esteira | Data da Fotografia]
+            VAR Fim = D + 1
+            VAR Sit    = MAX( '13_ETAPA_RECRUTAMENTO'[situacao_app] )
+            VAR Status = MAX( '13_ETAPA_RECRUTAMENTO'[status] )
+            VAR Cand   = MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] )
+            VAR Ciclo  = COALESCE( MIN( '13_ETAPA_RECRUTAMENTO'[ciclo_inicio] ), Cand )
+            VAR Pausa  = MAX( '13_ETAPA_RECRUTAMENTO'[dias_pausa_sla] )
+            VAR Mot    = MAX( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] )
+            VAR Tipo   = MAX( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] )
+            VAR Contr  = MAX( '13_ETAPA_RECRUTAMENTO'[data_contratacao] )
+            VAR RejEm  = MAX( '13_ETAPA_RECRUTAMENTO'[rejected_at] )
+            VAR FechouContr = NOT ISBLANK( Contr ) && Contr < Fim
+            VAR FechouRej = Status = "rejected" && NOT ( RejEm >= Fim )
+            VAR AbertaD = NOT FechouContr && NOT FechouRej
+            VAR SitD = IF( AbertaD, "Em andamento", Sit )
+            // etapa de hoje (para quem já tinha encerrado em D, a etapa do encerramento)
+            VAR Hoje = CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                '13_ETAPA_RECRUTAMENTO'[eh_etapa_atual] = TRUE(),
+                REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+            VAR EtHoje = IF( NOT ISEMPTY( Hoje ), COALESCE( MAXX( Hoje, '13_ETAPA_RECRUTAMENTO'[stage_name] ), "(etapa sem nome)" ) )
+            VAR DiasHoje = MAXX( Hoje, '13_ETAPA_RECRUTAMENTO'[days_in_stage] )
+            // etapa em D: a passagem que cobria o dia
+            VAR Passagens = CALCULATETABLE(
+                SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+                    '13_ETAPA_RECRUTAMENTO'[data_saida_stage], '13_ETAPA_RECRUTAMENTO'[passagem_valida] ),
+                REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+            VAR Cobre = FILTER( Passagens,
+                '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1
+                && NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
+                && '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim
+                && ( ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) )
+            VAR CobreUlt = TOPN( 1, Cobre, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], DESC )
+            VAR EtD  = MAXX( CobreUlt, '13_ETAPA_RECRUTAMENTO'[stage_name] )
+            VAR EntD = MAXX( CobreUlt, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
+            VAR EtapaDia = IF( AbertaD, COALESCE( EtD, "(sem etapa no dia)" ), EtHoje )
+            VAR DiasDia  = IF( AbertaD, IF( NOT ISBLANK( EntD ), INT( D - EntD ) ), DiasHoje )
+            VAR Saida = SWITCH( Sit, "Contratada", Contr, "Rejeitada", RejEm, "Declinou", RejEm, "Contratada via outra vaga", RejEm )
+            VAR Sla = IF( NOT AbertaD && Sit = "Contratada", ROUND( MAX( '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ), 0 ),
+                IF( NOT ISBLANK( Ciclo ), MAX( 0, INT( IF( AbertaD, D, COALESCE( Saida, D ) ) - Ciclo ) - Pausa ) ) )
+            VAR tSla  = "||SLA (dias)=" & IF( ISBLANK( Sla ), "", "#" & Sla )
+            VAR dCand = IF( ISBLANK( Cand ), "", "@" & FORMAT( Cand, F ) )
+            VAR Base  = "||Situação no dia=" & SitD & "||Etapa no dia=" & EtapaDia & "||Situação hoje=" & Sit
+                & "||Candidatura=" & dCand & tSla
+            VAR UmaEtapa = ISFILTERED( dEtapa[stage_name] ) && HASONEVALUE( dEtapa[stage_name] )
+            RETURN
+            SWITCH( V,
+                "Aplicações",
+                    "seg=" & SitD & Base & "||Motivo=" & IF( AbertaD, "", Mot ) & "||Tipo de encerramento=" & IF( AbertaD, "", Tipo ),
+                "Por recrutador",
+                    "seg=" & SitD & Base & "||Motivo=" & IF( AbertaD, "", Mot ),
+                "Funil",
+                    VAR MaxOrd = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[ordem_etapa] ),
+                        '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+                        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim,
+                        REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+                    VAR Chegou = LOOKUPVALUE( dEtapa[stage_name], dEtapa[ordem], MaxOrd )
+                    RETURN "seg=" & SitD & "||Chegou até=" & Chegou & Base,
+                "Contratadas",
+                    VAR Orig = MAX( '13_ETAPA_RECRUTAMENTO'[origem_contratacao] )
+                    RETURN "seg=" & Orig & "||Origem=" & Orig
+                        & "||Início do ciclo=" & IF( ISBLANK( Ciclo ), "", "@" & FORMAT( Ciclo, F ) )
+                        & "||Candidatura=" & dCand
+                        & "||Contratação=" & IF( ISBLANK( Contr ), "", "@" & FORMAT( Contr, F ) )
+                        & tSla,
+                "Em andamento",
+                    "seg=" & IF( ISBLANK( DiasDia ), "Sem etapa no dia", IF( DiasDia > 45, "Parada há mais de 45 dias", "Até 45 dias" ) )
+                    & "||Etapa no dia=" & EtapaDia
+                    & "||Entrou na etapa=" & IF( ISBLANK( EntD ), "", "@" & FORMAT( EntD, F ) )
+                    & "||Dias na etapa=" & IF( ISBLANK( DiasDia ), "", "#" & DiasDia )
+                    & "||Situação hoje=" & Sit & "||Candidatura=" & dCand & tSla,
+                "Andamento por faixa",
+                    VAR Faixa = IF( ISBLANK( DiasDia ), "Sem etapa no dia",
+                        MAXX( FILTER( dFaixaDias, DiasDia >= dFaixaDias[de] && DiasDia <= dFaixaDias[ate] ), dFaixaDias[faixa] ) )
+                    RETURN "seg=" & Faixa & "||Etapa no dia=" & EtapaDia & "||Faixa=" & Faixa
+                        & "||Entrou na etapa=" & IF( ISBLANK( EntD ), "", "@" & FORMAT( EntD, F ) )
+                        & "||Dias na etapa=" & IF( ISBLANK( DiasDia ), "", "#" & DiasDia )
+                        & "||Situação hoje=" & Sit & "||Candidatura=" & dCand & tSla,
+                "Rejeitados e motivos",
+                    VAR RejP = CALCULATETABLE(
+                        SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[rejected_at] < Fim ) )
+                    VAR EtRej = MAXX( RejP, '13_ETAPA_RECRUTAMENTO'[stage_name] )
+                    VAR DiasRej = MAXX( RejP, '13_ETAPA_RECRUTAMENTO'[days_in_stage] )
+                    RETURN "seg=" & Tipo & "||Etapa da rejeição=" & EtRej & "||Motivo=" & Mot & "||Tipo=" & Tipo
+                        & "||Rejeitada em=" & IF( ISBLANK( RejEm ), "", "@" & FORMAT( RejEm, F ) )
+                        & "||Dias na etapa=" & IF( ISBLANK( DiasRej ), "", "#" & DiasRej )
+                        & "||Candidatura=" & dCand & tSla,
+                "Entradas por etapa",
+                    VAR Pass = CALCULATETABLE(
+                        SUMMARIZE( '13_ETAPA_RECRUTAMENTO', '13_ETAPA_RECRUTAMENTO'[stage_name], '13_ETAPA_RECRUTAMENTO'[data_entrada_stage],
+                            '13_ETAPA_RECRUTAMENTO'[data_saida_stage], '13_ETAPA_RECRUTAMENTO'[resultado_etapa],
+                            '13_ETAPA_RECRUTAMENTO'[passagem_valida], '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                        KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ) )
+                    VAR Rel = FILTER( Pass,
+                        ( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] >= Ini && '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim )
+                        || ( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Aprovado" && '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1
+                             && '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini && '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim )
+                        || ( '13_ETAPA_RECRUTAMENTO'[resultado_etapa] = "Rejeitado" && RejEm >= Ini && RejEm < Fim )
+                        || ( AbertaD && '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1
+                             && NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
+                             && '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim
+                             && ( ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) ) )
+                    VAR P1 = TOPN( 1, Rel, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage], DESC )
+                    VAR EtP  = MAXX( P1, '13_ETAPA_RECRUTAMENTO'[stage_name] )
+                    VAR EntP = MAXX( P1, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] )
+                    VAR SaiP0 = MAXX( P1, '13_ETAPA_RECRUTAMENTO'[data_saida_stage] )
+                    VAR ResP0 = MAXX( P1, '13_ETAPA_RECRUTAMENTO'[resultado_etapa] )
+                    VAR RejNoP = ResP0 = "Rejeitado" && NOT ( RejEm >= Fim )
+                    VAR SaiuAteD = NOT ISBLANK( SaiP0 ) && SaiP0 < Fim
+                    VAR ResD = SWITCH( TRUE(), RejNoP, "Rejeitado", SaiuAteD, ResP0, "Em andamento" )
+                    VAR SaiD = IF( RejNoP, COALESCE( SaiP0, RejEm ), IF( SaiuAteD, SaiP0 ) )
+                    VAR DiasP = IF( ResD = "Em andamento",
+                        IF( NOT ISBLANK( EntP ), INT( D - EntP ) ),
+                        MAXX( P1, '13_ETAPA_RECRUTAMENTO'[days_in_stage] ) )
+                    RETURN "seg=" & ResD & "||Etapa=" & EtP & "||Resultado no dia=" & ResD
+                        & "||Entrada=" & IF( ISBLANK( EntP ), "", "@" & FORMAT( EntP, F ) )
+                        & "||Saída=" & IF( ISBLANK( SaiD ), "", "@" & FORMAT( SaiD, F ) )
+                        & "||Dias na etapa=" & IF( ISBLANK( DiasP ), "", "#" & DiasP )
+                        & "||Situação hoje=" & Sit & "||Candidatura=" & dCand & tSla,
+                "SLA por etapa",
+                    VAR Conc = CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+                    VAR SomaD = CALCULATE( SUM( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+                    VAR EntS = CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+                    VAR SaiS = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+                        KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+                    VAR SomaInt = INT( SomaD )
+                    VAR Faixa = MAXX( FILTER( dFaixaDias, SomaInt >= dFaixaDias[de] && SomaInt <= dFaixaDias[ate] ), dFaixaDias[faixa] )
+                    RETURN "seg=" & Faixa
+                        & "||Etapa=" & IF( UmaEtapa, SELECTEDVALUE( dEtapa[stage_name] ), "(" & Conc & " etapas)" )
+                        & "||Etapas concluídas=#" & Conc
+                        & "||Entrada=" & IF( ISBLANK( EntS ), "", "@" & FORMAT( EntS, F ) )
+                        & "||Saída=" & IF( ISBLANK( SaiS ), "", "@" & FORMAT( SaiS, F ) )
+                        & "||Dias nas etapas=" & IF( ISBLANK( SomaD ), "", "#" & SomaInt )
+                        & "||Situação hoje=" & Sit & "||Candidatura=" & dCand & tSla
+            )
+        )
+
+    MEASURE '_Medidas'[Esteira | Visão Dados Modo] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        IF( [Esteira | Modo] = "Fotografia" && NOT ( V IN { "Evolução", "Entrevistas", "Alertas" } ),
+            [Esteira | Visão Dados Foto], [Esteira | Visão Dados] )
+
+    // ---------- cabeçalho da tabela (frase, segmentos e ordem) ----------
+    MEASURE '_Medidas'[Esteira | Visão Contexto Modo] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        IF( [Esteira | Modo] <> "Fotografia" || V IN { "Evolução", "Entrevistas", "Alertas" },
+            [Esteira | Visão Contexto],
+            CALCULATE(
+                VAR N = [Esteira | Visão Contagem Modo]
+                VAR Dt = FORMAT( [Esteira | Data da Fotografia], "dd/mm" )
+                VAR Per = " de " & FORMAT( MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) ), "dd/mm" ) & " a " & Dt
+                VAR EtTxt = IF( ISFILTERED( dEtapa[stage_name] ),
+                    " em " & CONCATENATEX( VALUES( dEtapa[stage_name] ), dEtapa[stage_name], ", " ), "" )
+                VAR Faixas = "0–2 d;3–7 d;8–15 d;16–30 d;31–45 d;> 45 d"
+                VAR Frase = SWITCH( V,
+                    "Aplicações",           "aplicações que existiam em " & Dt & " (base desde 01/07)",
+                    "Contratadas",          "contratadas" & Per & " (pela data da contratação)",
+                    "Em andamento",         "aplicações em andamento em " & Dt & EtTxt,
+                    "Funil",                "aplicações que existiam em " & Dt & " e até onde tinham chegado",
+                    "Entradas por etapa",   "aplicações que estiveram" & IF( EtTxt = "", " em alguma etapa", EtTxt ) & Per,
+                    "Rejeitados e motivos", "aplicações rejeitadas" & EtTxt & Per,
+                    "Andamento por faixa",  "aplicações em andamento em " & Dt & ", por dias parada na etapa",
+                    "SLA por etapa",        "aplicações com etapa concluída" & EtTxt & Per & " · "
+                                                & FORMAT( [Esteira | Fluxo Base SLA], "#,0" ) & " passagens",
+                    "Por recrutador",       "aplicações que existiam em " & Dt,
+                    "aplicações" )
+                VAR Origem = SWITCH( V,
+                    "Aplicações",           "card Aplicações",
+                    "Contratadas",          "card Contratadas",
+                    "Em andamento",         "card Em andamento",
+                    "Funil",                "Funil",
+                    "Entradas por etapa",   "Entradas e aprovações por etapa",
+                    "Rejeitados e motivos", "Rejeitados por etapa e Motivos de saída",
+                    "Andamento por faixa",  "Aplicações em andamento por etapa",
+                    "SLA por etapa",        "SLA por etapa",
+                    "Por recrutador",       "Aprovados por recrutador",
+                    "" )
+                VAR Segs = SWITCH( V,
+                    "Contratadas",          "Direto;Via pool;Dentro do pool",
+                    "Em andamento",         "Até 45 dias;Parada há mais de 45 dias;Sem etapa no dia",
+                    "Entradas por etapa",   "Aprovado;Rejeitado;Em andamento;Voltou;Saiu para outra vaga",
+                    "Rejeitados e motivos", "Avaliação;Declínio do candidato;Administrativo;A classificar",
+                    "Andamento por faixa",  Faixas & ";Sem etapa no dia",
+                    "SLA por etapa",        Faixas,
+                    "Em andamento;Contratada;Contratada via outra vaga;Rejeitada;Declinou" )
+                VAR Ordem = SWITCH( V,
+                    "Em andamento",         "Dias na etapa",
+                    "Andamento por faixa",  "Dias na etapa",
+                    "Rejeitados e motivos", "Dias na etapa",
+                    "Entradas por etapa",   "Dias na etapa",
+                    "SLA por etapa",        "Dias nas etapas",
+                    "SLA (dias)" )
+                RETURN
+                "visao=" & V & "||n=" & N & "||frase=" & Frase & "||origem=" & Origem & "||segs=" & Segs & "||ordem=" & Ordem,
+                ALLSELECTED( '13_ETAPA_RECRUTAMENTO' ) ) )
+
+// Conferência 1 · número do menu = aplicações na lista, nas 9 visões que mudam (01/10 a 25/10, Fotografia). Pode levar ~1 min.
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS(
+        FILTER( SUMMARIZE( dVisao, dVisao[ordem], dVisao[visao] ), NOT ( dVisao[visao] IN { "Evolução", "Entrevistas", "Alertas" } ) ),
+        "contagem", [Esteira | Visão Contagem Modo],
+        "na lista", COUNTROWS( FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), [Esteira | Visão Na Lista Modo] = 1 ) ) ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+ORDER BY dVisao[ordem]
+
+// Conferência 2 · 3 linhas da visão "Entradas por etapa" (confere se o texto da linha monta sem erro)
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+RETURN
+CALCULATETABLE(
+    VAR Apps = TOPN( 3, FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), [Esteira | Visão Na Lista Modo] = 1 ),
+        '13_ETAPA_RECRUTAMENTO'[application_id], ASC )
+    RETURN ADDCOLUMNS( Apps, "dados", [Esteira | Visão Dados Modo] ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), TREATAS( { "Entradas por etapa" }, dVisao[visao] ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+
+// Conferência 3 · 3 linhas da visão "Em andamento"
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+RETURN
+CALCULATETABLE(
+    VAR Apps = TOPN( 3, FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), [Esteira | Visão Na Lista Modo] = 1 ),
+        '13_ETAPA_RECRUTAMENTO'[application_id], ASC )
+    RETURN ADDCOLUMNS( Apps, "dados", [Esteira | Visão Dados Modo] ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), TREATAS( { "Em andamento" }, dVisao[visao] ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
