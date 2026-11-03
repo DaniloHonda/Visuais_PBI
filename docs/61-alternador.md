@@ -41,3 +41,9 @@ Copiar para as outras páginas (Ctrl+C / Ctrl+V → Sincronizar).
 ## 4. Conferência
 Cartão temporário com `Esteira | Modo`: clicar em Fotografia → "Fotografia"; em Candidatura → "Candidatura". Depois apagar o cartão.
 Nada no dash muda ainda: as medidas de cada visual no modo Fotografia vêm na parte 2 (cards do Resumo).
+
+## 1.1.0 (03/11/2026) · sincroniza entre páginas
+Só muda a capacidade `supportsSynchronizingFilterState` (aparência igual). Sem ela o Power BI não sincroniza visual personalizado:
+cada página teria o seu modo e, ao trocar de página, voltaria para Candidatura.
+Importar `dist/XP - Alternador 1.1.0.pbiviz` por cima da 1.0.0 → copiar do Resumo (Ctrl+C) → colar na Report (Ctrl+V) → "Sincronizar".
+Conferir em Exibição → Sincronizar segmentações: `modo` com Sincronizar e Visível marcados no Resumo e na Report.
