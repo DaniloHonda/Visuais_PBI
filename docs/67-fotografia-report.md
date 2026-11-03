@@ -17,3 +17,17 @@ O funil é o único que usa "todas as aplicações existentes em D" (docs/65); a
 
 Partes: (1) Alternador 1.1.0 sincronizado na Report · (2) medidas · (3) troca de campos visual a visual ·
 (4) subtítulos do fundo neutros (hoje dizem "Aplicações do período…", errado na Fotografia) · (5) lista Pré Offer e Offer.
+
+## Parte 2 · medidas (`docs/68-fotografia-report-medidas.dax`) e troca de campos
+| Visual | Campo | Passa a ser |
+|---|---|---|
+| Entradas e aprovações por etapa | Participantes · Aprovados · Rejeitados · Em andamento · SLA média · SLA mediana | Etapa Entradas · Etapa Aprovados · Etapa Rejeitados · Etapa Em Andamento · Etapa SLA Média · Etapa SLA Mediana (Textos → Coluna participantes = "Entradas") |
+| Em andamento por etapa (matriz) | Valor | Etapa Ativos na Faixa |
+| Rejeitados por etapa | Partes 1 e 2 | Etapa Rejeitados (Empresa) · Etapa Declinados (Offer) |
+| SLA por etapa | Típico · P90 · Base · Acima hoje | Etapa SLA Mediana · Etapa SLA P90 · Etapa Base SLA · Etapa Acima do P90 |
+| Motivos de saída | Valor | Etapa Rejeitados |
+| Aprovados por praça | Valor · Base da taxa | Etapa Aprovados · Etapa Rejeitados |
+| Aprovados por recrutador | Participantes · Aprovados · Rejeitados · Em andamento · SLA mediana | Card Aplicações · Card Contratados · Recrutador Rejeitados · Recrutador Em Andamento · Card SLA |
+Achado na foto do Resumo (03/11): "Onde a esteira perde" mostra as mesmas partes nos dois modos (2.436 · 2.197 · 3.447 no Mindsight e PI
+Cognitivo): as partes da barra ainda não foram trocadas para Etapa Aprovados / Rejeitados / Em Andamento.
+Pendente (parte 4): título "Acima hoje" é fixo no XP · Tabela de SLA 1.0.0.

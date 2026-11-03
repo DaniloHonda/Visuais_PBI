@@ -1,0 +1,167 @@
+// 68 · Medidas da página Report no modo Fotografia · mesmo texto enviado na conversa (03/11/2026)
+// Régua: estoque = como estava em D (Data da Fotografia); movimento = o que aconteceu entre o início do período e D.
+// Medidas "Etapa …" / "Recrutador …" trocam sozinhas pelo modo; no modo Candidatura devolvem as medidas de antes.
+DEFINE
+    // ---------- Movimento do período (base Fluxo)
+    MEASURE '_Medidas'[Esteira | Fluxo Entradas] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[stage_name] ) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo Dias na Etapa (Média)] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( AVERAGE( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo Dias na Etapa (Mediana)] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( MEDIAN( '13_ETAPA_RECRUTAMENTO'[days_in_stage] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo Dias na Etapa (P90)] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( PERCENTILE.INC( '13_ETAPA_RECRUTAMENTO'[days_in_stage], 0.9 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo Base SLA] =
+        VAR Ini = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR Fim = [Esteira | Data da Fotografia] + 1
+        RETURN
+        CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Ini ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] < Fim ) )
+
+    MEASURE '_Medidas'[Esteira | Fluxo Declínios do Candidato] =
+        CALCULATE( [Esteira | Fluxo Reprovações],
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio do candidato" ) )
+
+    // ---------- Estoque em D (base Foto)
+    MEASURE '_Medidas'[Esteira | Foto Ativos na Faixa] =
+        VAR D = [Esteira | Data da Fotografia]
+        VAR Fim = D + 1
+        VAR De  = MIN( dFaixaDias[de] )
+        VAR Ate = MIN( MAX( dFaixaDias[ate] ) + 1, 3650 )
+        RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ),
+            KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Fim ) ),
+            KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Fim ) ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] > D - Ate ),
+            KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] <= D - De ),
+            KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) ) )
+
+    MEASURE '_Medidas'[Esteira | Foto Acima do P90] =
+        VAR D = [Esteira | Data da Fotografia]
+        VAR Fim = D + 1
+        RETURN
+        SUMX( VALUES( dEtapa[stage_name] ),
+            VAR P = [Esteira | Fluxo Dias na Etapa (P90)]
+            RETURN
+            IF( NOT ISBLANK( P ),
+                CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim ),
+                    KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                        ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] >= Fim ) ),
+                    KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                        '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] >= Fim ) ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1 ),
+                    KEEPFILTERS( NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+                    KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < D - P ),
+                    KEEPFILTERS( FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                        ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] >= Fim ) ) ) ) )
+
+    // ---------- Medidas que vão nos visuais (trocam pelo modo)
+    MEASURE '_Medidas'[Esteira | Etapa Entradas] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Entradas], [Esteira | Participantes] )
+    MEASURE '_Medidas'[Esteira | Etapa SLA Média] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Dias na Etapa (Média)], [Esteira | Dias na Etapa (Média)] )
+    MEASURE '_Medidas'[Esteira | Etapa SLA Mediana] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Dias na Etapa (Mediana)], [Esteira | Dias na Etapa (Mediana)] )
+    MEASURE '_Medidas'[Esteira | Etapa SLA P90] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Dias na Etapa (P90)], [Esteira | Dias na Etapa (P90)] )
+    MEASURE '_Medidas'[Esteira | Etapa Base SLA] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Base SLA], [Esteira | Base SLA] )
+    MEASURE '_Medidas'[Esteira | Etapa Acima do P90] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Acima do P90], [Esteira | Acima do P90 Hoje] )
+    MEASURE '_Medidas'[Esteira | Etapa Ativos na Faixa] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Ativos na Faixa], [Esteira | Ativos na Faixa] )
+    MEASURE '_Medidas'[Esteira | Etapa Rejeitados (Empresa)] =
+        IF( [Esteira | Modo] = "Fotografia",
+            [Esteira | Fluxo Reprovações] - COALESCE( [Esteira | Fluxo Declínios do Candidato], 0 ),
+            [Esteira | Rejeitados (Empresa)] )
+    MEASURE '_Medidas'[Esteira | Etapa Declinados (Offer)] =
+        IF( [Esteira | Modo] = "Fotografia",
+            CALCULATE( [Esteira | Fluxo Reprovações],
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] = "Declínio do candidato" ),
+                KEEPFILTERS( LEFT( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name], 7 ) = "[Offer]" ) ),
+            [Esteira | Declinados (Offer)] )
+    MEASURE '_Medidas'[Esteira | Recrutador Rejeitados] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Reprovações], [Esteira | Rejeitados no Processo] )
+    MEASURE '_Medidas'[Esteira | Recrutador Em Andamento] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Em Andamento], [Esteira | Aplicações Ativas] )
+
+// Conferência 1 · tabela por etapa na Fotografia (01/10 a 25/10)
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+VAR T =
+    CALCULATETABLE(
+        ADDCOLUMNS( SUMMARIZE( dEtapa, dEtapa[ordem], dEtapa[stage_name] ),
+            "entr", [Esteira | Etapa Entradas],
+            "aprov", [Esteira | Etapa Aprovados],
+            "rej", [Esteira | Etapa Rejeitados],
+            "andam", [Esteira | Etapa Em Andamento],
+            "med", [Esteira | Etapa SLA Mediana] ),
+        Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+RETURN
+FILTER( T, [entr] + [aprov] + [rej] + [andam] > 0 )
+ORDER BY dEtapa[ordem]
+
+// Conferência 2 · SLA e rejeitados por etapa na Fotografia
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+VAR T =
+    CALCULATETABLE(
+        ADDCOLUMNS( SUMMARIZE( dEtapa, dEtapa[ordem], dEtapa[stage_name] ),
+            "p90", [Esteira | Etapa SLA P90],
+            "base", [Esteira | Etapa Base SLA],
+            "acima", [Esteira | Etapa Acima do P90],
+            "empresa", [Esteira | Etapa Rejeitados (Empresa)],
+            "declin", [Esteira | Etapa Declinados (Offer)] ),
+        Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+RETURN
+FILTER( T, [base] + [acima] + [empresa] + [declin] > 0 )
+ORDER BY dEtapa[ordem]
+
+// Conferência 3 · em andamento em 25/10 por faixa de dias parado (soma das etapas)
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS( SUMMARIZE( dFaixaDias, dFaixaDias[ordem], dFaixaDias[faixa] ),
+        "apps", SUMX( VALUES( dEtapa[stage_name] ), [Esteira | Etapa Ativos na Faixa] ) ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+ORDER BY dFaixaDias[ordem]
