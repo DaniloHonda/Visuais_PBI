@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "xpToggle",
+        "displayName": "XP · Alternador",
+        "guid": "xpToggle3B8E5D21C7F04A9E96B2D4C1A7E3F985",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Botão de modo (pílula, abas ou compacto) que filtra uma tabela de opções. Rótulos, dicas, cores, opção padrão e texto de contexto configuráveis. Padrão visual XP.",
+        "supportUrl": "https://github.com/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.11.1",
+    "author": {
+        "name": "Time de People Analytics",
+        "email": "people-analytics@example.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

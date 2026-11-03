@@ -1,0 +1,213 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Opções",
+            "name": "opcao",
+            "kind": "Grouping",
+            "description": "Coluna de uma tabela de opções sem relação (ex.: dModo[modo]). Classifique pela coluna de ordem."
+        },
+        {
+            "displayName": "Texto de contexto (opcional)",
+            "name": "contexto",
+            "kind": "Measure",
+            "description": "Texto mostrado ao lado ou embaixo do botão, da opção ativa. Use **texto** para negrito. Ex.: Esteira | Texto do Modo"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "opcao": {
+                        "max": 1
+                    },
+                    "contexto": {
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "opcao"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 20
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "contexto"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "general": {
+            "properties": {
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                }
+            }
+        },
+        "textos": {
+            "properties": {
+                "rotulos": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "dicas": {
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "comportamento": {
+            "properties": {
+                "padrao": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "aplicarPadrao": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "formato": {
+            "properties": {
+                "estilo": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "alinhamento": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "tamanho": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "altura": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "cantos": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "larguraIgual": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "cores": {
+            "properties": {
+                "ativo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "textoAtivo": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "trilho": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "texto": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borda": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "contexto": {
+            "properties": {
+                "posicao": {
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "tamanho": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "cor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "destaque": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "privileges": [],
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": []
+    }
+}
