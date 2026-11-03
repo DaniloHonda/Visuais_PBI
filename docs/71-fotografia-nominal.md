@@ -19,3 +19,8 @@ Colunas novas na Fotografia: Situação no dia, Etapa no dia, Situação hoje; D
 - Alternador: copiar do Resumo e colar na Nominal → Sincronizar.
 - Menu de visões: Contagem → `Esteira | Visão Contagem Modo` (tirar o campo "Visão alvo", se tiver).
 - Tabela nominal: Dados da visão → `Esteira | Visão Dados Modo` · Contexto → `Esteira | Visão Contexto Modo`.
+
+## Conferência da parte A (foto do Danilo, 03/11, Fotografia 01–25/10)
+contagem = na lista em todas as visões visíveis: Aplicações 117.161 · Contratadas 208 · Em andamento 51.222 · Funil 117.161 ·
+Entradas por etapa 66.114 · Rejeitados e motivos 16.622 · Andamento por faixa 51.222 · SLA por etapa 28.430 (941 ms).
+Por recrutador (9ª linha) ficou fora da foto. Falta: foto da parte B e parte C.
