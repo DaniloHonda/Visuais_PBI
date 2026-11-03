@@ -30,3 +30,8 @@ Rodou (1,35 s). "Em andamento": 290507619002 parada > 45 d em Phone Screening (9
 (Phone Screening, 4 dias), 221786095002 sem etapa no dia (lacuna). "Entradas por etapa": a 287492680002 saiu como "Triagem"
 com saída 21/10 e "Em andamento" — mistura de duas passagens com a mesma entrada (21/10) no TOPN. Correção: desempate por
 passagem aberta primeiro (saída vazia) e depois pela etapa (linha `VAR PassUlt` do B3).
+
+## Conferência da parte C (foto, 03/11)
+Em andamento n=51.222 "aplicações em andamento em 25/10" · Entradas por etapa n=66.114 "…de 01/10 a 25/10" ·
+SLA por etapa n=28.430 "…· 38.918 passagens"; segs e ordem certos (178 ms). Falta: foto da correção do desempate (B3) e a página
+depois da troca de campos.
