@@ -9,6 +9,7 @@ Registro da homologação e das regras de negócio: `docs/27-homologacao.md`.
 - Passo a passo com cliques, posições (X, Y, L, A) e cores. Números em pt-BR. Escrever "aplicações".
 - Medidas pela Exibição de consulta DAX no formato `DEFINE MEASURE … EVALUATE` → Executar → "Atualizar o modelo com alterações".
 - **DAX sempre como texto no chat** (bloco de código para copiar), **nunca como arquivo anexo**. O `.dax` pode ficar no repositório, mas o que ele usa é o texto da mensagem.
+- DAX grande: **dividir em partes** (A, B, C…), cada uma com a própria conferência, uma parte por mensagem. Ele não consegue mandar a mensagem de erro inteira quando o bloco é muito grande.
 - Nunca pedir token ou senha no chat.
 - Não afirmar que algo foi conferido sem a foto do resultado: dizer o que falta conferir.
 
@@ -17,8 +18,8 @@ Registro da homologação e das regras de negócio: `docs/27-homologacao.md`.
 ### DAX
 - **`IF` / `SWITCH` não devolvem tabela.** Para escolher entre dois filtros, use um `FILTER` só com o `IF` dentro da condição:
   `FILTER( T, IF( Cond, T[c] = "a", T[c] <> "a" && … ) )`. Nunca `VAR X = IF( Cond, FILTER(…), FILTER(…) )`.
-- **Nomes de variável reservados**: `AT` (de `START AT`) quebrou uma medida ("syntax of AT is incorrect"). Evitar nomes curtos que
-  sejam palavras do DAX (`At`, `Top`, `Asc`, `Desc`, `Order`, `By`, `Var`, `Return`, `Define`, `Measure`, `Column`, `Table`). Usar nomes descritivos (`LimAtencao`, `Maior`).
+- **Nomes de variável reservados**: `AT` (de `START AT`) quebrou uma medida ("syntax of AT is incorrect"); `Status` também ("syntax for 'Status' is incorrect", 03/11). Evitar nomes curtos que
+  sejam palavras do DAX (`At`, `Status`, `Top`, `Asc`, `Desc`, `Order`, `By`, `Var`, `Return`, `Define`, `Measure`, `Column`, `Table`). Usar nomes descritivos (`LimAtencao`, `Maior`).
 - **Coluna calculada não se cria na Exibição de consulta DAX**: ali só medidas. Colunas = Exibição de tabela → Nova coluna (uma por vez). Sempre separar o arquivo em "colunas" e "medidas" e dizer onde cada parte vai.
 - **Ordem de dependência**: listar e criar primeiro as tabelas e colunas que as outras usam (ex.: `dMotivoTipo` com a coluna nova → `tipo_encerramento` → `situacao_app` / `considerar`; `dias_pausa_sla` → `sla_esteira_dias`). Uma coluna quebrada derruba todas as que dependem dela.
 - **Tabela calculada alterada** (DATATABLE) só mostra colunas novas depois de recalculada: Página Inicial → Atualizar, ou botão direito na tabela → Atualizar dados. Pelo Tabular Editor: salvar e depois Atualizar no Power BI ("objetos calculados precisam ser atualizados manualmente").
