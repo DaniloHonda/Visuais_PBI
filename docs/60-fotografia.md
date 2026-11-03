@@ -27,3 +27,12 @@ A 13 só traz aplicações **criadas a partir de 01/07/2026**. A fotografia não
 abertas (pools guardam candidatos por meses). Julho fica muito incompleto; de setembro em diante, menos. Pedido à engenharia:
 incluir na 13 as aplicações abertas criadas antes de 01/07 (o histórico de etapas existe: há entradas desde 2024).
 Outras: atributos (recrutador, vaga, esteira, praça) são os de hoje; desrejeição usa a última rejeição; datas sem hora.
+
+## Situação em 03/11/2026 (para a apresentação)
+Feito no **Resumo**: botão Candidatura | Fotografia (XP · Alternador 1.0.0), cabeçalho novo, cards (Aplicações existentes, Em andamento
+e paradas em D, Contratadas no período, Taxa de aprovação do período, SLA das contratadas no período, Entrevistas igual), Onde a esteira
+perde (decisões do período + estoque em D), Destaques, Consumo do SLA (contratações do período), Onde estão (estoque em D),
+Funil e "por contratação" acinzentados (Funil 1.3.0, Card de KPI 1.5.0, Barras 1.2.0). Medidas: `docs/62`, `63`, `63b`, `63c`.
+Visto em foto do Danilo: botão, Aplicações 117.161 em 25/10, 25.028 paradas há mais de 45 dias em 25/10, taxa com 17.884 aprovações
+e 16.622 reprovações (01–25/10). Falta conferir em foto os gráficos depois da troca de campos.
+Não feito: Report, Nominal, Data Quality, página Conceitos; comparação "foto × foto" (vs 30 dias antes).
