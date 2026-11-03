@@ -23,7 +23,7 @@ class LinkCard extends Card {
 class ComportamentoCard extends Card {
     linhasIniciais = new formattingSettings.NumUpDown({ name: "linhasIniciais", displayName: "Linhas na tela", value: 50 });
     passo = new formattingSettings.NumUpDown({ name: "passo", displayName: "\"Mostrar mais\" adiciona", value: 100 });
-    maxLinhas = new formattingSettings.NumUpDown({ name: "maxLinhas", displayName: "Máximo de linhas carregadas", value: 60000 });
+    maxLinhas = new formattingSettings.NumUpDown({ name: "maxLinhas", displayName: "Máximo de linhas carregadas", value: 150000 });
     name = "comportamento";
     displayName = "Comportamento";
     slices = [this.linhasIniciais, this.passo, this.maxLinhas];

@@ -14,6 +14,7 @@ import PrimitiveValue = powerbi.PrimitiveValue;
 
 import { TabelaSettings } from "./settings";
 import { xpFont } from "./xpTheme";
+import { Faixa, parseFaixas, resolvedor } from "./foto";
 
 // Tipos de célula vindos de "Esteira | Visão Dados": "@aaaa-mm-dd" = data, "#n" = número, resto = texto.
 type Kind = "text" | "date" | "num";
@@ -32,7 +33,9 @@ interface Row {
     id: ISelectionId;
 }
 interface Col { key: string; title: string; kind: Kind; fixed: boolean; }
-interface Ctx { visao: string; n: number | null; frase: string; origem: string; segs: string[]; ordem: string; }
+// foto/ini/etapas/faixas: só no modo Fotografia (data da foto, início do período, etapas filtradas e faixas de dias).
+interface Ctx { visao: string; n: number | null; frase: string; origem: string; segs: string[]; ordem: string;
+    foto: string; ini: string; etapas: string[]; faixas: Faixa[]; }
 
 const INT = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const NAME_COL = "Candidato";
@@ -44,9 +47,10 @@ const PILL: Record<string, string> = {
     "avaliacao": "bad", "desistencia do candidato": "dec", "administrativo": "off", "sem motivo na base": "off", "a classificar": "off",
     "direto": "ok", "via pool": "out", "dentro do pool": "bad", "ate 45 dias": "now", "parada ha mais de 45 dias": "bad",
     "aprovou": "ok", "aprovou e foi rejeitada": "back", "a realizar": "now", "sem resultado": "off",
-    "declinio do candidato": "dec", "desconsiderada": "off"
+    "declinio do candidato": "dec", "desconsiderada": "off", "sem etapa no dia": "off"
 };
-const PILL_COLS = ["situação", "resultado na etapa", "tipo", "tipo de encerramento", "origem", "faixa", "movimento", "resultado da entrevista"];
+const PILL_COLS = ["situação", "situação no dia", "situação hoje", "resultado na etapa", "resultado no dia", "tipo", "tipo de encerramento",
+    "origem", "faixa", "movimento", "resultado da entrevista"];
 // Colunas de dias (dias na etapa, SLA…) ganham selo cinza / âmbar / coral pelos limites do painel "Dias".
 const DAYS_COL = /dias|sla/i;
 
@@ -67,7 +71,8 @@ export class Visual implements IVisual {
     private fixedCols: Col[] = [];
     private hasLink = false;
     private hasDados = false;
-    private ctx: Ctx = { visao: "", n: null, frase: "", origem: "", segs: [], ordem: "" };
+    private ctx: Ctx = { visao: "", n: null, frase: "", origem: "", segs: [], ordem: "", foto: "", ini: "", etapas: [], faixas: [] };
+    private limite = false;
     private lastVisao: string | null = null;
     private seg = "Todas";
     private soExcecoes = false;
@@ -112,8 +117,10 @@ export class Visual implements IVisual {
             this.read(dv);
             this.loading = false;
             this.complete = !(dv && dv.metadata && dv.metadata.segment);
-            if (!this.complete && dv.table && dv.table.rows.length < this.settings.comportamento.maxLinhas.value) {
-                this.loading = this.host.fetchMoreData(true);
+            this.limite = false;
+            if (!this.complete && dv.table) {
+                if (dv.table.rows.length < this.settings.comportamento.maxLinhas.value) this.loading = this.host.fetchMoreData(true);
+                this.limite = !this.loading;
             }
             this.shown = Math.max(this.shown, this.pageSize());
             this.render();
@@ -157,6 +164,7 @@ export class Visual implements IVisual {
         // o Power BI repete a aplicação. Mantém a primeira e avisa no rodapé.
         const seen = new Set<string>();
         this.repetidas = 0;
+        const fc = { d: this.ctx.foto, ini: this.ctx.ini, etapas: this.ctx.etapas, faixas: this.ctx.faixas };
         table.rows.forEach((r, i) => {
             const packed = iDados >= 0 ? asText(r[iDados]) : "";
             if (iDados >= 0 && !packed) return; // fora da lista da visão
@@ -167,11 +175,19 @@ export class Visual implements IVisual {
             }
             const cells: Record<string, Cell> = {};
             let seg = "";
+            const pares: [string, string][] = [];
+            const meta: Record<string, string> = {};
             for (const part of packed.split("||")) {
                 const p = part.indexOf("=");
                 if (p <= 0) continue;
-                const k = part.slice(0, p).trim();
-                const v = part.slice(p + 1).trim();
+                const k = part.slice(0, p).trim(), v = part.slice(p + 1).trim();
+                if (k.charAt(0) === "_") meta[k] = v; else pares.push([k, v]);
+            }
+            // Fotografia: "~token" vira valor calculado aqui com a linha do tempo e a data da foto.
+            const resolve = this.ctx.foto && packed.indexOf("~") >= 0
+                ? resolvedor(iJor >= 0 ? asText(r[iJor]) : "", fc, meta) : null;
+            for (const [k, v0] of pares) {
+                const v = resolve && v0.charAt(0) === "~" ? resolve(v0.slice(1)) : v0;
                 if (k === "seg") { seg = v; continue; }
                 const c = toCell(v);
                 cells[k] = c;
@@ -200,7 +216,7 @@ export class Visual implements IVisual {
 
     // Contexto: "visao=…||n=…||frase=…||origem=…||segs=a;b;c||ordem=Coluna". Ao trocar de visão, limpa busca, aba e ordem.
     private readContext(ctx: string) {
-        const c: Ctx = { visao: "", n: null, frase: "", origem: "", segs: [], ordem: "" };
+        const c: Ctx = { visao: "", n: null, frase: "", origem: "", segs: [], ordem: "", foto: "", ini: "", etapas: [], faixas: [] };
         for (const part of ctx.split("||")) {
             const p = part.indexOf("=");
             if (p <= 0) continue;
@@ -211,6 +227,10 @@ export class Visual implements IVisual {
             else if (k === "origem") c.origem = v;
             else if (k === "segs") c.segs = v.split(";").map(x => x.trim()).filter(Boolean);
             else if (k === "ordem") c.ordem = v;
+            else if (k === "foto") c.foto = v;
+            else if (k === "ini") c.ini = v;
+            else if (k === "etapas") c.etapas = v.split(";").map(x => x.trim()).filter(Boolean);
+            else if (k === "faixas") c.faixas = parseFaixas(v);
         }
         this.ctx = c;
         if (this.lastVisao !== c.visao) {
@@ -290,6 +310,10 @@ export class Visual implements IVisual {
                    : `⚠ o gráfico mostra ${INT.format(this.ctx.n)} · a lista tem ${INT.format(total)}`);
             if (!ok) badge.title = "Diferença conhecida: aplicações em etapa sem nome ou linhas acima do limite carregado. Veja a página Conceitos.";
             this.topEl.appendChild(badge);
+        } else if (this.limite) {
+            const w = el("span", "xp-t2__chk xp-t2__chk--warn", `⚠ parou no limite de ${INT.format(total)} linhas carregadas`);
+            w.title = "Formatar → Comportamento → Máximo de linhas carregadas. A lista e o CSV têm só estas linhas.";
+            this.topEl.appendChild(w);
         } else if (!this.complete) {
             this.topEl.appendChild(el("span", "xp-t2__chk", "Carregando a lista inteira…"));
         }
@@ -346,9 +370,12 @@ export class Visual implements IVisual {
         colBtn.addEventListener("click", () => (this.menuEl ? this.closeMenu() : this.openMenu(colBtn)));
         this.head.appendChild(colBtn);
 
-        const exp = el("button", "xp-t2__btn", "⤓ Exportar CSV");
-        exp.title = "Baixa a lista inteira (aba, busca e colunas escolhidas), não só as linhas visíveis";
-        exp.addEventListener("click", () => this.exportCsv(exp));
+        const pronto = this.complete || this.limite;
+        const exp = el("button", "xp-t2__btn", pronto ? "⤓ Exportar CSV" : "⏳ Preparando CSV…") as HTMLButtonElement;
+        exp.disabled = !pronto;
+        exp.title = pronto ? "Baixa a lista inteira (aba, busca e colunas escolhidas), não só as linhas visíveis"
+            : "O CSV fica disponível quando a lista terminar de carregar, para sair completo";
+        exp.addEventListener("click", () => { if (pronto) this.exportCsv(exp); });
         this.head.appendChild(exp);
     }
 
