@@ -187,8 +187,10 @@ export class Visual implements IVisual {
             this.root.appendChild(wrap);
         }
 
-        const showCmp = s.comparacao.mostrar.value && (roles.cmpAtual || roles.cmpAnterior);
-        const showYtd = s.acumulado.mostrar.value && roles.ytd;
+        // Campo preenchido mas medida vazia (ex.: modo Fotografia) → o bloco some, em vez de mostrar "—".
+        const has = (r: RoleValue | undefined) => !!r && r.value !== null && r.value !== undefined && r.value !== "";
+        const showCmp = s.comparacao.mostrar.value && (has(roles.cmpAtual) || has(roles.cmpAnterior));
+        const showYtd = s.acumulado.mostrar.value && has(roles.ytd);
         if (showCmp || showYtd) {
             const footer = this.el("div", "xp-kpi__footer");
             if (showCmp) footer.appendChild(this.comparisonBlock(roles));
