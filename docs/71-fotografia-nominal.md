@@ -55,3 +55,11 @@ alertas e contexto têm valor em todas), em blocos de 10 mil; a tabela descarta 
 carregadas" → só as contratadas que caíram nos primeiros blocos (80). É também a causa principal da lentidão.
 Correção: filtro do visual `Esteira | Visão Na Lista Modo` é 1. Filtros da página que sobraram do Detalhamento (data_saida_stage,
 rejection_reason_name, saiu_na_etapa, todos "(Tudo)") podem sair.
+
+## Analisador de desempenho (foto, 03/11 13:04)
+Tabela nominal 50.307 ms na primeira carga e 4.537 ms depois de trocar a visão; menu 824 ms; o resto 0,1–0,6 s. A página ainda está
+como **Tipo de página = Detalhamento** com "Manter todos os filtros" ligado (painel Formato da página) → trocar para Página de relatório.
+Danilo: o CSV precisa baixar a lista inteira (não dá para limitar as linhas carregadas) → "Máximo de linhas carregadas" ≥ 150.000.
+Proposta (2.2.0, com prévia antes): (1) a tabela calcula "Etapa no dia", "Dias na etapa" e "Resultado no dia" a partir da linha do
+tempo (`jornada_txt`, que já tem etapa|entrada|saída|resultado|dias) e a data da foto vinda no contexto → a linha da Fotografia fica
+tão leve quanto a da Candidatura; (2) mostra as primeiras linhas enquanto carrega o resto, e o CSV espera a lista completa.
