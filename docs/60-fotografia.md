@@ -44,3 +44,7 @@ contratação" também vale, com o texto "… contratações até dd/mmm". O cin
 Pontos a deixar claros na tela: (1) período que termina hoje → igual ao modo Candidatura; (2) quem entrou nos últimos dias do período
 ainda não teve tempo de avançar, então o funil e a relação por contratação parecem piores do que vão ficar.
 Alternativa descartada (B · chegadas por etapa no período): grupos diferentes em cada barra, não é funil.
+Visto em foto do Danilo (01–25/10, depois do docs/64): Fotografia ≤ Candidatura em todas as etapas (Mindsight Fit 10.961 × 11.032,
+Testes Online 4.667 × 4.842, recrutador 2.763 × 2.924, contratadas 81 × 86; 217,8 × 205,1 por contratação). Diferença pequena porque
+o período termina perto do fim da base (só uma semana a mais de andamento). Das 208 contratações de 01–25/10, 81 vieram do grupo de outubro.
+A conferir: relógio do cabeçalho mostra 23/10 12:26, mas há movimento depois de 25/10; topo do funil (17.488) × Aplicações (17.642).
