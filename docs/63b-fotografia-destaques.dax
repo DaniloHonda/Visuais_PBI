@@ -1,0 +1,75 @@
+// 63b · Destaques do período no modo Fotografia (mesmo texto enviado na conversa, 03/11/2026)
+DEFINE
+    MEASURE '_Medidas'[Esteira | Etapa Maior Perda] =
+        VAR T = ADDCOLUMNS( VALUES( dEtapa[stage_name] ), "@rej", [Esteira | Etapa Rejeitados] )
+        RETURN MAXX( TOPN( 1, FILTER( T, [@rej] > 0 ), [@rej], DESC ), dEtapa[stage_name] )
+
+    MEASURE '_Medidas'[Esteira | Destaque Maior Perda] =
+        VAR Foto = [Esteira | Modo] = "Fotografia"
+        VAR Nome = [Esteira | Etapa Maior Perda]
+        VAR Rej = CALCULATE( [Esteira | Etapa Rejeitados], TREATAS( { Nome }, dEtapa[stage_name] ) )
+        VAR Total = [Esteira | Etapa Rejeitados]
+        VAR Conv = CALCULATE( [Esteira | Etapa Conversão], TREATAS( { Nome }, dEtapa[stage_name] ) )
+        RETURN
+        IF( NOT ISBLANK( Nome ),
+            FORMAT( Rej, "#,0" ) & IF( Foto, " reprov.", " rej." ) & " || Maior perda em " & Nome & " || "
+                & FORMAT( DIVIDE( Rej, Total ), "0%" ) & " dos " & FORMAT( Total, "#,0" )
+                & IF( Foto, " reprovados no período. Aprovação da etapa no período: ", " rejeitados do período. Conversão da etapa: " )
+                & FORMAT( Conv, "0%" ) & ". || ruim" )
+
+    MEASURE '_Medidas'[Esteira | Destaque Parados] =
+        VAR Foto = [Esteira | Modo] = "Fotografia"
+        VAR Quando = IF( Foto, " em " & FORMAT( [Esteira | Data da Fotografia], "dd/mm" ), "" )
+        VAR N = COALESCE( [Esteira | Andamento Acima 45], 0 )
+        VAR T = ADDCOLUMNS( VALUES( dEtapa[stage_name] ), "@p", [Esteira | Andamento Acima 45] )
+        VAR Top1 = TOPN( 1, FILTER( T, [@p] > 0 ), [@p], DESC )
+        VAR Etapa = MAXX( Top1, dEtapa[stage_name] )
+        VAR NEtapa = MAXX( Top1, [@p] )
+        RETURN
+        IF( N > 0,
+            FORMAT( N, "#,0" ) & " || Aplicações paradas há mais de 45 dias" & Quando & " || Maior concentração: "
+                & Etapa & " (" & FORMAT( NEtapa, "#,0" ) & "). Lista na página Nominal. || atencao",
+            "0 || Nenhuma aplicação parada há mais de 45 dias" & Quando
+                & " || Todas as aplicações em processo avançaram nos 45 dias anteriores. || bom" )
+
+    MEASURE '_Medidas'[Esteira | Destaque Conversão] =
+        VAR Foto = [Esteira | Modo] = "Fotografia"
+        VAR C = [Esteira | Contratados]
+        VAR D = C + [Esteira | Rejeitados no Processo]
+        VAR A = COALESCE( [Esteira | Ativos Agora], 0 )
+        VAR Ap = COALESCE( [Esteira | Fluxo Aprovações], 0 )
+        VAR Rp = COALESCE( [Esteira | Fluxo Reprovações], 0 )
+        VAR Est = COALESCE( [Esteira | Foto Em Andamento], 0 )
+        RETURN
+        IF( Foto,
+            IF( Ap + Rp > 0,
+                FORMAT( DIVIDE( Ap, Ap + Rp ), "0%" ) & " || Taxa de aprovação no período || "
+                    & FORMAT( Ap, "#,0" ) & " aprovações e " & FORMAT( Rp, "#,0" ) & " reprovações nas etapas. "
+                    & FORMAT( Est, "#,0" ) & " seguiam em andamento em " & FORMAT( [Esteira | Data da Fotografia], "dd/mm" ) & ". || bom" ),
+            IF( D > 0,
+                FORMAT( DIVIDE( C, D ), "0%" ) & " || Conversão da esteira || "
+                    & FORMAT( C, "#,0" ) & " contratados de " & FORMAT( D, "#,0" ) & " aplicações decididas. "
+                    & FORMAT( A, "#,0" ) & " seguem em andamento hoje. || bom" ) )
+
+    MEASURE '_Medidas'[Esteira | Destaque SLA] =
+        VAR Foto = [Esteira | Modo] = "Fotografia"
+        VAR S = IF( Foto, [Esteira | Fluxo SLA Contratações], [Esteira | SLA da Esteira (Mediana)] )
+        VAR M = [Esteira | Meta SLA]
+        RETURN
+        IF( NOT ISBLANK( S ),
+            FORMAT( S, "0" ) & " dias || "
+                & IF( S <= M, "SLA dentro da meta de ", "SLA acima da meta de " ) & FORMAT( M, "0" )
+                & IF( Foto, " dias || Mediana das contratadas no período. ", " dias || Mediana da candidatura à contratação. " )
+                & FORMAT( DIVIDE( S, M ), "0%" ) & " da meta consumida. || " & IF( S <= M, "bom", "ruim" ) )
+
+EVALUATE
+CALCULATETABLE(
+    ADDCOLUMNS(
+        VALUES( dModo[modo] ),
+        "perda", [Esteira | Destaque Maior Perda],
+        "parados", [Esteira | Destaque Parados]
+    ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ),
+    '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 )
+)
