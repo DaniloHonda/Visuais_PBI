@@ -1,0 +1,106 @@
+// =====================================================================
+// 60 · Modo "Fotografia": a 13 guarda histórico suficiente? (03/11/2026)
+// Fotografia em D = como estava cada aplicação no FIM do dia D:
+//   existia (candidatura ≤ D) · contratada até D (data_contratacao ≤ D) · rejeitada até D (rejected_at ≤ D)
+//   · senão, em andamento em D, na etapa com entrada ≤ D e saída > D (ou sem saída).
+// Colar tudo na Exibição de consulta DAX → Executar (sai um resultado por consulta) → foto de cada um.
+// =====================================================================
+
+
+// F1 · Cobertura do histórico
+// cand antes 01/07 = aplicações de antes do início da base (se for 0, a fotografia dos primeiros dias de julho fica incompleta)
+// rej sem data / contr sem data = não dá para saber desde quando estão encerradas
+EVALUATE
+CALCULATETABLE(
+    ROW(
+        "1ª candidatura", MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] ),
+        "1ª entrada", MIN( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+        "cand antes 01/07", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < DATE( 2026, 7, 1 ) ),
+        "rej sem data", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[status] = "rejected", ISBLANK( '13_ETAPA_RECRUTAMENTO'[rejected_at] ) ),
+        "contr sem data", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[status] = "hired", ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) ),
+        "ativos agora", [Esteira | Ativos Agora]
+    ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE()
+)
+
+
+// F2 · Fotografia em 4 datas: quantas aplicações estavam em andamento e se dá para dizer em que etapa estavam
+// sem etapa = em andamento em D, mas sem nenhuma passagem cobrindo D (lacuna no histórico)
+// linhas a mais = aplicações em 2 etapas ao mesmo tempo em D (sobreposição)
+// Na linha "hoje", "em andamento" deve ficar perto de "ativos agora" da F1.
+EVALUATE
+VAR Datas =
+    DATATABLE( "foto", STRING, "d", DATETIME,
+        { { "31/07", "2026-07-31" }, { "31/08", "2026-08-31" }, { "30/09", "2026-09-30" }, { "hoje", "2026-11-02" } } )
+RETURN
+SELECTCOLUMNS( Datas,
+    "foto", [foto],
+    "existiam", VAR D = [d] RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <= D ),
+    "em andamento", VAR D = [d] RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <= D,
+            FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] > D ),
+            FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] > D ) ),
+    "c/ etapa", VAR D = [d] RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <= D,
+            FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] > D ),
+            FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] > D ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+            '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] <= D,
+            FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] > D ) ),
+    "linhas cobrindo", VAR D = [d] RETURN
+        CALCULATE( COUNTROWS( '13_ETAPA_RECRUTAMENTO' ),
+            '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(), '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <= D,
+            FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] > D ),
+            FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+                '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] > D ),
+            '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+            '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] <= D,
+            FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+                ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] > D ) )
+)
+
+
+// F3 · Fotografia de 30/09 por etapa: onde estavam as aplicações em andamento naquele dia
+// med dias = mediana de dias que já estavam na etapa em 30/09 · > 45 d = paradas há mais de 45 dias naquele dia
+EVALUATE
+VAR D = DATE( 2026, 9, 30 )
+VAR Base =
+    CALCULATETABLE(
+        ADDCOLUMNS(
+            VALUES( dEtapa[stage_name] ),
+            "ord", CALCULATE( MIN( dEtapa[ordem] ) ),
+            "apps", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ) ),
+            "med dias", CALCULATE( MEDIANX( '13_ETAPA_RECRUTAMENTO', ( D - '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) * 1 ) ),
+            "> 45 d", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+                KEEPFILTERS( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < D - 45 ) )
+        ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        '13_ETAPA_RECRUTAMENTO'[data_aplicacao] <= D,
+        FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ),
+            ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_contratacao] ) || '13_ETAPA_RECRUTAMENTO'[data_contratacao] > D ),
+        FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[status], '13_ETAPA_RECRUTAMENTO'[rejected_at] ),
+            '13_ETAPA_RECRUTAMENTO'[status] <> "rejected" || '13_ETAPA_RECRUTAMENTO'[rejected_at] > D ),
+        '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1,
+        '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] <= D,
+        FILTER( ALL( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ),
+            ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_saida_stage] ) || '13_ETAPA_RECRUTAMENTO'[data_saida_stage] > D )
+    )
+RETURN
+SELECTCOLUMNS(
+    TOPN( 15, FILTER( Base, [apps] > 0 ), [apps], DESC ),
+    "ord", [ord], "etapa", dEtapa[stage_name], "apps", [apps], "med dias", [med dias], "> 45 d", [> 45 d] + 0
+)
+ORDER BY [ord]
