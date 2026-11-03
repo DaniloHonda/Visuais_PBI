@@ -103,6 +103,8 @@ ORDER BY dVisao[ordem]
 
 
 // =========================== PARTE B · linha da tabela (depois de atualizar o modelo com a parte A) ===========================
+// Enviada em 4 pedaços (B1–B4) para caber no Teams: colar os 4 em sequência na MESMA consulta e só então Executar.
+// Cortes: B1 até o RETURN · B2 visões Aplicações…Rejeitados · B3 Entradas por etapa · B4 SLA por etapa + Dados Modo + conferências.
 DEFINE
     // ---------- uma linha da tabela na Fotografia ----------
     MEASURE '_Medidas'[Esteira | Visão Dados Foto] =
