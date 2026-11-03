@@ -48,3 +48,10 @@ Causas prováveis: (1) o Contexto é calculado em cada linha e conta a visão in
 (2) o filtro do visual ainda é `Visão Na Lista` (Candidatura) → na Fotografia a lista sai errada; (3) na Fotografia as listas são
 grandes (51 mil a 117 mil) e a tabela carrega tudo em blocos de 10 mil. Passo 1: `docs/72-nominal-desempenho.dax` (Contexto Leve),
 filtro do visual → `Visão Na Lista Modo`, máximo carregado 20.000, medir no Analisador de desempenho.
+
+## Lista não bate com o menu (foto, 03/11, Fotografia): 80 de 208 contratadas, "Carregando a lista inteira…"
+A tabela estava **sem filtro do visual**. Sem `Visão Na Lista Modo` é 1, a consulta devolve todas as aplicações (jornada, seguintes,
+alertas e contexto têm valor em todas), em blocos de 10 mil; a tabela descarta quem não está na visão e para no "Máximo de linhas
+carregadas" → só as contratadas que caíram nos primeiros blocos (80). É também a causa principal da lentidão.
+Correção: filtro do visual `Esteira | Visão Na Lista Modo` é 1. Filtros da página que sobraram do Detalhamento (data_saida_stage,
+rejection_reason_name, saiu_na_etapa, todos "(Tudo)") podem sair.

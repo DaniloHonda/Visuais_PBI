@@ -32,6 +32,7 @@ Registro da homologação e das regras de negócio: `docs/27-homologacao.md`.
 - Visual personalizado com **mapeamento de tabela** e uma coluna de agrupamento de tabela **sem relação** (ex.: `dAlerta[alerta]` junto com colunas da 13) não entregou os valores por tipo: passar a composição como **medida de texto** (`ordem|tipo=n;;…`).
 - Visual personalizado **não navega entre páginas** (só `launchUrl` e menu de contexto): navegação = botão nativo (Indicador ou Detalhamento).
 - Visual personalizado só desenha dentro do próprio retângulo: lista de filtro aberta precisa de altura e cobre os gráficos → usar o modo **janela** (`openModalDialog`).
+- **Tabela nominal 2 sem o filtro do visual** (`Visão Na Lista Modo` é 1) puxa a base inteira em blocos de 10 mil, descarta quem não está na visão e para no "Máximo de linhas carregadas": a lista fica incompleta (80 de 208) e lenta, com "Carregando a lista inteira…" para sempre. O filtro é obrigatório e precisa acompanhar a medida Modo.
 - Lint do pbiviz proíbe `http://` literal: montar como `"ht" + "tp://…"`.
 
 ### Regras de negócio já decididas (não reabrir sem o Danilo pedir)
