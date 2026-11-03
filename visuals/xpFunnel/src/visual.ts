@@ -61,6 +61,9 @@ export class Visual implements IVisual {
             const dataView: DataView | undefined = options.dataViews && options.dataViews[0];
             this.settings = this.formattingSettingsService.populateFormattingSettingsModel(FunnelSettings, dataView);
             this.render(dataView);
+            const prev = this.root.querySelector(".xp-aviso");
+            if (prev) prev.remove();
+            addAviso(this.root, avisoOf(dataView));
             this.host.eventService.renderingFinished(options);
         } catch (e) {
             this.host.eventService.renderingFailed(options, String(e));
@@ -288,3 +291,32 @@ function textOn(hex: string): string {
 }
 
 export { xpColors };
+
+// Aviso de visual indisponível (ex.: modo Fotografia): cobre o visual com o texto "título||explicação".
+function addAviso(root: HTMLElement, text: string) {
+    const t = (text || "").trim();
+    if (!t) return;
+    const [head, ...rest] = t.split("||");
+    const box = document.createElement("div");
+    box.className = "xp-aviso";
+    const h = document.createElement("div");
+    h.className = "xp-aviso__head";
+    h.textContent = head.trim();
+    box.appendChild(h);
+    if (rest.length && rest.join("||").trim()) {
+        const sub = document.createElement("div");
+        sub.className = "xp-aviso__sub";
+        sub.textContent = rest.join("||").trim();
+        box.appendChild(sub);
+    }
+    box.addEventListener("click", e => e.stopPropagation());
+    root.appendChild(box);
+}
+
+function avisoOf(dv: DataView | undefined): string {
+    const cols = (dv && dv.categorical && dv.categorical.values) || [];
+    const c = cols.find(v => v.source.roles && v.source.roles["aviso"]);
+    if (!c) return "";
+    const v = c.values.find(x => x !== null && x !== undefined && String(x).trim() !== "");
+    return v === undefined ? "" : String(v);
+}

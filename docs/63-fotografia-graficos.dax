@@ -1,0 +1,85 @@
+// 63 · Gráficos do Resumo no modo Fotografia (parte 3a) · mesmo texto enviado na conversa (03/11/2026)
+DEFINE
+    // Avisos (acinzentam o visual no modo Fotografia)
+    MEASURE '_Medidas'[Esteira | Aviso Só Candidatura] =
+        IF( [Esteira | Modo] = "Fotografia",
+            "Disponível no modo Candidatura||O funil segue o mesmo grupo de aplicações do início ao fim." )
+    MEASURE '_Medidas'[Esteira | Aviso Por Contratação] =
+        IF( [Esteira | Modo] = "Fotografia",
+            "Disponível no modo Candidatura||A relação aplicações ÷ contratações só vale para o mesmo grupo de aplicações." )
+
+    // Onde a esteira perde aplicações
+    MEASURE '_Medidas'[Esteira | Etapa Aprovados] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Aprovações], [Esteira | Aprovados] )
+    MEASURE '_Medidas'[Esteira | Etapa Rejeitados] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Reprovações], [Esteira | Rejeitados] )
+    MEASURE '_Medidas'[Esteira | Etapa Em Andamento] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Em Andamento], [Esteira | Em Andamento] )
+    MEASURE '_Medidas'[Esteira | Etapa Total] =
+        IF( [Esteira | Modo] = "Fotografia", BLANK(), [Esteira | Participantes] )
+    MEASURE '_Medidas'[Esteira | Etapa Conversão] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Fluxo Taxa de Aprovação], [Esteira | Conversão Geral %] )
+    MEASURE '_Medidas'[Esteira | Etapa Texto Total] =
+        IF( [Esteira | Modo] = "Fotografia", "no total", "entraram" )
+    MEASURE '_Medidas'[Esteira | Etapa Texto Indicador] =
+        IF( [Esteira | Modo] = "Fotografia", "aprovação", "conversão" )
+    MEASURE '_Medidas'[Esteira | Texto Maior Perda] =
+        VAR Foto = [Esteira | Modo] = "Fotografia"
+        VAR T =
+            CALCULATETABLE(
+                ADDCOLUMNS( VALUES( dEtapa[stage_name] ), "@rej", [Esteira | Etapa Rejeitados] ),
+                ALLSELECTED( dEtapa ) )
+        VAR TotalRej = SUMX( T, [@rej] )
+        VAR Top1 = TOPN( 1, T, [@rej], DESC )
+        VAR Nome = MAXX( Top1, dEtapa[stage_name] )
+        VAR Rej = MAXX( Top1, [@rej] )
+        RETURN
+        IF( TotalRej > 0,
+            IF( Foto, "Maior perda no período: **", "Maior perda: **" ) & Nome & "** concentra " & FORMAT( Rej, "#,0" ) & " dos "
+                & FORMAT( TotalRej, "#,0" ) & IF( Foto, " reprovados no período (", " rejeitados (" )
+                & FORMAT( DIVIDE( Rej, TotalRej ), "0%" ) & ").",
+            IF( Foto, "Nenhuma reprovação no período.", "Nenhuma rejeição no período." ) )
+
+    // Onde estão as aplicações em andamento
+    MEASURE '_Medidas'[Esteira | Andamento Acima 45] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Paradas 45], [Esteira | Ativos Acima de 45 Dias] )
+    MEASURE '_Medidas'[Esteira | Andamento Total] =
+        IF( [Esteira | Modo] = "Fotografia", [Esteira | Foto Em Andamento], [Esteira | Ativos Agora] )
+    MEASURE '_Medidas'[Esteira | Andamento Até 45] =
+        COALESCE( [Esteira | Andamento Total], 0 ) - COALESCE( [Esteira | Andamento Acima 45], 0 )
+    MEASURE '_Medidas'[Esteira | Andamento % Parados] =
+        DIVIDE( [Esteira | Andamento Acima 45], [Esteira | Andamento Total] )
+    MEASURE '_Medidas'[Esteira | Texto Parados] =
+        VAR Foto = [Esteira | Modo] = "Fotografia"
+        VAR Quando = IF( Foto, " em " & FORMAT( [Esteira | Data da Fotografia], "dd/mm" ), "" )
+        VAR N = CALCULATE( [Esteira | Andamento Total], ALLSELECTED( dEtapa ) )
+        VAR P = COALESCE( CALCULATE( [Esteira | Andamento Acima 45], ALLSELECTED( dEtapa ) ), 0 )
+        VAR T =
+            CALCULATETABLE(
+                ADDCOLUMNS( VALUES( dEtapa[stage_name] ), "@p", [Esteira | Andamento Acima 45] ),
+                ALLSELECTED( dEtapa ) )
+        VAR Top1 = TOPN( 1, FILTER( T, [@p] > 0 ), [@p], DESC )
+        VAR Etapa = MAXX( Top1, dEtapa[stage_name] )
+        VAR NE = MAXX( Top1, [@p] )
+        RETURN
+        IF( P > 0,
+            "**" & FORMAT( P, "#,0" ) & " das " & FORMAT( N, "#,0" ) & "** aplicações em andamento" & Quando
+                & IF( Foto, " estavam", " estão" ) & " paradas há mais de 45 dias. **"
+                & FORMAT( NE, "#,0" ) & IF( Foto, " estavam em ", " estão em " ) & Etapa & ".**",
+            "Nenhuma aplicação parada há mais de 45 dias" & Quando & "." )
+
+EVALUATE
+CALCULATETABLE(
+    ADDCOLUMNS(
+        VALUES( dModo[modo] ),
+        "aviso", [Esteira | Aviso Só Candidatura],
+        "aprov", [Esteira | Etapa Aprovados],
+        "rej", [Esteira | Etapa Rejeitados],
+        "andam", [Esteira | Etapa Em Andamento],
+        "parados", [Esteira | Andamento Acima 45]
+    ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ),
+    '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ),
+    dEtapa[stage_name] = "Revisão de aplicação"
+)

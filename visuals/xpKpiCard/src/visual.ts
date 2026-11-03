@@ -21,7 +21,7 @@ interface RoleValue {
     displayName: string;
 }
 
-type Roles = Partial<Record<"valor" | "cmpAtual" | "cmpAnterior" | "ytd" | "meta" | "contexto" | "perValor" | "rotCmp" | "rotYtd" | "status" | "insight" | "info", RoleValue>>;
+type Roles = Partial<Record<"valor" | "cmpAtual" | "cmpAnterior" | "ytd" | "meta" | "contexto" | "perValor" | "rotCmp" | "rotYtd" | "status" | "insight" | "info" | "aviso", RoleValue>>;
 
 export class Visual implements IVisual {
     private host: IVisualHost;
@@ -48,7 +48,9 @@ export class Visual implements IVisual {
         try {
             const dataView: DataView | undefined = options.dataViews && options.dataViews[0];
             this.settings = this.formattingSettingsService.populateFormattingSettingsModel(KpiCardSettings, dataView);
-            this.render(this.readRoles(dataView));
+            const roles = this.readRoles(dataView);
+            this.render(roles);
+            addAviso(this.root, roles.aviso && roles.aviso.value !== null && roles.aviso.value !== undefined ? String(roles.aviso.value) : "");
             this.host.eventService.renderingFinished(options);
         } catch (e) {
             this.host.eventService.renderingFailed(options, String(e));
@@ -289,3 +291,24 @@ export class Visual implements IVisual {
 }
 
 export { xpColors };
+
+// Aviso de visual indisponível (ex.: modo Fotografia): cobre o visual com o texto "título||explicação".
+function addAviso(root: HTMLElement, text: string) {
+    const t = (text || "").trim();
+    if (!t) return;
+    const [head, ...rest] = t.split("||");
+    const box = document.createElement("div");
+    box.className = "xp-aviso";
+    const h = document.createElement("div");
+    h.className = "xp-aviso__head";
+    h.textContent = head.trim();
+    box.appendChild(h);
+    if (rest.length && rest.join("||").trim()) {
+        const sub = document.createElement("div");
+        sub.className = "xp-aviso__sub";
+        sub.textContent = rest.join("||").trim();
+        box.appendChild(sub);
+    }
+    box.addEventListener("click", e => e.stopPropagation());
+    root.appendChild(box);
+}

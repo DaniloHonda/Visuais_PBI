@@ -29,6 +29,18 @@
             "name": "destaque",
             "kind": "Measure",
             "description": "Medida de texto mostrada na faixa abaixo das barras. Use **texto** para negrito."
+        },
+        {
+            "displayName": "Texto após o total (opcional)",
+            "name": "rotTotal",
+            "kind": "Measure",
+            "description": "Medida de texto que troca o \"entraram\" (ex.: muda com o modo Candidatura/Fotografia)."
+        },
+        {
+            "displayName": "Texto do indicador (opcional)",
+            "name": "rotIndicador",
+            "kind": "Measure",
+            "description": "Medida de texto que troca o \"conversão\" abaixo do indicador."
         }
     ],
     "dataViewMappings": [
@@ -48,6 +60,12 @@
                         "max": 1
                     },
                     "destaque": {
+                        "max": 1
+                    },
+                    "rotTotal": {
+                        "max": 1
+                    },
+                    "rotIndicador": {
                         "max": 1
                     }
                 }
@@ -83,6 +101,16 @@
                         {
                             "bind": {
                                 "to": "destaque"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "rotTotal"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "rotIndicador"
                             }
                         }
                     ]

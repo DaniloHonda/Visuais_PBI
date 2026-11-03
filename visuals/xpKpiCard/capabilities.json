@@ -69,6 +69,12 @@
             "name": "info",
             "kind": "Measure",
             "description": "Texto que aparece ao passar o mouse no ⓘ do título."
+        },
+        {
+            "displayName": "Aviso (visual indisponível)",
+            "name": "aviso",
+            "kind": "Measure",
+            "description": "Texto que acinzenta o card. Ex.: Esteira | Aviso Só Candidatura (\"título||explicação\"; vazio = normal)."
         }
     ],
     "dataViewMappings": [
@@ -109,6 +115,9 @@
                         "max": 1
                     },
                     "info": {
+                        "max": 1
+                    },
+                    "aviso": {
                         "max": 1
                     }
                 }
@@ -174,6 +183,11 @@
                         {
                             "bind": {
                                 "to": "info"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "aviso"
                             }
                         }
                     ]

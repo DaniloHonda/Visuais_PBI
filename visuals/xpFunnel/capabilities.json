@@ -23,6 +23,12 @@
             "name": "base",
             "kind": "Measure",
             "description": "Denominador do \"% do total\". Se vazio, usa o valor da primeira etapa."
+        },
+        {
+            "displayName": "Aviso (visual indisponível)",
+            "name": "aviso",
+            "kind": "Measure",
+            "description": "Texto que acinzenta o funil. Ex.: Esteira | Aviso Só Candidatura (\"título||explicação\"; vazio = normal)."
         }
     ],
     "dataViewMappings": [
@@ -39,6 +45,9 @@
                         "max": 1
                     },
                     "grupo": {
+                        "max": 1
+                    },
+                    "aviso": {
                         "max": 1
                     }
                 }
@@ -73,6 +82,11 @@
                         {
                             "bind": {
                                 "to": "base"
+                            }
+                        },
+                        {
+                            "bind": {
+                                "to": "aviso"
                             }
                         }
                     ]

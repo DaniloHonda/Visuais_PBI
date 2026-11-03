@@ -47,6 +47,8 @@ export class Visual implements IVisual {
     private rows: Row[] = [];
     private parts: Part[] = [];
     private indicatorFormat = "";
+    private totalText = "";
+    private indicatorText = "";
     private hasTotal = false;
     private rowEls: { el: HTMLElement; id: ISelectionId }[] = [];
 
@@ -111,6 +113,13 @@ export class Visual implements IVisual {
         const totalCol = byRole("total")[0];
         const indicatorCol = byRole("indicador")[0];
         const insightCol = byRole("destaque")[0];
+        // Textos que podem vir de medida (ex.: trocar com o modo do dash); vale o primeiro preenchido.
+        const firstText = (col: DataViewValueColumn | undefined) => {
+            const v = col ? col.values.find(x => x !== null && x !== undefined && String(x).trim() !== "") : undefined;
+            return v === undefined ? "" : String(v).trim();
+        };
+        this.totalText = firstText(byRole("rotTotal")[0]) || s.rotulos.textoTotal.value;
+        this.indicatorText = firstText(byRole("rotIndicador")[0]) || s.indicador.texto.value;
         if (!categories || partCols.length === 0) return;
 
         const colors = [s.barras.cor1, s.barras.cor2, s.barras.cor3, s.barras.cor4, s.barras.cor5].map(c => c.value.value);
@@ -126,7 +135,8 @@ export class Visual implements IVisual {
         this.rows = categories.values.map((c, i) => {
             const vals = partCols.map(col => asNumber(col.values[i]));
             const sum = vals.reduce<number>((a, v) => a + (v || 0), 0);
-            const total = totalCol ? asNumber(totalCol.values[i]) || 0 : sum;
+            const tv = totalCol ? asNumber(totalCol.values[i]) : null;
+            const total = tv === null ? sum : tv;
             return {
                 index: i,
                 label: c === null || c === undefined ? "(vazio)" : String(c),
@@ -323,7 +333,7 @@ export class Visual implements IVisual {
             title.style.fontSize = fontSize + "px";
             title.title = r.label;
             name.appendChild(title);
-            if (this.hasTotal) name.appendChild(this.el("div", "xp-cbar__sub", `${totalFormatter.format(r.total)} ${s.rotulos.textoTotal.value}`.trim()));
+            if (this.hasTotal) name.appendChild(this.el("div", "xp-cbar__sub", `${totalFormatter.format(r.total)} ${this.totalText}`.trim()));
             row.appendChild(name);
 
             const lane = this.el("div", "xp-cbar__lane");
@@ -374,7 +384,7 @@ export class Visual implements IVisual {
                 const val = this.el("div", "xp-cbar__ind-value", r.indicator === null ? "—" : indFormatter.format(r.indicator));
                 if (r.indicator === null) val.classList.add("xp-cbar__ind-value--none");
                 ind.appendChild(val);
-                ind.appendChild(this.el("div", "xp-cbar__ind-label", s.indicador.texto.value));
+                ind.appendChild(this.el("div", "xp-cbar__ind-label", this.indicatorText));
                 row.appendChild(ind);
             }
 
