@@ -69,3 +69,37 @@ TOPN( 10,
         '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim ),
     [apps], DESC )
 ORDER BY [apps] DESC
+
+// Resultado (foto do Danilo, 03/11): diferença 482 = entrada após D 5 + etapa sem ordem 477 (sem data cand 0).
+
+// E1 · Etapas da base que não estão na dEtapa (base inteira, não só as 477)
+EVALUATE
+VAR O1 = MIN( dFunil[ordem_passo] )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS( VALUES( '13_ETAPA_RECRUTAMENTO'[stage_name] ),
+        "apps", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ) ),
+        "1ª entrada", CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ),
+        "última", CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ) ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+    NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+    '13_ETAPA_RECRUTAMENTO'[ordem_etapa] < O1 )
+ORDER BY [apps] DESC
+
+// E2 · As 5 aplicações com entrada só depois de 25/10
+EVALUATE
+VAR Fim = DATE( 2026, 10, 25 ) + 1
+VAR Apps =
+    CALCULATETABLE(
+        ADDCOLUMNS( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            "cand", CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] ) ),
+            "1ª entrada", CALCULATE( MIN( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ) ) ),
+        '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE(),
+        NOT ISBLANK( '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] ),
+        '13_ETAPA_RECRUTAMENTO'[data_aplicacao] < Fim )
+RETURN
+ADDCOLUMNS( FILTER( Apps, [1ª entrada] >= Fim ), "dias", INT( [1ª entrada] - [cand] ) )
+
+// E3 · dEtapa atual (para encaixar as etapas novas na ordem certa)
+EVALUATE dEtapa
+ORDER BY dEtapa[ordem]
