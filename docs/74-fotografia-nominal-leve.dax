@@ -82,3 +82,75 @@ CALCULATETABLE(
         "contexto", [Esteira | Visão Contexto Leve] ),
     Cal )
 ORDER BY dModo[modo]
+
+
+// =========================== PARTE 2 · linha da Fotografia leve (tokens) ===========================
+// Redefine a mesma medida (os campos não mudam). Os "~…" são calculados pela Tabela nominal 2.2.0.
+DEFINE
+    MEASURE '_Medidas'[Esteira | Visão Dados Foto] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        RETURN
+        IF( [Esteira | Visão Na Lista Foto] = 1,
+            VAR F = "yyyy-mm-dd"
+            VAR D = [Esteira | Data da Fotografia]
+            VAR Fim = D + 1
+            VAR Sit = MAX( '13_ETAPA_RECRUTAMENTO'[situacao_app] )
+            VAR StApp = MAX( '13_ETAPA_RECRUTAMENTO'[status] )
+            VAR Cand = MIN( '13_ETAPA_RECRUTAMENTO'[data_aplicacao] )
+            VAR Ciclo = COALESCE( MIN( '13_ETAPA_RECRUTAMENTO'[ciclo_inicio] ), Cand )
+            VAR Pausa = MAX( '13_ETAPA_RECRUTAMENTO'[dias_pausa_sla] )
+            VAR Mot = MAX( '13_ETAPA_RECRUTAMENTO'[rejection_reason_name] )
+            VAR Tipo = MAX( '13_ETAPA_RECRUTAMENTO'[tipo_encerramento] )
+            VAR Contr = MAX( '13_ETAPA_RECRUTAMENTO'[data_contratacao] )
+            VAR RejEm = MAX( '13_ETAPA_RECRUTAMENTO'[rejected_at] )
+            VAR AbertaD = NOT ( NOT ISBLANK( Contr ) && Contr < Fim ) && NOT ( StApp = "rejected" && NOT ( RejEm >= Fim ) )
+            VAR SitD = IF( AbertaD, "Em andamento", Sit )
+            VAR Saida = SWITCH( Sit, "Contratada", Contr, "Rejeitada", RejEm, "Declinou", RejEm, "Contratada via outra vaga", RejEm )
+            VAR Sla = IF( NOT AbertaD && Sit = "Contratada", ROUND( MAX( '13_ETAPA_RECRUTAMENTO'[sla_esteira_dias] ), 0 ),
+                IF( NOT ISBLANK( Ciclo ), MAX( 0, INT( IF( AbertaD, D, COALESCE( Saida, D ) ) - Ciclo ) - Pausa ) ) )
+            VAR tSla = "||SLA (dias)=" & IF( ISBLANK( Sla ), "", "#" & Sla )
+            VAR tCand = "||Candidatura=" & IF( ISBLANK( Cand ), "", "@" & FORMAT( Cand, F ) )
+            VAR tHoje = "||Situação hoje=" & Sit
+            VAR Base = "||Situação no dia=" & SitD & "||Etapa no dia=" & IF( AbertaD, "~etapa_dia", "~etapa_ultima" ) & tHoje & tCand & tSla
+            RETURN
+            SWITCH( V,
+                "Aplicações",
+                    "seg=" & SitD & Base & "||Motivo=" & IF( AbertaD, "", Mot ) & "||Tipo de encerramento=" & IF( AbertaD, "", Tipo ),
+                "Por recrutador",
+                    "seg=" & SitD & Base & "||Motivo=" & IF( AbertaD, "", Mot ),
+                "Funil",
+                    VAR MaxOrd = CALCULATE( MAX( '13_ETAPA_RECRUTAMENTO'[ordem_etapa] ),
+                        '13_ETAPA_RECRUTAMENTO'[passagem_valida] = 1, '13_ETAPA_RECRUTAMENTO'[data_entrada_stage] < Fim,
+                        REMOVEFILTERS( dEtapa ), REMOVEFILTERS( '13_ETAPA_RECRUTAMENTO'[stage_name] ) )
+                    RETURN "seg=" & SitD & "||Chegou até=" & LOOKUPVALUE( dEtapa[stage_name], dEtapa[ordem], MaxOrd ) & Base,
+                "Contratadas",
+                    VAR Orig = MAX( '13_ETAPA_RECRUTAMENTO'[origem_contratacao] )
+                    RETURN "seg=" & Orig & "||Origem=" & Orig
+                        & "||Início do ciclo=" & IF( ISBLANK( Ciclo ), "", "@" & FORMAT( Ciclo, F ) ) & tCand
+                        & "||Contratação=" & IF( ISBLANK( Contr ), "", "@" & FORMAT( Contr, F ) ) & tSla,
+                "Em andamento",
+                    "seg=~seg45||Etapa no dia=~etapa_dia||Entrou na etapa=~entrada_dia||Dias na etapa=~dias_dia" & tHoje & tCand & tSla,
+                "Andamento por faixa",
+                    "seg=~faixa_dia||Etapa no dia=~etapa_dia||Faixa=~faixa_dia||Entrou na etapa=~entrada_dia||Dias na etapa=~dias_dia"
+                        & tHoje & tCand & tSla,
+                "Rejeitados e motivos",
+                    "seg=" & Tipo & "||Etapa da rejeição=~etapa_rej||Motivo=" & Mot & "||Tipo=" & Tipo
+                        & "||Rejeitada em=" & IF( ISBLANK( RejEm ), "", "@" & FORMAT( RejEm, F ) ) & "||Dias na etapa=~dias_rej" & tCand & tSla,
+                "Entradas por etapa",
+                    "seg=~ent_res||Etapa=~ent_etapa||Resultado no dia=~ent_res||Entrada=~ent_entrada||Saída=~ent_saida||Dias na etapa=~ent_dias"
+                        & tHoje & tCand & tSla
+                        & "||_rej=" & IF( ISBLANK( RejEm ), "", FORMAT( RejEm, F ) ) & "||_aberta=" & IF( AbertaD, "1", "0" ),
+                "SLA por etapa",
+                    "seg=~sla_faixa||Etapa=~sla_etapa||Etapas concluídas=~sla_n||Entrada=~sla_entrada||Saída=~sla_saida||Dias nas etapas=~sla_dias"
+                        & tHoje & tCand & tSla ) )
+
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+RETURN
+CALCULATETABLE(
+    VAR Apps = TOPN( 3, FILTER( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), [Esteira | Visão Na Lista Modo] = 1 ),
+        '13_ETAPA_RECRUTAMENTO'[application_id], ASC )
+    RETURN ADDCOLUMNS( Apps, "dados", [Esteira | Visão Dados Modo] ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), TREATAS( { "Em andamento" }, dVisao[visao] ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )

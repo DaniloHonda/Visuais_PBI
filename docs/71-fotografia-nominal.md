@@ -63,3 +63,6 @@ Danilo: o CSV precisa baixar a lista inteira (não dá para limitar as linhas ca
 Proposta (2.2.0, com prévia antes): (1) a tabela calcula "Etapa no dia", "Dias na etapa" e "Resultado no dia" a partir da linha do
 tempo (`jornada_txt`, que já tem etapa|entrada|saída|resultado|dias) e a data da foto vinda no contexto → a linha da Fotografia fica
 tão leve quanto a da Candidatura; (2) mostra as primeiras linhas enquanto carrega o resto, e o CSV espera a lista completa.
+
+## Tabela 2.2.0 importada (foto, 03/11): Fotografia · Contratadas 208 no cabeçalho = menu, Direto 161 + Via pool 46 + Dentro do pool 1,
+CSV liberado. Próximo: parte 2 do `docs/74` (linha leve com tokens).
