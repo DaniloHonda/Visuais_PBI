@@ -1,0 +1,84 @@
+// 74 · Nominal na Fotografia, versão leve (com a XP · Tabela nominal 2.2.0) · mesmo texto da conversa (03/11/2026)
+// A tabela 2.2.0 calcula "Etapa no dia", "Entrou na etapa", "Dias na etapa", faixas e o resultado no dia a partir da
+// linha do tempo (jornada) e da data da foto. O Power BI só manda colunas simples (valores "~token" na linha).
+// Ordem: importar a 2.2.0 → parte 1 (cabeçalho manda foto/ini/etapas/faixas) → parte 2 (linha leve).
+
+// =========================== PARTE 1 · cabeçalho com a data da foto ===========================
+DEFINE
+    MEASURE '_Medidas'[Esteira | Visão Contexto Leve] =
+        VAR V = SELECTEDVALUE( dVisao[visao], "Aplicações" )
+        VAR Foto = [Esteira | Modo] = "Fotografia" && NOT ( V IN { "Evolução", "Entrevistas", "Alertas" } )
+        VAR Dt = FORMAT( [Esteira | Data da Fotografia], "dd/mm" )
+        VAR IniF = MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) )
+        VAR PerTxt = " de " & FORMAT( IniF, "dd/mm" ) & " a " & Dt
+        VAR EtTxt = IF( ISFILTERED( dEtapa[stage_name] ),
+            " em " & CONCATENATEX( VALUES( dEtapa[stage_name] ), dEtapa[stage_name], ", " ), "" )
+        VAR AlTxt = IF( HASONEVALUE( dAlerta[alerta] ), """" & VALUES( dAlerta[alerta] ) & """", "algum alerta" )
+        VAR Faixas = "0–2 d;3–7 d;8–15 d;16–30 d;31–45 d;> 45 d"
+        VAR Frase =
+            IF( Foto,
+                SWITCH( V,
+                    "Aplicações", "aplicações que existiam em " & Dt & " (base desde 01/07)",
+                    "Contratadas", "contratadas" & PerTxt & " (pela data da contratação)",
+                    "Em andamento", "aplicações em andamento em " & Dt & EtTxt,
+                    "Funil", "aplicações que existiam em " & Dt & " e até onde tinham chegado",
+                    "Entradas por etapa", "aplicações que estiveram" & IF( EtTxt = "", " em alguma etapa", EtTxt ) & PerTxt,
+                    "Rejeitados e motivos", "aplicações rejeitadas" & EtTxt & PerTxt,
+                    "Andamento por faixa", "aplicações em andamento em " & Dt & ", por dias parada na etapa",
+                    "SLA por etapa", "aplicações com etapa concluída" & EtTxt & PerTxt,
+                    "Por recrutador", "aplicações que existiam em " & Dt,
+                    "aplicações" ),
+                SWITCH( V,
+                    "Aplicações", "aplicações com candidatura no período",
+                    "Contratadas", "contratadas · candidatura no período",
+                    "Em andamento", "aplicações em andamento hoje" & EtTxt,
+                    "Funil", "aplicações do período e até onde chegaram",
+                    "Entradas por etapa", "aplicações que entraram" & IF( EtTxt = "", " em alguma etapa", EtTxt ),
+                    "Rejeitados e motivos", "aplicações rejeitadas" & EtTxt,
+                    "Andamento por faixa", "aplicações em andamento, por dias parada na etapa atual",
+                    "SLA por etapa", "aplicações do período com etapa concluída" & EtTxt,
+                    "Por recrutador", "aplicações do período",
+                    "Evolução", "aplicações com aprovação ou rejeição no período (data do movimento)" & EtTxt,
+                    "Entrevistas", "aplicações com entrevista marcada no período" & EtTxt,
+                    "Alertas", "aplicações com " & AlTxt & EtTxt,
+                    "aplicações" ) )
+        VAR Origem = SWITCH( V,
+            "Aplicações", "card Aplicações", "Contratadas", "card Contratadas", "Em andamento", "card Em andamento",
+            "Funil", "Funil", "Entradas por etapa", "Entradas e aprovações por etapa",
+            "Rejeitados e motivos", "Rejeitados por etapa e Motivos de saída", "Andamento por faixa", "Aplicações em andamento por etapa",
+            "SLA por etapa", "SLA por etapa", "Por recrutador", "Aprovados por recrutador",
+            "Evolução", "Evolução", "Entrevistas", "Entrevistas", "Alertas", "Tipos de alerta", "" )
+        VAR SemEtapa = IF( Foto, ";Sem etapa no dia", "" )
+        VAR Segs = SWITCH( V,
+            "Contratadas", "Direto;Via pool;Dentro do pool",
+            "Em andamento", "Até 45 dias;Parada há mais de 45 dias" & SemEtapa,
+            "Entradas por etapa", "Aprovado;Rejeitado;Em andamento;Voltou;Saiu para outra vaga",
+            "Rejeitados e motivos", "Avaliação;Declínio do candidato;Administrativo;A classificar",
+            "Andamento por faixa", Faixas & SemEtapa,
+            "SLA por etapa", Faixas,
+            "Evolução", "Aprovou;Rejeitada;Aprovou e foi rejeitada",
+            "Entrevistas", "Aprovado;Rejeitado;Sem resultado;A realizar",
+            "Em andamento;Contratada;Contratada via outra vaga;Rejeitada;Declinou" )
+        VAR Ordem = SWITCH( V,
+            "Em andamento", "Dias na etapa", "Andamento por faixa", "Dias na etapa", "Rejeitados e motivos", "Dias na etapa",
+            "Entradas por etapa", "Dias na etapa", "SLA por etapa", "Dias nas etapas",
+            "Evolução", "Último movimento", "Entrevistas", "Última entrevista", "SLA (dias)" )
+        // Só na Fotografia: o que a tabela 2.2.0 precisa para calcular o "no dia"
+        VAR FotoTxt = IF( Foto,
+            "||foto=" & FORMAT( [Esteira | Data da Fotografia], "yyyy-mm-dd" )
+            & "||ini=" & FORMAT( IniF, "yyyy-mm-dd" )
+            & "||etapas=" & IF( ISFILTERED( dEtapa[stage_name] ), CONCATENATEX( VALUES( dEtapa[stage_name] ), dEtapa[stage_name], ";" ) )
+            & "||faixas=" & CONCATENATEX( ALL( dFaixaDias ), dFaixaDias[de] & ":" & dFaixaDias[ate] & ":" & dFaixaDias[faixa], ";", dFaixaDias[ordem], ASC ) )
+        RETURN
+        "visao=" & V & "||frase=" & Frase & "||origem=" & Origem & "||segs=" & Segs & "||ordem=" & Ordem & FotoTxt
+
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS(
+        CROSSJOIN( VALUES( dModo[modo] ), FILTER( SUMMARIZE( dVisao, dVisao[ordem], dVisao[visao] ), dVisao[visao] = "Em andamento" ) ),
+        "contexto", [Esteira | Visão Contexto Leve] ),
+    Cal )
+ORDER BY dModo[modo]
