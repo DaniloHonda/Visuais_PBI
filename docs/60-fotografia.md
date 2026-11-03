@@ -48,3 +48,11 @@ Visto em foto do Danilo (01–25/10, depois do docs/64): Fotografia ≤ Candidat
 Testes Online 4.667 × 4.842, recrutador 2.763 × 2.924, contratadas 81 × 86; 217,8 × 205,1 por contratação). Diferença pequena porque
 o período termina perto do fim da base (só uma semana a mais de andamento). Das 208 contratações de 01–25/10, 81 vieram do grupo de outubro.
 A conferir: relógio do cabeçalho mostra 23/10 12:26, mas há movimento depois de 25/10; topo do funil (17.488) × Aplicações (17.642).
+
+## Funil na Fotografia, versão final (03/11/2026: caso C, substitui o A)
+O Danilo pediu que o funil da Fotografia olhe **todas as aplicações que existiam em D** (o mesmo grupo do card Aplicações, 117.161 em 25/10)
+e mostre até onde tinham chegado até D; contratadas = contratadas até D. Continua funil de verdade (grupo fixo, um momento só) e fica
+coerente com o resto da página. Pontos a deixar claros: só o último dia importa (o início do período não muda o funil); o grupo é o
+acumulado da base desde 01/07; mistura aplicações antigas e novas. Medidas: `docs/65-funil-fotografia-existentes.dax`.
+Nos 2 cards "por contratação", o selo passa a `Esteira | Card Período Estoque` ("em 25/out"). Subtítulo fixo do fundo
+("Aplicações do período que chegaram…") fica errado na Fotografia: trocar por texto dinâmico (parte seguinte).
