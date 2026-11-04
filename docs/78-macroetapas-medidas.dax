@@ -1,0 +1,11 @@
+// 78 · Macroetapas na Matriz de calor (grupo e ordem das linhas) · mesmo texto da conversa (04/11/2026)
+DEFINE
+    MEASURE '_Medidas'[Esteira | Grupo da Etapa] = SELECTEDVALUE( dEtapa[macro] )
+    MEASURE '_Medidas'[Esteira | Ordem da Etapa] = MIN( dEtapa[ordem_macro] ) * 1000 + MIN( dEtapa[ordem] )
+
+EVALUATE
+ADDCOLUMNS( SUMMARIZE( dEtapa, dEtapa[ordem_macro], dEtapa[macro] ),
+    "de", CALCULATE( MINX( VALUES( dEtapa[stage_name] ), [Esteira | Ordem da Etapa] ) ),
+    "até", CALCULATE( MAXX( VALUES( dEtapa[stage_name] ), [Esteira | Ordem da Etapa] ) ),
+    "grupo", CALCULATE( MAXX( VALUES( dEtapa[stage_name] ), [Esteira | Grupo da Etapa] ) ) )
+ORDER BY dEtapa[ordem_macro]

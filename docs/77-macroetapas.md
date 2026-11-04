@@ -37,3 +37,10 @@ Linha da macro com o total; clique abre as etapas. Começar por "Aprovados por p
 ## Conferência M2 (foto, 04/11): Triagem 14 · Qualificação 18 · Pool 32 · Avaliação R&S 10 · Liderança 30 · Avaliação técnica 2 ·
 Checagem 5 · Offer 4 = 115 (todas). Como Triagem era o "resto" da regra, a regra passou a listar a Triagem e o resto vira
 "Sem macro" (ordem 9): etapa nova no Greenhouse aparece como "Sem macro" em vez de cair na Triagem sem ninguém ver. Consulta M4.
+
+## M4 (foto, 04/11): nenhuma etapa da dEtapa sem macro · na base, só o nome vazio (579 aplicações) fica fora → engenharia.
+
+## Passo 2 · Matriz "Aprovados por praça em cada etapa" por macro (sem visual novo)
+`Esteira | Grupo da Etapa` = macro e `Esteira | Ordem da Etapa` = ordem_macro × 1000 + ordem (as etapas de cada macro ficam juntas).
+Formatar → Textos → Botão de grupo = "Macroetapa". Não classificar `dEtapa[stage_name]` por coluna derivada dele (dependência
+circular): a ordem por macro vai pelas medidas de ordem dos visuais.
