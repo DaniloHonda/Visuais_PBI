@@ -1,0 +1,30 @@
+// 76 · Card Aplicações = aplicações criadas no período nos DOIS modos (pedido do Danilo, 04/11/2026) · mesmo texto da conversa
+// Antes, na Fotografia, o card mostrava as existentes em D (117.161). Agora mostra as criadas no período (Candidatos) nos dois modos,
+// com texto, selo do período e comparações iguais aos da Candidatura. O funil da Fotografia continua com as existentes em D (Funil Base).
+// Efeito junto: a coluna "Aplicações" do "Aprovados por recrutador" (Report) também usa o Card Aplicações.
+// Depois de atualizar: no card Aplicações do Resumo, Período do valor → Esteira | Período Selecionado.
+DEFINE
+    MEASURE '_Medidas'[Esteira | Card Aplicações] = [Esteira | Candidatos]
+    MEASURE '_Medidas'[Esteira | Texto Candidatos] = "Aplicações com candidatura no período"
+    MEASURE '_Medidas'[Esteira | Candidatos (mês atual)] =
+        VAR Hoje = TODAY()
+        RETURN CALCULATE( [Esteira | Candidatos], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), Hoje ) )
+    MEASURE '_Medidas'[Esteira | Candidatos (mês anterior)] =
+        VAR Hoje = TODAY()
+        RETURN CALCULATE( [Esteira | Candidatos], DATESBETWEEN( '_dCALENDARIO'[Data], EDATE( DATE( YEAR( Hoje ), MONTH( Hoje ), 1 ), -1 ), EDATE( Hoje, -1 ) ) )
+    MEASURE '_Medidas'[Esteira | Candidatos (YTD)] =
+        VAR Hoje = TODAY()
+        RETURN CALCULATE( [Esteira | Candidatos], DATESBETWEEN( '_dCALENDARIO'[Data], DATE( YEAR( Hoje ), 1, 1 ), Hoje ) )
+
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS( VALUES( dModo[modo] ),
+        "card", [Esteira | Card Aplicações],
+        "texto", [Esteira | Texto Candidatos],
+        "mês atual", [Esteira | Candidatos (mês atual)],
+        "mês ant", [Esteira | Candidatos (mês anterior)],
+        "desde jul", [Esteira | Candidatos (YTD)] ),
+    Cal, '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )

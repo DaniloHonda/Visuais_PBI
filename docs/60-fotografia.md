@@ -56,3 +56,9 @@ coerente com o resto da página. Pontos a deixar claros: só o último dia impor
 acumulado da base desde 01/07; mistura aplicações antigas e novas. Medidas: `docs/65-funil-fotografia-existentes.dax`.
 Nos 2 cards "por contratação", o selo passa a `Esteira | Card Período Estoque` ("em 25/out"). Subtítulo fixo do fundo
 ("Aplicações do período que chegaram…") fica errado na Fotografia: trocar por texto dinâmico (parte seguinte).
+
+## 04/11/2026 · Card Aplicações igual nos dois modos
+Pedido do Danilo: o big number Aplicações do Resumo mostra as **criadas no período** também na Fotografia (Candidatos, 17.642 em
+01–25/10), com texto, selo do período e comparações da Candidatura. Medidas: `docs/76-aplicacoes-criadas-no-periodo.dax`.
+O funil da Fotografia segue com as existentes em D. Efeito junto: coluna Aplicações do "Aprovados por recrutador".
+Pendente de decisão: alinhar as visões Aplicações e Por recrutador da Nominal (hoje, na Fotografia, listam as existentes em D).
