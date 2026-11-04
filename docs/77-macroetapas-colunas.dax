@@ -4,32 +4,36 @@
 // "Pool" (etapas dos bancos de talentos: Pool …, Júnior/Pleno/Sênior, áreas de Operations) é sugestão: se ficar dentro de Qualificação,
 // troque o resultado "Pool" por "Qualificação" na regra.
 
-// 1) macro
-macro =
+// Dependência circular (04/11): "Classificar por coluna" faz a coluna ordenada depender da coluna de ordem. Se ordem_macro fosse
+// calculada a partir de macro e macro fosse classificada por ordem_macro, uma dependeria da outra. Por isso a REGRA fica na
+// ordem_macro (número) e o nome (macro) sai da ordem.
+
+// 1) ordem_macro (a regra)
+ordem_macro =
 VAR N = TRIM( dEtapa[stage_name] )
 RETURN
 SWITCH( TRUE(),
-    N IN { "Pré Offer", "Offer", "Recusou a offer", "Em negociação" }, "Offer",
-    N IN { "Background Check", "Análise de Crédito", "Reference Check", "Comitê de contratação", "Executive Review" }, "Checagem",
-    N IN { "Avaliação técnica", "Take Home Test - Tech" }, "Avaliação técnica",
-    N = "Entrevista Inteligente", "Qualificação",
+    N IN { "Pré Offer", "Offer", "Recusou a offer", "Em negociação" }, 8,
+    N IN { "Background Check", "Análise de Crédito", "Reference Check", "Comitê de contratação", "Executive Review" }, 7,
+    N IN { "Avaliação técnica", "Take Home Test - Tech" }, 6,
+    N = "Entrevista Inteligente", 2,
     N IN { "Etapa com Recrutamento", "Entrevista R&S", "Apresentação Pessoal" }
         || SEARCH( "dinâmica", N, 1, 0 ) > 0 || SEARCH( "xday", N, 1, 0 ) > 0
-        || SEARCH( "Aprovados - Recrut", N, 1, 0 ) = 1 || SEARCH( "Em avaliação", N, 1, 0 ) = 1, "Avaliação R&S",
+        || SEARCH( "Aprovados - Recrut", N, 1, 0 ) = 1 || SEARCH( "Em avaliação", N, 1, 0 ) = 1, 4,
     SEARCH( "Entrevista com ", N, 1, 0 ) = 1 || SEARCH( "Avaliação - ", N, 1, 0 ) = 1
-        || N IN { "Entrevista Líder", "Bar Raiser", "Aprovados - Líder" }, "Entrevistas de liderança",
+        || N IN { "Entrevista Líder", "Bar Raiser", "Aprovados - Líder" }, 5,
     SEARCH( "Pool ", N, 1, 0 ) = 1 || SEARCH( "Banking", N, 1, 0 ) = 1
         || N IN { "Júnior", "Junior", "Pleno", "Sênior/Espec", "Senior", "Assistente", "AMS Operations", "Clients Operations",
-                  "Operations Plataform", "Middle Operations", "Offshore", "Candidatos Internos" }, "Pool",
+                  "Operations Plataform", "Middle Operations", "Offshore", "Candidatos Internos" }, 3,
     N IN { "Qualificação", "Longlist", "On Hold" }
         || SEARCH( "phone", N, 1, 0 ) > 0 || SEARCH( "short", N, 1, 0 ) > 0 || SEARCH( "stand", N, 1, 0 ) > 0
-        || SEARCH( "vídeo entrevista", N, 1, 0 ) > 0 || SEARCH( "video entrevista", N, 1, 0 ) > 0, "Qualificação",
-    "Triagem" )
+        || SEARCH( "vídeo entrevista", N, 1, 0 ) > 0 || SEARCH( "video entrevista", N, 1, 0 ) > 0, 2,
+    1 )
 
-// 2) ordem_macro   (depois: dEtapa[macro] → Classificar por coluna → ordem_macro)
-ordem_macro =
-SWITCH( dEtapa[macro], "Triagem", 1, "Qualificação", 2, "Pool", 3, "Avaliação R&S", 4,
-    "Entrevistas de liderança", 5, "Avaliação técnica", 6, "Checagem", 7, "Offer", 8, 9 )
+// 2) macro (o nome, a partir da ordem)   (depois: dEtapa[macro] → Classificar por coluna → ordem_macro)
+macro =
+SWITCH( dEtapa[ordem_macro], 1, "Triagem", 2, "Qualificação", 3, "Pool", 4, "Avaliação R&S",
+    5, "Entrevistas de liderança", 6, "Avaliação técnica", 7, "Checagem", 8, "Offer" )
 
 // ---------------- Conferência (Exibição de consulta DAX → Executar; não precisa atualizar o modelo)
 // M2 · quantas etapas caíram em cada macro
