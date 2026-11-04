@@ -1,0 +1,43 @@
+// 77 · Macroetapas · COLUNAS NOVAS na dEtapa (Exibição de tabela → dEtapa → Nova coluna, uma por vez) · 04/11/2026
+// Regras por nome (a lista tem 115 etapas e muitos nomes longos): primeiro os nomes exatos, depois os começos de nome.
+// Macros na ordem do processo: Triagem · Qualificação · Pool · Avaliação R&S · Entrevistas de liderança · Avaliação técnica · Checagem · Offer
+// "Pool" (etapas dos bancos de talentos: Pool …, Júnior/Pleno/Sênior, áreas de Operations) é sugestão: se ficar dentro de Qualificação,
+// troque o resultado "Pool" por "Qualificação" na regra.
+
+// 1) macro
+macro =
+VAR N = TRIM( dEtapa[stage_name] )
+RETURN
+SWITCH( TRUE(),
+    N IN { "Pré Offer", "Offer", "Recusou a offer", "Em negociação" }, "Offer",
+    N IN { "Background Check", "Análise de Crédito", "Reference Check", "Comitê de contratação", "Executive Review" }, "Checagem",
+    N IN { "Avaliação técnica", "Take Home Test - Tech" }, "Avaliação técnica",
+    N = "Entrevista Inteligente", "Qualificação",
+    N IN { "Etapa com Recrutamento", "Entrevista R&S", "Apresentação Pessoal" }
+        || SEARCH( "dinâmica", N, 1, 0 ) > 0 || SEARCH( "xday", N, 1, 0 ) > 0
+        || SEARCH( "Aprovados - Recrut", N, 1, 0 ) = 1 || SEARCH( "Em avaliação", N, 1, 0 ) = 1, "Avaliação R&S",
+    SEARCH( "Entrevista com ", N, 1, 0 ) = 1 || SEARCH( "Avaliação - ", N, 1, 0 ) = 1
+        || N IN { "Entrevista Líder", "Bar Raiser", "Aprovados - Líder" }, "Entrevistas de liderança",
+    SEARCH( "Pool ", N, 1, 0 ) = 1 || SEARCH( "Banking", N, 1, 0 ) = 1
+        || N IN { "Júnior", "Junior", "Pleno", "Sênior/Espec", "Senior", "Assistente", "AMS Operations", "Clients Operations",
+                  "Operations Plataform", "Middle Operations", "Offshore", "Candidatos Internos" }, "Pool",
+    N IN { "Qualificação", "Longlist", "On Hold" }
+        || SEARCH( "phone", N, 1, 0 ) > 0 || SEARCH( "short", N, 1, 0 ) > 0 || SEARCH( "stand", N, 1, 0 ) > 0
+        || SEARCH( "vídeo entrevista", N, 1, 0 ) > 0 || SEARCH( "video entrevista", N, 1, 0 ) > 0, "Qualificação",
+    "Triagem" )
+
+// 2) ordem_macro   (depois: dEtapa[macro] → Classificar por coluna → ordem_macro)
+ordem_macro =
+SWITCH( dEtapa[macro], "Triagem", 1, "Qualificação", 2, "Pool", 3, "Avaliação R&S", 4,
+    "Entrevistas de liderança", 5, "Avaliação técnica", 6, "Checagem", 7, "Offer", 8, 9 )
+
+// ---------------- Conferência (Exibição de consulta DAX → Executar; não precisa atualizar o modelo)
+// M2 · quantas etapas caíram em cada macro
+EVALUATE
+ADDCOLUMNS( SUMMARIZE( dEtapa, dEtapa[ordem_macro], dEtapa[macro] ), "etapas", CALCULATE( COUNTROWS( dEtapa ) ) )
+ORDER BY dEtapa[ordem_macro]
+
+// M3 · etapa por etapa (para revisar com os recrutadores)
+EVALUATE
+SELECTCOLUMNS( dEtapa, "macro", dEtapa[macro], "etapa", dEtapa[stage_name], "antes", dEtapa[grupo], "om", dEtapa[ordem_macro], "o", dEtapa[ordem] )
+ORDER BY [om], [o]

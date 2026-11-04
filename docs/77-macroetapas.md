@@ -24,3 +24,12 @@ Ordem das macros: Triagem → Qualificação → Avaliação R&S → Entrevistas
 ## Visuais (depois da tabela)
 Linha da macro com o total; clique abre as etapas. Começar por "Aprovados por praça em cada etapa" (Matriz de calor) e
 "Entradas e aprovações por etapa" (Tabela por etapa); depois Onde perde, SLA por etapa, Rejeitados e Em andamento × faixa. Prévia antes.
+
+## Lista real (foto do Danilo, 04/11): 115 etapas na dEtapa + 1 linha com nome de etapa vazio
+- Todas as etapas da base estão na dEtapa. As "477 aplicações com etapa sem ordem" (docs/66) são linhas da 13 com **stage_name vazio**
+  (579 aplicações têm alguma linha assim): não é etapa faltando na dEtapa, é dado sem nome de etapa → Data Quality / engenharia.
+- Grupos antigos: Triagem, Avaliações, Entrevistas, Pools, Outros, Checagens, Offer. "Outros" e "Pools" são etapas de vagas de pool
+  (Pool Varejo, Pool Tecnologia…, Júnior/Pleno/Sênior, AMS/Clients/Middle Operations, Offshore…).
+- Macro por regra de nome: `docs/77-macroetapas-colunas.dax` (colunas `macro` e `ordem_macro` na dEtapa). Proposta de 8ª macro "Pool".
+- Atenção: a coluna "apps" da consulta M1 conta aplicações com **linha** na etapa, inclusive etapas não alcançadas (a 13 tem linha
+  para todas as etapas da vaga). Ex.: 8.770 em vários Pools = todas as aplicações daquela vaga de pool.
