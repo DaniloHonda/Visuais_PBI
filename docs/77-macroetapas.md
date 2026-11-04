@@ -44,3 +44,10 @@ Checagem 5 · Offer 4 = 115 (todas). Como Triagem era o "resto" da regra, a regr
 `Esteira | Grupo da Etapa` = macro e `Esteira | Ordem da Etapa` = ordem_macro × 1000 + ordem (as etapas de cada macro ficam juntas).
 Formatar → Textos → Botão de grupo = "Macroetapa". Não classificar `dEtapa[stage_name]` por coluna derivada dele (dependência
 circular): a ordem por macro vai pelas medidas de ordem dos visuais.
+
+## Matriz de calor 1.4.0 (prévia `docs/79-matriz-macroetapas-preview.png`, 04/11)
+Com o campo Grupo da linha preenchido, cada grupo vira uma linha com a soma; clique no nome abre/fecha as etapas (começa tudo
+fechado). "Abrir todas" / "Fechar todas" no lugar do botão Etapa | Grupo. Busca por etapa abre o grupo sozinho. Escala de cor
+separada para macros e etapas. Formatar → Comportamento → "Grupos que abrem e fecham" (ligado).
+Outros gráficos: "Aplicações em andamento por etapa" é a mesma Matriz → só preencher Ordem e Grupo. Tabela por etapa, Barras com
+composição e Tabela de SLA precisam de versão nova cada (SLA da macro vem do DAX: mediana não se soma).

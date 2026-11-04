@@ -24,11 +24,12 @@ class ComportamentoCard extends Card {
     modoPct = new formattingSettings.ToggleSwitch({ name: "modoPct", displayName: "Abrir em \"% da linha\"", value: false });
     mostrarTotal = new formattingSettings.ToggleSwitch({ name: "mostrarTotal", displayName: "Mostrar coluna de total", value: true });
     botaoGrupo = new formattingSettings.ToggleSwitch({ name: "botaoGrupo", displayName: "Mostrar botão linha | grupo", value: true });
+    abrirFechar = new formattingSettings.ToggleSwitch({ name: "abrirFechar", displayName: "Grupos que abrem e fecham (clique no grupo)", value: true });
     ocultarColunas = new formattingSettings.ToggleSwitch({ name: "ocultarColunas", displayName: "\"Só com movimento\" esconde colunas vazias", value: true });
     colunasPorTotal = new formattingSettings.ToggleSwitch({ name: "colunasPorTotal", displayName: "Colunas: maior valor primeiro", value: false });
     name = "comportamento";
     displayName = "Comportamento";
-    slices = [this.busca, this.soMovimento, this.modoPct, this.mostrarTotal, this.botaoGrupo, this.ocultarColunas, this.colunasPorTotal];
+    slices = [this.busca, this.soMovimento, this.modoPct, this.mostrarTotal, this.botaoGrupo, this.abrirFechar, this.ocultarColunas, this.colunasPorTotal];
 }
 
 class AlertaCard extends Card {

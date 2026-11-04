@@ -30,6 +30,8 @@ interface Row {
 // Ordem: coluna (índice, -1 = total) e direção; null = ordem original.
 type Sort = { col: number; desc: boolean } | null;
 type Mode = "num" | "pct" | "taxa";
+// Linha desenhada: linha comum, grupo (soma das linhas do grupo, abre e fecha) ou linha dentro de um grupo aberto.
+interface Item { row: Row; kind: "row" | "group" | "child"; open: boolean; n: number; }
 
 const INT = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 
@@ -57,6 +59,7 @@ export class Visual implements IVisual {
     private height = 0;
     private hasGrupo = false;
     private byGroup = false;
+    private open = new Set<string>();
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
@@ -263,7 +266,23 @@ export class Visual implements IVisual {
         moving.addEventListener("click", () => { this.onlyMoving = !this.onlyMoving; this.renderToolbar(); this.renderTable(); });
         this.toolbar.appendChild(moving);
 
-        if (this.hasGrupo && this.settings.comportamento.botaoGrupo.value) {
+        if (this.expandable()) {
+            const gseg = el("div", "xp-hm__seg");
+            const grupos = Array.from(new Set(this.rows.map(r => r.grupo || "(sem grupo)")));
+            const todosAbertos = grupos.every(g => this.open.has(g));
+            for (const [abrir, label] of [[true, "Abrir todas"], [false, "Fechar todas"]] as [boolean, string][]) {
+                const on = abrir ? todosAbertos : this.open.size === 0;
+                const b = el("button", "xp-hm__opt" + (on ? " xp-hm__opt--on" : ""), label);
+                b.setAttribute("aria-pressed", String(on));
+                b.addEventListener("click", () => {
+                    this.open = abrir ? new Set(grupos) : new Set();
+                    this.renderToolbar();
+                    this.renderTable();
+                });
+                gseg.appendChild(b);
+            }
+            this.toolbar.appendChild(gseg);
+        } else if (this.hasGrupo && this.settings.comportamento.botaoGrupo.value) {
             const gseg = el("div", "xp-hm__seg");
             const opts: [boolean, string][] = [[false, this.settings.textos.colLinhas.value || this.rowName], [true, this.settings.textos.rotuloGrupo.value || "Grupo"]];
             for (const [g, label] of opts) {
@@ -303,23 +322,58 @@ export class Visual implements IVisual {
 
     private hasOrdem(): boolean { return this.rows.some(r => r.ordem !== null); }
 
+    private sortKey(): ((r: Row) => number) | null {
+        const sort = this.sort;
+        if (!sort) return null;
+        return (r: Row) => {
+            if (sort.col === -2) { const x = this.rowRate(r); return x === null ? -1 : x; }
+            if (sort.col < 0) return r.total;
+            if (this.mode === "taxa") { const x = this.rate(r.values[sort.col], r.bases[sort.col]).r; return x === null ? -1 : x; }
+            const v = r.values[sort.col] || 0;
+            return this.mode === "pct" ? (r.total ? v / r.total : 0) : v;
+        };
+    }
+
+    private sorted(list: Row[]): Row[] {
+        const key = this.sortKey();
+        if (!key || !this.sort) return list;
+        const desc = this.sort.desc;
+        const pos = new Map<Row, number>();
+        list.forEach((r, n) => pos.set(r, n));
+        return list.slice().sort((a, b) => (key(a) === key(b) ? (pos.get(a) || 0) - (pos.get(b) || 0) : (key(a) - key(b)) * (desc ? -1 : 1)));
+    }
+
     private visibleRows(): Row[] {
         const q = normalize(this.query);
-        let list = this.ordered(this.baseRows()).filter(r => (!this.onlyMoving || r.total > 0) && (!q || normalize(r.label).indexOf(q) >= 0));
-        const sort = this.sort;
-        if (sort) {
-            const key = (r: Row) => {
-                if (sort.col === -2) { const x = this.rowRate(r); return x === null ? -1 : x; }
-                if (sort.col < 0) return r.total;
-                if (this.mode === "taxa") { const x = this.rate(r.values[sort.col], r.bases[sort.col]).r; return x === null ? -1 : x; }
-                const v = r.values[sort.col] || 0;
-                return this.mode === "pct" ? (r.total ? v / r.total : 0) : v;
-            };
-            const pos = new Map<Row, number>();
-            list.forEach((r, n) => pos.set(r, n));
-            list = list.slice().sort((a, b) => (key(a) === key(b) ? (pos.get(a) || 0) - (pos.get(b) || 0) : (key(a) - key(b)) * (sort.desc ? -1 : 1)));
+        return this.sorted(this.ordered(this.baseRows()).filter(r => (!this.onlyMoving || r.total > 0) && (!q || normalize(r.label).indexOf(q) >= 0)));
+    }
+
+    // Grupos que abrem e fecham: cada grupo vira uma linha com a soma; aberto, mostra as linhas dele logo abaixo.
+    private expandable(): boolean { return this.hasGrupo && this.settings.comportamento.abrirFechar.value; }
+
+    private items(): Item[] {
+        if (!this.expandable()) return this.visibleRows().map(r => ({ row: r, kind: "row" as const, open: false, n: 0 }));
+        const q = normalize(this.query);
+        const kids = new Map<string, Row[]>();
+        for (const r of this.ordered(this.rows)) {
+            const k = r.grupo || "(sem grupo)";
+            const arr = kids.get(k) || [];
+            arr.push(r);
+            kids.set(k, arr);
         }
-        return list;
+        const out: Item[] = [];
+        for (const g of this.sorted(this.groupRows().filter(x => !this.onlyMoving || x.total > 0))) {
+            const all = kids.get(g.grupo) || [];
+            const gMatch = !q || normalize(g.label).indexOf(q) >= 0;
+            let ch = all.filter(r => !this.onlyMoving || r.total > 0);
+            if (!gMatch) ch = ch.filter(r => normalize(r.label).indexOf(q) >= 0);
+            if (!gMatch && !ch.length) continue;
+            // Na busca por etapa, o grupo abre sozinho para mostrar o que achou.
+            const open = this.open.has(g.grupo) || !gMatch;
+            out.push({ row: g, kind: "group", open, n: all.length });
+            if (open) this.sorted(ch).forEach(r => out.push({ row: r, kind: "child", open: false, n: 0 }));
+        }
+        return out;
     }
 
     private renderTable() {
@@ -343,21 +397,27 @@ export class Visual implements IVisual {
             return;
         }
 
-        const base = this.baseRows();
+        const exp = this.expandable();
+        const base = exp ? this.rows : this.baseRows();
         this.computeColRates(base);
-        const list = this.visibleRows();
+        const items = this.items();
+        const list = items.map(x => x.row);
         const cols = this.visibleCols(base);
         const showTotal = s.comportamento.mostrarTotal.value;
         const rowAvg = this.mode === "taxa" && this.byRow();
         // Títulos de grupo entre as linhas: só na ordem do processo, sem busca de grupo e fora da visão por grupo.
-        const showGroups = this.hasGrupo && !this.byGroup && !this.sort;
-        // Escala da cor: maior valor visível (ou maior % da linha).
-        let max = 0;
-        for (const r of list) cols.forEach(i => { const x = this.cellValue(r.values[i], r); if (x > max) max = x; });
+        const showGroups = this.hasGrupo && !exp && !this.byGroup && !this.sort;
+        // Escala da cor: maior valor visível (ou maior % da linha). Grupos e linhas dentro dos grupos têm escalas próprias.
+        let max = 0, maxG = 0;
+        for (const it of items) cols.forEach(i => {
+            const x = this.cellValue(it.row.values[i], it.row);
+            if (it.kind === "group") { if (x > maxG) maxG = x; } else if (x > max) max = x;
+        });
 
         const table = el("table", "xp-hm__table");
         const head = el("tr", "");
-        const rowTitle = this.byGroup ? (s.textos.rotuloGrupo.value || "Grupo") : (s.textos.colLinhas.value || this.rowName);
+        const rowTitle = exp ? `${s.textos.rotuloGrupo.value || "Grupo"} › ${(s.textos.colLinhas.value || this.rowName).toLowerCase()}`
+            : this.byGroup ? (s.textos.rotuloGrupo.value || "Grupo") : (s.textos.colLinhas.value || this.rowName);
         head.appendChild(el("th", "xp-hm__th-name", rowTitle));
         const headers: [string, number][] = [];
         if (rowAvg) headers.push([s.textos.rotuloMediaCol.value || "Média", -2]);
@@ -416,7 +476,9 @@ export class Visual implements IVisual {
         // Degradê em três pontos (claro → meio → escuro), escala raiz para os valores pequenos aparecerem.
         const shade = (t: number) => (t < 0.5 ? mixOklab(light, mid, t * 2) : mixOklab(mid, dark, (t - 0.5) * 2));
         let lastGroup: string | null = null;
-        for (const r of list) {
+        for (const it of items) {
+            const r = it.row;
+            const escala = it.kind === "group" ? maxG : max;
             if (showGroups && r.grupo !== lastGroup) {
                 lastGroup = r.grupo;
                 const gtr = el("tr", "xp-hm__grp");
@@ -425,13 +487,33 @@ export class Visual implements IVisual {
                 gtr.appendChild(gtd);
                 tbody.appendChild(gtr);
             }
-            const tr = el("tr", "");
+            const tr = el("tr", it.kind === "group" ? "xp-hm__row-grp" + (it.open ? " is-open" : "") : it.kind === "child" ? "xp-hm__row-kid" : "");
             const name = el("td", "xp-hm__name");
             name.tabIndex = 0;
-            highlight(name, r.label, q);
-            name.title = r.label;
-            this.bindSelect(name, r.rowIds);
-            this.cellEls.push({ el: name, ids: r.rowIds });
+            if (it.kind === "group") {
+                // Clique no nome do grupo abre ou fecha; as células continuam filtrando a página.
+                name.appendChild(el("span", "xp-hm__chev", it.open ? "▾" : "▸"));
+                const lab = el("span", "");
+                highlight(lab, r.label, q);
+                name.appendChild(lab);
+                name.appendChild(el("span", "xp-hm__cnt", String(it.n)));
+                name.title = (it.open ? "Fechar " : "Abrir ") + r.label;
+                name.setAttribute("role", "button");
+                name.setAttribute("aria-expanded", String(it.open));
+                const toggle = (e: Event) => {
+                    e.stopPropagation();
+                    if (this.open.has(r.grupo)) this.open.delete(r.grupo); else this.open.add(r.grupo);
+                    this.renderToolbar();
+                    this.renderTable();
+                };
+                name.addEventListener("click", toggle);
+                name.addEventListener("keydown", (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") toggle(e); });
+            } else {
+                highlight(name, r.label, q);
+                name.title = r.label;
+                this.bindSelect(name, r.rowIds);
+                this.cellEls.push({ el: name, ids: r.rowIds });
+            }
             tr.appendChild(name);
             if (rowAvg) {
                 const avg = this.rowRate(r);
@@ -444,7 +526,7 @@ export class Visual implements IVisual {
                 if (this.mode === "taxa") {
                     this.paintRate(td, r, i);
                 } else if (x > 0) {
-                    const bg = shade(max ? Math.sqrt(x / max) : 0);
+                    const bg = shade(escala ? Math.sqrt(x / escala) : 0);
                     td.style.background = bg;
                     td.style.color = textOn(bg);
                     td.textContent = this.mode === "pct" ? Math.round(x * 100) + "%" : INT.format(x);
