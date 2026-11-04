@@ -33,3 +33,7 @@ Linha da macro com o total; clique abre as etapas. Começar por "Aprovados por p
 - Macro por regra de nome: `docs/77-macroetapas-colunas.dax` (colunas `macro` e `ordem_macro` na dEtapa). Proposta de 8ª macro "Pool".
 - Atenção: a coluna "apps" da consulta M1 conta aplicações com **linha** na etapa, inclusive etapas não alcançadas (a 13 tem linha
   para todas as etapas da vaga). Ex.: 8.770 em vários Pools = todas as aplicações daquela vaga de pool.
+
+## Conferência M2 (foto, 04/11): Triagem 14 · Qualificação 18 · Pool 32 · Avaliação R&S 10 · Liderança 30 · Avaliação técnica 2 ·
+Checagem 5 · Offer 4 = 115 (todas). Como Triagem era o "resto" da regra, a regra passou a listar a Triagem e o resto vira
+"Sem macro" (ordem 9): etapa nova no Greenhouse aparece como "Sem macro" em vez de cair na Triagem sem ninguém ver. Consulta M4.

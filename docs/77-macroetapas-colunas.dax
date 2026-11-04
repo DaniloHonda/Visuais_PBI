@@ -28,12 +28,15 @@ SWITCH( TRUE(),
     N IN { "Qualificação", "Longlist", "On Hold" }
         || SEARCH( "phone", N, 1, 0 ) > 0 || SEARCH( "short", N, 1, 0 ) > 0 || SEARCH( "stand", N, 1, 0 ) > 0
         || SEARCH( "vídeo entrevista", N, 1, 0 ) > 0 || SEARCH( "video entrevista", N, 1, 0 ) > 0, 2,
-    1 )
+    N IN { "Revisão de aplicação", "Priorizados IA", "Triagem", "Testes Online", "TestGorilla", "Validação de laudo",
+           "Teste PI realizado", "Declinou do processo", "Reprovados" }
+        || SEARCH( "mindsight", N, 1, 0 ) > 0 || SEARCH( "Ranking Score", N, 1, 0 ) = 1, 1,
+    9 )   // 9 = Sem macro: etapa nova que nenhuma regra pegou (aparece nos gráficos como "Sem macro")
 
 // 2) macro (o nome, a partir da ordem)   (depois: dEtapa[macro] → Classificar por coluna → ordem_macro)
 macro =
 SWITCH( dEtapa[ordem_macro], 1, "Triagem", 2, "Qualificação", 3, "Pool", 4, "Avaliação R&S",
-    5, "Entrevistas de liderança", 6, "Avaliação técnica", 7, "Checagem", 8, "Offer" )
+    5, "Entrevistas de liderança", 6, "Avaliação técnica", 7, "Checagem", 8, "Offer", "Sem macro" )
 
 // ---------------- Conferência (Exibição de consulta DAX → Executar; não precisa atualizar o modelo)
 // M2 · quantas etapas caíram em cada macro
@@ -45,3 +48,13 @@ ORDER BY dEtapa[ordem_macro]
 EVALUATE
 SELECTCOLUMNS( dEtapa, "macro", dEtapa[macro], "etapa", dEtapa[stage_name], "antes", dEtapa[grupo], "om", dEtapa[ordem_macro], "o", dEtapa[ordem] )
 ORDER BY [om], [o]
+
+// M4 · etapas fora das macros: na dEtapa sem macro (tem que vir vazio) e na base fora da dEtapa (só o nome vazio)
+EVALUATE
+VAR SemMacro = SELECTCOLUMNS( FILTER( dEtapa, dEtapa[ordem_macro] = 9 ), "etapa", dEtapa[stage_name], "onde", "dEtapa sem macro" )
+VAR ForaDEtapa = SELECTCOLUMNS( EXCEPT( VALUES( '13_ETAPA_RECRUTAMENTO'[stage_name] ), DISTINCT( dEtapa[stage_name] ) ),
+    "etapa", '13_ETAPA_RECRUTAMENTO'[stage_name], "onde", "base, fora da dEtapa" )
+RETURN
+ADDCOLUMNS( UNION( SemMacro, ForaDEtapa ),
+    "apps", VAR N = [etapa] RETURN CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+        '13_ETAPA_RECRUTAMENTO'[stage_name] = N, '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() ) + 0 )
