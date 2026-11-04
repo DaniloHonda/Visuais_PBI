@@ -1,0 +1,19 @@
+// 77 · M1 · Todas as etapas (da base e da dEtapa), com ordem e grupo atuais, aplicações e a esteira que mais usa
+// ordem vazia = etapa que não está na dEtapa (aparece primeiro)
+EVALUATE
+VAR Nomes = DISTINCT( UNION( VALUES( '13_ETAPA_RECRUTAMENTO'[stage_name] ), VALUES( dEtapa[stage_name] ) ) )
+RETURN
+ADDCOLUMNS( Nomes,
+    "ordem", LOOKUPVALUE( dEtapa[ordem], dEtapa[stage_name], [stage_name] ),
+    "grupo", LOOKUPVALUE( dEtapa[grupo], dEtapa[stage_name], [stage_name] ),
+    "apps", VAR N = [stage_name] RETURN
+        CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ),
+            '13_ETAPA_RECRUTAMENTO'[stage_name] = N, '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() ) + 0,
+    "esteira", VAR N = [stage_name] RETURN
+        MAXX( TOPN( 1,
+            CALCULATETABLE(
+                ADDCOLUMNS( VALUES( '13_ETAPA_RECRUTAMENTO'[esteira] ),
+                    "@n", CALCULATE( DISTINCTCOUNT( '13_ETAPA_RECRUTAMENTO'[application_id] ) ) ),
+                '13_ETAPA_RECRUTAMENTO'[stage_name] = N, '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() ),
+            [@n], DESC ), '13_ETAPA_RECRUTAMENTO'[esteira] ) )
+ORDER BY [ordem], [apps] DESC
