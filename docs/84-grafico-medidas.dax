@@ -232,3 +232,24 @@ CALCULATETABLE(
     Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
 ORDER BY [card], [ordem_grafico]
 // fim da parte 2G
+
+// Resultado 2G (05/11, Fotografia): graf = lista = menu nas 6 linhas. Card Em andamento 51.222 · Onde estão e Em andamento por
+// etapa 49.144 (2.078 aplicações abertas sem etapa no dia ficam só no card) · Entradas e aprovações 66.114 · Onde perde 66.064 ·
+// Rejeitados por etapa 15.459. Fotografia fechada nos 20 gráficos (Agenda fora do menu até ter lista própria).
+
+// =========================== PARTE 2H · mesma conferência na Candidatura, todos os gráficos (só leitura) ===========================
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+VAR Apps = CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS(
+        FILTER( SUMMARIZE( dVisao, dVisao[card], dVisao[ordem_grafico], dVisao[grafico] ),
+            dVisao[grafico] <> "Evolução da esteira · Agenda" ),
+        "graf", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Regra] ) ) ),
+        "lista", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Na Lista] = 1 ) ) ),
+        "menu", CALCULATE( [Esteira | Gráfico Contagem] ) ),
+    Cal, TREATAS( { "Candidatura" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+ORDER BY [card], [ordem_grafico]
+// fim da parte 2H
