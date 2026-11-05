@@ -1,0 +1,113 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Nominal mais fácil de ler</title><style>
+body{margin:0;background:#EEF0F0;font-family:"Segoe UI",Arial,sans-serif;color:#121212}
+.pg{width:1650px;padding:26px 30px 30px 60px;box-sizing:border-box}
+.cap{font-size:13px;color:#6B6B6B;margin:0 0 14px}.cap b{color:#121212;font-size:18px;margin-right:10px}
+.card{background:#fff;border-radius:18px;padding:18px 22px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative}
+/* menu */
+.mn{display:flex;gap:16px;align-items:stretch;position:relative}
+.sec{display:flex;flex-direction:column;min-width:0}.sec+.sec{border-left:1px solid #E6E6E6;padding-left:16px}
+.grp{font-size:11px;font-weight:700;letter-spacing:.05em;color:#6B6B6B;margin:0 2px 6px}
+.cards{display:flex;gap:8px;flex:1}
+.c{width:132px;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;padding:9px 11px;border:1px solid #E6E6E6;border-radius:14px;background:#fff}
+.c .nm{font-size:12.5px;font-weight:600;line-height:1.25;min-height:2.5em;display:flex;gap:6px}
+.c .ic{width:20px;height:20px;flex:none;border-radius:7px;background:#E3F1F0;color:#067D84;font-size:11px;display:flex;align-items:center;justify-content:center}
+.c .v{font-size:23px;font-weight:700;line-height:1.15;margin-top:auto;font-variant-numeric:tabular-nums}
+.c .ds{font-size:11px;color:#6B6B6B;line-height:1.3;min-height:2.6em}
+.c .tg{font-size:9.5px;font-weight:700;color:#6B6B6B;background:#F0F2F2;border-radius:6px;padding:1px 6px;align-self:flex-start;margin-top:3px}
+.c.on{background:#067D84;border-color:#067D84;color:#fff}.c.on .ic{background:#fff}.c.on .ds{color:#CDE9E7}
+/* tabela */
+.t2{margin-top:16px;border-top:1px solid #E6E6E6;padding-top:14px;position:relative}
+.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.n{font-size:32px;font-weight:700}.fr{font-size:15px;color:#333}
+.orig{font-size:12.5px;color:#0A6B5A;font-weight:600;margin-left:6px}
+.ler{font-size:12.5px;color:#3C3C3C;background:#F3FAFA;border:1px solid #DCEEEE;border-radius:10px;padding:7px 12px;margin:8px 0 10px;display:inline-block}
+.ler b{color:#03474C}
+.segs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sg{font-size:13px;border:1px solid #DDE2E3;border-radius:16px;padding:5px 12px;background:#fff}.sg b{margin-left:3px}
+.sg.on{background:#067D84;border-color:#067D84;color:#fff}
+.hd{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.srch{flex:1;height:34px;border:1px solid #A9B4B6;border-radius:10px;display:flex;align-items:center;padding:0 12px;color:#8A8A8A;font-size:13px;box-sizing:border-box}
+.tog{height:34px;box-sizing:border-box;border:1px solid #E3A33B;color:#9A6512;border-radius:10px;padding:0 12px;font-size:13px;font-weight:600;display:flex;align-items:center}
+.btn{height:34px;box-sizing:border-box;border:1px solid #067D84;color:#067D84;border-radius:10px;padding:0 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.btn small{font-weight:400;color:#6B6B6B}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:11px;font-weight:600;color:#6B6B6B;padding:10px 9px;border-bottom:1px solid #DDE2E3;white-space:nowrap}
+th.k{color:#03474C;background:#E3F1F0;border-bottom:2px solid #067D84}
+td{height:40px;padding:0 9px;border-bottom:1px solid #F0F2F2;white-space:nowrap}
+td.k{background:#F5FBFA}
+.r{text-align:right}.x{color:#A9B4B6;font-size:11px;width:12px}
+.lk{font-size:12px;font-weight:700;color:#03474C;border:1px solid #BFE3E5;border-radius:7px;padding:2px 8px}
+.st{font-weight:600}.mu{color:#6B6B6B}
+.p{border-radius:10px;padding:2px 8px;font-size:11.5px;font-weight:600}
+.ok{background:#E3F1F0;color:#03474C}.bad{background:#FBE3E1;color:#B23A31}.now{background:#FBF0DC;color:#9A6512}.out{background:#DDEFF0;color:#04585D}
+.d{display:inline-block;min-width:40px;text-align:center;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.dok{background:#F2F4F4;color:#3C3C3C}.dwarn{background:#FFF1D6;color:#7A4B00}
+.foot{text-align:center;font-size:12px;color:#8A8A8A;padding-top:10px}
+/* marcadores */
+.m{position:absolute;width:26px;height:26px;border-radius:50%;background:#E05A4F;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff;z-index:3}
+.mi{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#E05A4F;color:#fff;font-size:12px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;margin-left:6px;flex:none}
+.leg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 22px;margin-top:16px}
+.li{display:flex;gap:10px;font-size:13px;line-height:1.45;color:#3C3C3C}
+.li i{flex:none;width:22px;height:22px;border-radius:50%;background:#E05A4F;color:#fff;font-style:normal;font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.li b{color:#121212}
+</style></head><body><div class="pg">
+<p class="cap"><b>Prévia · Nominal mais fácil de ler</b>Números da sua foto (Fotografia em 25/10, B2C) · nomes e vagas fictícios · Aplicações com número ilustrativo</p>
+
+<div class="card">
+  <div class="mn">
+    <span class="m" style="left:-50px;top:26px">1</span>
+    <div class="sec"><div class="grp">RESUMO</div><div class="cards">
+      <div class="c"><div class="nm"><span class="ic">◍</span>Aplicações</div><div class="v">4.870</div><div class="ds">criadas no período · igual ao card</div></div>
+      <div class="c"><div class="nm"><span class="ic">▽</span>Funil</div><div class="v">12.963</div><div class="ds">existiam em 25/10 · até onde chegaram</div></div>
+      <div class="c"><div class="nm"><span class="ic">◷</span>Em andamento</div><div class="v">3.147</div><div class="ds">etapa em 25/10 e dias parada</div></div>
+      <div class="c"><div class="nm"><span class="ic">✓</span>Contratadas</div><div class="v">51</div><div class="ds">origem e SLA</div></div>
+    </div></div>
+    <div class="sec"><div class="grp">REPORT</div><div class="cards">
+      <div class="c on"><div class="nm"><span class="ic">⇄</span>Entradas por etapa</div><div class="v">5.106</div><div class="ds">passaram pelas etapas no período</div></div>
+      <div class="c"><div class="nm"><span class="ic">✕</span>Rejeitados e motivos</div><div class="v">2.040</div><div class="ds">etapa e motivo</div></div>
+      <div class="c"><div class="nm"><span class="ic">◔</span>SLA por etapa</div><div class="v">2.862</div><div class="ds">etapas concluídas no período</div></div>
+      <div class="c"><div class="nm"><span class="ic">↗</span>Evolução</div><div class="v">2.813</div><div class="ds">aprovou ou rejeitou</div><span class="tg">igual nos 2 modos</span></div>
+      <div class="c"><div class="nm"><span class="ic">▦</span>Entrevistas</div><div class="v">297</div><div class="ds">entrevistas marcadas</div><span class="tg">igual nos 2 modos</span></div>
+    </div></div>
+    <div class="sec"><div class="grp">DATA QUALITY</div><div class="cards">
+      <div class="c"><div class="nm"><span class="ic">!</span>Alertas</div><div class="v">98</div><div class="ds">criadas no período com alerta</div><span class="tg">igual nos 2 modos</span></div>
+    </div></div>
+  </div>
+
+  <div class="t2">
+    <span class="m" style="left:-50px;top:22px">2</span>
+    <div class="top"><span class="n">5.106</span><span class="fr">aplicações que passaram por alguma etapa de 01/10 a 25/10</span><span class="orig">= gráfico "Entradas e aprovações por etapa" (Report)</span></div>
+    <div class="ler">Cada linha é uma aplicação na etapa em que ela se mexeu no período. As abas contam a coluna em destaque: <b>Resultado até 25/10</b>.</div>
+    <div class="segs"><span class="sg on">Todas <b>5.106</b></span><span class="sg">Aprovado <b>133</b></span><span class="sg">Rejeitado <b>1.996</b></span><span class="sg">Em andamento <b>2.950</b></span><span class="sg">Saiu para outra vaga <b>2</b></span></div>
+    <div class="hd" style="position:relative">
+      <div class="srch">⌕&nbsp; Buscar candidato, vaga, recrutador, motivo…</div>
+      <div class="tog">⚠ Só com alerta (812)</div>
+      <div class="btn">Colunas ▾ <small>+3 ocultas</small></div><span class="mi" style="margin-left:-4px">5</span>
+      <div class="btn">⤓ Exportar CSV <small>todas as colunas</small></div>
+          </div>
+    <div style="position:relative">
+    <table>
+      <tr><th class="x"></th><th>Greenhouse</th><th>Candidato</th><th>Etapa</th><th class="k">Resultado até 25/10<span class="mi">3</span></th><th class="r" style="color:#03474C">Entrada ↓<span class="mi">4</span></th><th class="r">Saída</th><th class="r">Dias na etapa</th><th>Vaga<span class="mi">6</span></th><th>Recrutador</th></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Ana Paula Ribeiro</td><td>Entrevista com supervisor</td><td class="k"><span class="p ok">Aprovado</span></td><td class="r">24/10/26</td><td class="r">25/10/26</td><td class="r">1</td><td>[Talent Pool B2C] Assessoria Varejo - SP</td><td>Marina Costa</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Bruno Henrique Alves</td><td>Revisão de aplicação</td><td class="k"><span class="p now">Em andamento</span></td><td class="r">24/10/26</td><td class="r">—</td><td class="r">1</td><td>[Talent Pool B2C] Assessoria Future - BH</td><td>Rafael Torres</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Camila Duarte</td><td>Triagem</td><td class="k"><span class="p bad">Rejeitado</span></td><td class="r">23/10/26</td><td class="r">24/10/26</td><td class="r">1</td><td>Assessoria Varejo - Campinas</td><td>Marina Costa</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Diego Martins</td><td>Mindsight e PI Cognitivo</td><td class="k"><span class="p now">Em andamento</span></td><td class="r">22/10/26</td><td class="r">—</td><td class="r">3</td><td>Pool Vaga Afirmativa PCD</td><td>Juliana Prado</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Eduarda Lima</td><td>Entrevista Inteligente</td><td class="k"><span class="p ok">Aprovado</span></td><td class="r">21/10/26</td><td class="r">23/10/26</td><td class="r">2</td><td>[Talent Pool B2C] Assessoria Varejo - RJ</td><td>Rafael Torres</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Felipe Souza</td><td>Etapa com Recrutamento</td><td class="k"><span class="p bad">Rejeitado</span></td><td class="r">20/10/26</td><td class="r">22/10/26</td><td class="r">2</td><td>Assessoria Future - Curitiba</td><td>Juliana Prado</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Henrique Prado</td><td>Qualificação</td><td class="k"><span class="p out">Saiu para outra vaga</span></td><td class="r">18/10/26</td><td class="r">21/10/26</td><td class="r">3</td><td>[Talent Pool B2C] Assessoria Varejo - SP</td><td>Marina Costa</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Isabela Rocha</td><td>Revisão de aplicação</td><td class="k"><span class="p now">Em andamento</span></td><td class="r">01/07/26</td><td class="r">—</td><td class="r">116</td><td>[Talent Pool B2C] Assessoria Varejo - Ribeirão</td><td>Rafael Torres</td></tr>
+    </table>
+    </div>
+    <div class="foot">Mostrando 8 de 5.106 · Mostrar mais ▾ <span style="margin-left:14px;color:#6B6B6B">(a última linha está aqui só para mostrar: com a ordem pela entrada, quem está parado desde 01/07 vai para o fim)</span></div>
+  </div>
+</div>
+
+<div class="leg">
+  <div class="li"><i>1</i><div><b>10 cards em vez de 12, nomes inteiros.</b> "Por recrutador" entra em Aplicações (a lista era a mesma, com 12.963 repetido) e "Andamento por faixa" entra em Em andamento (abas por faixa). Os 3 que não mudam na Fotografia ganham a etiqueta.</div></div>
+  <div class="li"><i>2</i><div><b>De onde vem o número e como ler a lista</b>, em uma linha, logo abaixo da frase.</div></div>
+  <div class="li"><i>3</i><div><b>Coluna em destaque = a que as abas contam.</b> Só ela tem cor; as outras ficam neutras. "no dia" vira a data: "Resultado até 25/10".</div></div>
+  <div class="li"><i>4</i><div><b>Ordem de acordo com a pergunta.</b> Entradas abre pela entrada mais recente (hoje abre por dias na etapa e mostra primeiro quem está parado desde 01/07).</div></div>
+  <div class="li"><i>5</i><div><b>Colunas de apoio ocultas</b> (Situação hoje, Candidatura, SLA) ficam em "Colunas"; o CSV continua levando todas. "Só exceções" vira "Só com alerta".</div></div>
+  <div class="li"><i>6</i><div><b>Vaga e Recrutador</b> no lugar de "job name" e "recruiter name" (dá para fazer hoje: renomear o campo no visual).</div></div>
+</div>
+</div></body></html>
