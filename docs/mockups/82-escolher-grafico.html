@@ -1,0 +1,124 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Escolher o gráfico</title><style>
+body{margin:0;background:#EEF0F0;font-family:"Segoe UI",Arial,sans-serif;color:#121212}
+.pg{width:1650px;padding:26px 30px 30px 60px;box-sizing:border-box}
+.cap{font-size:13px;color:#6B6B6B;margin:0 0 14px}.cap b{color:#121212;font-size:18px;margin-right:10px}
+.card{background:#fff;border-radius:18px;padding:18px 22px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative}
+/* menu */
+.mn{display:flex;gap:16px;align-items:stretch;position:relative}
+.sec{display:flex;flex-direction:column;min-width:0}.sec+.sec{border-left:1px solid #E6E6E6;padding-left:16px}
+.grp{font-size:11px;font-weight:700;letter-spacing:.05em;color:#6B6B6B;margin:0 2px 6px}
+.cards{display:flex;gap:8px;flex:1}
+.c{width:132px;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;padding:9px 11px;border:1px solid #E6E6E6;border-radius:14px;background:#fff}
+.c .nm{font-size:12.5px;font-weight:600;line-height:1.25;min-height:2.5em;display:flex;gap:6px}
+.c .ic{width:20px;height:20px;flex:none;border-radius:7px;background:#E3F1F0;color:#067D84;font-size:11px;display:flex;align-items:center;justify-content:center}
+.c .v{font-size:23px;font-weight:700;line-height:1.15;margin-top:auto;font-variant-numeric:tabular-nums}
+.c .ds{font-size:11px;color:#6B6B6B;line-height:1.3;min-height:2.6em}
+.c .tg{font-size:9.5px;font-weight:700;color:#6B6B6B;background:#F0F2F2;border-radius:6px;padding:1px 6px;align-self:flex-start;margin-top:3px}
+.c.on{background:#067D84;border-color:#067D84;color:#fff}.c.on .ic{background:#fff}.c.on .ds{color:#CDE9E7}
+/* tabela */
+.t2{margin-top:16px;border-top:1px solid #E6E6E6;padding-top:14px;position:relative}
+.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.n{font-size:32px;font-weight:700}.fr{font-size:15px;color:#333}
+.orig{font-size:12.5px;color:#0A6B5A;font-weight:600;margin-left:6px}
+.ler{font-size:12.5px;color:#3C3C3C;background:#F3FAFA;border:1px solid #DCEEEE;border-radius:10px;padding:7px 12px;margin:8px 0 10px;display:inline-block}
+.ler b{color:#03474C}
+.segs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sg{font-size:13px;border:1px solid #DDE2E3;border-radius:16px;padding:5px 12px;background:#fff}.sg b{margin-left:3px}
+.sg.on{background:#067D84;border-color:#067D84;color:#fff}
+.hd{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.srch{flex:1;height:34px;border:1px solid #A9B4B6;border-radius:10px;display:flex;align-items:center;padding:0 12px;color:#8A8A8A;font-size:13px;box-sizing:border-box}
+.tog{height:34px;box-sizing:border-box;border:1px solid #E3A33B;color:#9A6512;border-radius:10px;padding:0 12px;font-size:13px;font-weight:600;display:flex;align-items:center}
+.btn{height:34px;box-sizing:border-box;border:1px solid #067D84;color:#067D84;border-radius:10px;padding:0 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.btn small{font-weight:400;color:#6B6B6B}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:11px;font-weight:600;color:#6B6B6B;padding:10px 9px;border-bottom:1px solid #DDE2E3;white-space:nowrap}
+th.k{color:#03474C;background:#E3F1F0;border-bottom:2px solid #067D84}
+td{height:40px;padding:0 9px;border-bottom:1px solid #F0F2F2;white-space:nowrap}
+td.k{background:#F5FBFA}
+.r{text-align:right}.x{color:#A9B4B6;font-size:11px;width:12px}
+.lk{font-size:12px;font-weight:700;color:#03474C;border:1px solid #BFE3E5;border-radius:7px;padding:2px 8px}
+.st{font-weight:600}.mu{color:#6B6B6B}
+.p{border-radius:10px;padding:2px 8px;font-size:11.5px;font-weight:600}
+.ok{background:#E3F1F0;color:#03474C}.bad{background:#FBE3E1;color:#B23A31}.now{background:#FBF0DC;color:#9A6512}.out{background:#DDEFF0;color:#04585D}
+.d{display:inline-block;min-width:40px;text-align:center;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.dok{background:#F2F4F4;color:#3C3C3C}.dwarn{background:#FFF1D6;color:#7A4B00}
+.foot{text-align:center;font-size:12px;color:#8A8A8A;padding-top:10px}
+/* marcadores */
+.m{position:absolute;width:26px;height:26px;border-radius:50%;background:#E05A4F;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff;z-index:3}
+.mi{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#E05A4F;color:#fff;font-size:12px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;margin-left:6px;flex:none}
+.leg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 22px;margin-top:16px}
+.li{display:flex;gap:10px;font-size:13px;line-height:1.45;color:#3C3C3C}
+.li i{flex:none;width:22px;height:22px;border-radius:50%;background:#E05A4F;color:#fff;font-style:normal;font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.li b{color:#121212}
+
+.gr{display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;background:#F3FAFA;border:1px solid #DCEEEE;border-radius:14px;flex-wrap:wrap}
+.gr .q{font-size:12px;font-weight:700;letter-spacing:.04em;color:#03474C;margin-right:4px}
+.gc{display:flex;flex-direction:column;gap:1px;background:#fff;border:1px solid #BFE3E5;border-radius:11px;padding:6px 12px;min-width:200px}
+.gc small{font-size:10.5px;font-weight:700;color:#8A8A8A;letter-spacing:.04em}
+.gc span{font-size:13px;font-weight:600;color:#121212}
+.gc b{font-size:18px;font-weight:700;color:#03474C}
+.gc.on{background:#067D84;border-color:#067D84}.gc.on small{color:#CDE9E7}.gc.on span,.gc.on b{color:#fff}
+.chkok{font-size:12.5px;color:#0A6B5A;font-weight:600}
+.pas{font-size:12.5px;color:#6B6B6B;margin-top:4px}
+.ov{font-size:12px;color:#6B6B6B;align-self:center;margin-left:4px}
+.c.on2{border:2px solid #067D84}
+</style></head><body><div class="pg">
+<p class="cap"><b>Prévia · Clicar no card e escolher o gráfico</b>Números ilustrativos (só o 5.106 é da sua foto) · nomes e vagas fictícios</p>
+<div class="card">
+  <div class="mn">
+    <span class="m" style="left:-50px;top:26px">1</span>
+    <div class="sec"><div class="grp">RESUMO</div><div class="cards">
+      <div class="c"><div class="nm"><span class="ic">◍</span>Aplicações</div><div class="v">4.870</div><div class="ds">3 gráficos</div></div>
+      <div class="c"><div class="nm"><span class="ic">▽</span>Funil</div><div class="v">12.963</div><div class="ds">1 gráfico</div></div>
+      <div class="c"><div class="nm"><span class="ic">◷</span>Em andamento</div><div class="v">3.147</div><div class="ds">4 gráficos</div></div>
+      <div class="c"><div class="nm"><span class="ic">✓</span>Contratadas</div><div class="v">51</div><div class="ds">3 gráficos</div></div>
+    </div></div>
+    <div class="sec"><div class="grp">REPORT</div><div class="cards">
+      <div class="c on"><div class="nm"><span class="ic">⇄</span>Entradas por etapa</div><div class="v">5.106</div><div class="ds">3 gráficos</div></div>
+      <div class="c"><div class="nm"><span class="ic">✕</span>Rejeitados e motivos</div><div class="v">2.040</div><div class="ds">2 gráficos</div></div>
+      <div class="c"><div class="nm"><span class="ic">◔</span>SLA por etapa</div><div class="v">2.862</div><div class="ds">1 gráfico</div></div>
+      <div class="c"><div class="nm"><span class="ic">↗</span>Evolução</div><div class="v">2.813</div><div class="ds">1 gráfico</div></div>
+      <div class="c"><div class="nm"><span class="ic">▦</span>Entrevistas</div><div class="v">297</div><div class="ds">2 gráficos</div></div>
+    </div></div>
+    <div class="sec"><div class="grp">DATA QUALITY</div><div class="cards">
+      <div class="c"><div class="nm"><span class="ic">!</span>Alertas</div><div class="v">98</div><div class="ds">1 gráfico</div></div>
+    </div></div>
+  </div>
+  <div class="gr" style="position:relative">
+    <span class="m" style="left:-62px;top:16px">2</span>
+    <span class="q">DE QUAL GRÁFICO?</span>
+    <div class="gc"><small>REPORT</small><span>Entradas e aprovações por etapa</span><b>5.106</b></div>
+    <div class="gc on"><small>REPORT</small><span>Aprovados por praça em cada etapa</span><b>2.410</b></div>
+    <div class="gc"><small>RESUMO</small><span>Onde a esteira perde aplicações</span><b>4.322</b></div>
+    <span class="ov">O número de cada botão vem da mesma regra do gráfico.</span>
+  </div>
+  <div class="t2">
+    <span class="m" style="left:-50px;top:22px">3</span>
+    <div class="top"><span class="n">2.410</span><span class="fr">aplicações aprovadas ou rejeitadas em alguma etapa de 01/10 a 25/10</span><span class="chkok">= botão "Aprovados por praça em cada etapa" (2.410)</span></div>
+    <div class="pas">São 3.020 passagens por etapa (soma das células do gráfico): quem passou por 3 etapas conta 3 vezes no gráfico e 1 vez aqui.</div>
+    <div class="segs" style="margin-top:10px;position:relative"><span class="sg on">Todas <b>2.410</b></span><span class="sg">Aprovado <b>512</b></span><span class="sg">Rejeitado <b>2.051</b></span>
+      <span class="ov">153 aparecem nas duas abas (aprovadas numa etapa e rejeitadas em outra), como no gráfico</span><span class="m" style="position:relative;margin-left:8px">4</span></div>
+    <div class="hd">
+      <div class="srch">⌕&nbsp; Buscar candidato, vaga, recrutador, motivo…</div>
+      <div class="tog">⚠ Só com alerta (96)</div>
+      <div class="btn">Colunas ▾</div>
+      <div class="btn">⤓ Exportar CSV</div>
+    </div>
+    <table>
+      <tr><th class="x"></th><th>Greenhouse</th><th>Candidato</th><th>Etapa</th><th class="k">Movimento</th><th class="r" style="color:#03474C">Data ↓</th><th>Praça</th><th>Vaga</th><th>Recrutador</th></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Ana Paula Ribeiro</td><td>Entrevista com supervisor</td><td class="k"><span class="p ok">Aprovado</span></td><td class="r">25/10/26</td><td>São Paulo</td><td>[Talent Pool B2C] Assessoria Varejo - SP</td><td>Marina Costa</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Camila Duarte</td><td>Triagem</td><td class="k"><span class="p bad">Rejeitado</span></td><td class="r">24/10/26</td><td>Campinas</td><td>Assessoria Varejo - Campinas</td><td>Marina Costa</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Eduarda Lima</td><td>Entrevista Inteligente · Qualificação</td><td class="k"><span class="p ok">Aprovado</span> <span class="p bad">Rejeitado</span></td><td class="r">23/10/26</td><td>Rio de Janeiro</td><td>[Talent Pool B2C] Assessoria Varejo - RJ</td><td>Rafael Torres</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Felipe Souza</td><td>Etapa com Recrutamento</td><td class="k"><span class="p bad">Rejeitado</span></td><td class="r">22/10/26</td><td>Curitiba</td><td>Assessoria Future - Curitiba</td><td>Juliana Prado</td></tr>
+      <tr><td class="x">▸</td><td><span class="lk">Abrir ↗</span></td><td class="st">Isabela Rocha</td><td>Background Check</td><td class="k"><span class="p ok">Aprovado</span></td><td class="r">20/10/26</td><td>Belo Horizonte</td><td>Assessoria Future - BH</td><td>Rafael Torres</td></tr>
+    </table>
+  </div>
+</div>
+<div class="leg">
+  <div class="li"><i>1</i><div><b>O card é a lista; o gráfico é o recorte.</b> O card mostra quantos gráficos usam aquela lista.</div></div>
+  <div class="li"><i>2</i><div><b>Ao clicar no card, aparecem os gráficos dele</b>, cada um com o número que o próprio gráfico considera. O primeiro já vem escolhido.</div></div>
+  <div class="li"><i>3</i><div><b>Dois números, um embaixo do outro:</b> o do botão sai da medida do gráfico; o da lista, das linhas da lista. Se não baterem, aparece na hora. A lista diz também quantas passagens são, para bater com a soma das linhas por etapa.</div></div>
+  <div class="li"><i>4</i><div><b>As abas são as colunas do gráfico</b> (aqui, Aprovados e Rejeitados, a base da taxa). Como no gráfico, a mesma aplicação pode estar em duas abas.</div></div>
+  <div class="li"><i>✓</i><div><b>Com a Etapa filtrada</b> na barra de filtros, os números são os da linha daquela etapa no gráfico.</div></div>
+</div>
+</div></body></html>
