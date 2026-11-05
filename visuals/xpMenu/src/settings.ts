@@ -17,9 +17,11 @@ class MenuCard extends Card {
     mostrarDescricao = new formattingSettings.ToggleSwitch({ name: "mostrarDescricao", displayName: "Mostrar descrição", value: true });
     mostrarContagem = new formattingSettings.ToggleSwitch({ name: "mostrarContagem", displayName: "Mostrar contagem", value: true });
     ordemGrupos = new formattingSettings.TextInput({ name: "ordemGrupos", displayName: "Ordem dos grupos (separados por ;)", value: "Resumo;Report", placeholder: "Resumo;Report" });
+    tituloGrafico = new formattingSettings.TextInput({ name: "tituloGrafico", displayName: "Título da escolha de gráfico", value: "De qual gráfico?", placeholder: "De qual gráfico?" });
+    graficoUnico = new formattingSettings.ToggleSwitch({ name: "graficoUnico", displayName: "Mostrar a escolha quando o card tem 1 gráfico", value: true });
     name = "menu";
     displayName = "Menu";
-    slices = [this.layout, this.padrao, this.ordemGrupos, this.mostrarDescricao, this.mostrarContagem];
+    slices = [this.layout, this.padrao, this.ordemGrupos, this.mostrarDescricao, this.mostrarContagem, this.tituloGrafico, this.graficoUnico];
 }
 
 class CoresCard extends Card {

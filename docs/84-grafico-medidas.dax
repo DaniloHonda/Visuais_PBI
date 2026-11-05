@@ -253,3 +253,6 @@ CALCULATETABLE(
     Cal, TREATAS( { "Candidatura" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
 ORDER BY [card], [ordem_grafico]
 // fim da parte 2H
+// Resultado 2H (05/11, Candidatura, 92 s): graf = lista = menu nos 20 gráficos. Aplicações = Funil = recrutador 17.642 · Contratadas 86 ·
+// Em andamento 10.501 (por etapa 10.363) · Pré Offer e Offer 22 · Entradas 17.488 · Praça 13.459 · Onde perde 17.480 · Entrevistas 1.057 ·
+// Evolução 25.737 · Rejeitados por etapa 6.269 · Motivos 7.031 · SLA 13.637 · Alertas 1.062. Parte 2 fechada.

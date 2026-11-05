@@ -52,3 +52,35 @@
     .xp-mn__card.is-on { outline: 2px solid Highlight; }
     .xp-mn__it.is-on { outline: 2px solid Highlight; }
 }
+
+// 1.3.0 · "De qual gráfico?": cards em cima, botões dos gráficos do card ativo embaixo
+.xp-mn--col { display: flex; flex-direction: column; gap: 10px; overflow: hidden; padding: 6px 4px; }
+.xp-mn__secs { flex: 1 1 auto; min-height: 0; padding: 0; }
+.xp-mn__gbar {
+    flex: none; display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 8px 10px;
+    background: #F3FAFA; border: 1px solid #DCEEEE; border-radius: 14px;
+}
+.xp-mn__gq { flex: none; font-size: 11px; font-weight: 700; letter-spacing: .05em; color: #03474C; margin-right: 4px; }
+.xp-mn__gb {
+    flex: none; display: flex; align-items: center; gap: 12px; padding: 6px 12px; border: 1px solid #BFE3E5; border-radius: 11px;
+    background: #FFFFFF; font: inherit; color: #121212; cursor: pointer; text-align: left;
+}
+.xp-mn__gb:hover { border-color: var(--xp-accent); background: #FAFDFD; }
+.xp-mn__gb:focus-visible { outline: 2px solid var(--xp-accent); outline-offset: 1px; }
+.xp-mn__gtx { display: flex; flex-direction: column; min-width: 0; }
+.xp-mn__gp { font-size: 10px; font-weight: 700; letter-spacing: .04em; color: #8A8A8A; }
+.xp-mn__gn { font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.xp-mn__gc { font-size: 17px; font-weight: 700; color: #03474C; font-variant-numeric: tabular-nums; }
+.xp-mn__gb.is-on { background: var(--xp-accent); border-color: var(--xp-accent); color: #FFFFFF; }
+.xp-mn__gb.is-on .xp-mn__gp { color: #CDE9E7; }
+.xp-mn__gb.is-on .xp-mn__gc { color: #FFFFFF; }
+// Vertical: gráficos do card ativo, recuados embaixo dele
+.xp-mn__sub {
+    width: calc(100% - 26px); margin-left: 26px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px;
+    padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; text-align: left; font: inherit; font-size: 12.5px; color: inherit; cursor: pointer;
+}
+.xp-mn__sub:hover { background: #F3FAFA; }
+.xp-mn__sub.is-on { background: #E3F1F0; color: #03474C; font-weight: 600; }
+@media (forced-colors: active) {
+    .xp-mn__gb.is-on, .xp-mn__sub.is-on { outline: 2px solid Highlight; }
+}

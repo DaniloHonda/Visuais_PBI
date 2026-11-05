@@ -1,10 +1,10 @@
 {
     "dataRoles": [
         {
-            "displayName": "Visão",
+            "displayName": "Visão (card)",
             "name": "visao",
             "kind": "Grouping",
-            "description": "Coluna das visões (ex.: dVisao[visao]). É ela que o menu filtra."
+            "description": "Nome do card (ex.: dVisao[card]). Sem o campo Gráfico, é a coluna que o menu filtra."
         },
         {
             "displayName": "Grupo (opcional)",
@@ -29,6 +29,24 @@
             "name": "ordem",
             "kind": "Grouping",
             "description": "Ordem das visões (ex.: dVisao[ordem]). Sem ela, vale a ordem do Power BI."
+        },
+        {
+            "displayName": "Gráfico (opcional)",
+            "name": "grafico",
+            "kind": "Grouping",
+            "description": "Um botão por gráfico (ex.: dVisao[grafico]). Com ele, o menu filtra o gráfico escolhido e o card abre no primeiro."
+        },
+        {
+            "displayName": "Página do gráfico (opcional)",
+            "name": "pagina",
+            "kind": "Grouping",
+            "description": "Resumo, Report… (ex.: dVisao[pagina]), em cima do nome do gráfico."
+        },
+        {
+            "displayName": "Ordem do gráfico (opcional)",
+            "name": "ordemGrafico",
+            "kind": "Grouping",
+            "description": "Ordem dos botões dentro do card (ex.: dVisao[ordem_grafico]); o 1º dá o número do card."
         },
         {
             "displayName": "Contagem (opcional)",
@@ -67,6 +85,15 @@
                     },
                     "alvo": {
                         "max": 1
+                    },
+                    "grafico": {
+                        "max": 1
+                    },
+                    "pagina": {
+                        "max": 1
+                    },
+                    "ordemGrafico": {
+                        "max": 1
                     }
                 }
             ],
@@ -96,6 +123,21 @@
                         {
                             "for": {
                                 "in": "ordem"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "grafico"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "pagina"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "ordemGrafico"
                             }
                         }
                     ],
@@ -166,6 +208,16 @@
                                 "displayName": "Horizontal (cards em cima da tabela)"
                             }
                         ]
+                    }
+                },
+                "tituloGrafico": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "graficoUnico": {
+                    "type": {
+                        "bool": true
                     }
                 }
             }
