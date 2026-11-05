@@ -112,3 +112,49 @@ CALCULATETABLE(
     Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
 ORDER BY [card], [ordem_grafico]
 // fim da parte 2C
+
+// Resultado 05/11 com o filtro considerar:
+// 2B: graf = lista = menu nas 11 linhas (Aplicações 17.642 · Contratadas 208 · Em andamento 51.222 · Pré Offer e Offer 86 · Funil 117.161).
+// 2C: iguais em Alertas 1.062 · Aprovados por praça 25.737 · Card Entrevistas 1.057 · Evolução 25.737 · Motivos 16.622 · SLA 28.430.
+//     Rejeitados por etapa: graf = lista 15.459, menu 16.622 (menu vinha do card; o gráfico não conta declínio fora da Offer) → 2D.
+//     Entradas e aprovações 68.081 × lista 66.114 e Onde perde 68.070 × 66.103: 1.967 aplicações que o gráfico conta e a lista não → 2E.
+//     Agenda: graf 1.233 × lista 1.030 (a lista do card é por data de criação da entrevista; a Agenda é pela data da entrevista,
+//     inclusive futura): botão fica fora do menu até ter lista própria.
+
+// =========================== PARTE 2D · número do botão = conta do gráfico (Executar → Atualizar o modelo) ===========================
+DEFINE
+    MEASURE '_Medidas'[Esteira | Gráfico Contagem] =
+        VAR G = SELECTEDVALUE( dVisao[grafico] )
+        RETURN
+        SWITCH( TRUE(),
+            G IN { "Card Aplicações", "Card Conversão da esteira", "Aprovados por recrutador" }, [Esteira | Card Aplicações],
+            G IN { "Aplicações em Pré Offer e Offer", "Aprovados por praça em cada etapa", "Onde a esteira perde aplicações",
+                   "Rejeitados por etapa" },
+                COUNTROWS( FILTER(
+                    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() ),
+                    [Esteira | Gráfico Na Lista] = 1 ) ),
+            [Esteira | Visão Contagem Modo] )
+EVALUATE ROW( "medidas", 1 )
+// fim da parte 2D
+
+// =========================== PARTE 2E · diagnóstico das 1.967 (só leitura) ===========================
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+VAR Apps = CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+RETURN
+CALCULATETABLE(
+    VAR Fora = FILTER( Apps, [Esteira | Gráfico Regra] && [Esteira | Visão Na Lista Modo] <> 1 )
+    RETURN
+    ROW(
+        "fora", COUNTROWS( Fora ),
+        "ent", COUNTROWS( FILTER( Fora, [Esteira | Etapa Entradas] > 0 ) ),
+        "apr", COUNTROWS( FILTER( Fora, [Esteira | Etapa Aprovados] > 0 ) ),
+        "rej", COUNTROWS( FILTER( Fora, [Esteira | Etapa Rejeitados] > 0 ) ),
+        "andam", COUNTROWS( FILTER( Fora, [Esteira | Etapa Em Andamento] > 0 ) ),
+        "sem_nome", COUNTROWS( FILTER( Fora,
+            CALCULATE( [Esteira | Etapa Entradas] + [Esteira | Etapa Aprovados] + [Esteira | Etapa Rejeitados]
+                + [Esteira | Etapa Em Andamento], ISBLANK( dEtapa[stage_name] ) ) > 0 ) ) ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), TREATAS( { "Entradas e aprovações por etapa" }, dVisao[grafico] ),
+    '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+// fim da parte 2E
