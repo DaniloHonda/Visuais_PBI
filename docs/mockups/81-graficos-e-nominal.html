@@ -1,0 +1,105 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Gráficos e Nominal</title><style>
+body{margin:0;background:#EEF0F0;font-family:"Segoe UI",Arial,sans-serif;color:#121212}
+.pg{width:1640px;padding:26px 30px 30px;box-sizing:border-box}
+.cap{font-size:13px;color:#6B6B6B;margin:0 0 18px}.cap b{color:#121212;font-size:18px;margin-right:10px}
+h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+h2 i{font-style:normal;width:24px;height:24px;border-radius:50%;background:#E05A4F;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center}
+h2 span{font-weight:400;color:#6B6B6B;font-size:13px}
+.sec{margin-bottom:24px}
+/* 1 · cabeçalhos dos gráficos */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ch{background:#fff;border-radius:16px;padding:16px 20px 0;box-shadow:0 1px 4px rgba(0,0,0,.06);height:112px;box-sizing:border-box;position:relative;overflow:hidden}
+.ch .pgn{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:#8A8A8A;margin-bottom:4px}
+.ch .t{font-size:17px;font-weight:700;padding-right:250px}.ch .s{font-size:12px;color:#6B6B6B;margin-top:3px;padding-right:250px;line-height:1.35}
+.ch .fake{position:absolute;left:20px;right:20px;bottom:-10px;height:26px;background:repeating-linear-gradient(90deg,#E3F1F0 0 60px,#fff 60px 66px);border-radius:6px;opacity:.7}
+.chip{position:absolute;right:18px;top:16px;display:flex;align-items:center;gap:7px;border:1px solid #BFE3E5;background:#F3FAFA;color:#03474C;border-radius:10px;padding:6px 11px;font-size:12px}
+.chip b{font-weight:700}.chip small{color:#6B6B6B;font-size:11px}
+.chip svg,.c svg{flex:none}
+/* 2 · menu */
+.card{background:#fff;border-radius:18px;padding:18px 22px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.mn{display:flex;gap:16px}
+.ms{display:flex;flex-direction:column}.ms+.ms{border-left:1px solid #E6E6E6;padding-left:16px}
+.grp{font-size:11px;font-weight:700;letter-spacing:.05em;color:#6B6B6B;margin:0 2px 6px}
+.cards{display:flex;gap:8px}
+.c{width:130px;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;padding:9px 11px;border:1px solid #E6E6E6;border-radius:14px;background:#fff}
+.c .nm{font-size:12.5px;font-weight:600;line-height:1.25;min-height:2.5em;display:flex;gap:6px}
+.c .ic{width:22px;height:22px;flex:none;border-radius:7px;background:#E3F1F0;color:#067D84;display:flex;align-items:center;justify-content:center}
+.c .v{font-size:23px;font-weight:700;line-height:1.15;margin-top:auto}
+.c .ds{font-size:11px;color:#6B6B6B;line-height:1.3;min-height:2.6em}
+.c.on{background:#067D84;border-color:#067D84;color:#fff}.c.on .ic{background:#fff}.c.on .ds{color:#CDE9E7}
+/* 3 · cabeçalho da lista */
+.hd{margin-top:16px;border-top:1px solid #E6E6E6;padding-top:14px;display:flex;gap:26px;align-items:flex-start}
+.n{font-size:32px;font-weight:700}.fr{font-size:15px;color:#333}
+.src{display:flex;gap:16px;align-items:flex-start;background:#F7FAFA;border:1px solid #E1EEEE;border-radius:14px;padding:12px 16px}
+.src .lb{font-size:11px;font-weight:700;letter-spacing:.05em;color:#6B6B6B;margin-bottom:8px}
+.maps{display:flex;gap:14px;align-items:flex-start}
+.map{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:#6B6B6B}
+.lst{display:flex;flex-direction:column;gap:7px;font-size:13px;padding-top:2px}
+.lst div{display:flex;gap:8px;align-items:center}
+.num{width:18px;height:18px;border-radius:50%;background:#067D84;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.lst small{color:#6B6B6B}
+.note{font-size:12.5px;color:#3C3C3C;margin-top:8px;line-height:1.5}
+.leg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 24px;margin-top:4px}
+.li{font-size:13px;line-height:1.5;color:#3C3C3C}.li b{color:#121212}
+</style></head><body><div class="pg">
+<p class="cap"><b>Prévia · Cada gráfico diz qual card abrir</b>Títulos e posições reais dos fundos do Resumo e do Report · números da sua foto (Fotografia em 25/10, B2C)</p>
+
+<div class="sec">
+  <h2><i>1</i>Nos gráficos: um selo ao lado do título, com o ícone e o nome do card da Nominal <span>(vai no fundo da página; nenhum visual muda)</span></h2>
+  <div class="charts" id="charts"></div>
+</div>
+
+<div class="sec">
+  <h2><i>2</i>Na Nominal: o card tem o mesmo nome e o mesmo ícone do selo</h2>
+  <div class="card">
+    <div class="mn" id="menu"></div>
+    <div class="hd">
+      <div><div style="display:flex;align-items:baseline;gap:10px"><span class="n">5.106</span><span class="fr">aplicações que passaram por alguma etapa de 01/10 a 25/10</span></div>
+        <div class="note" style="display:flex;gap:10px;align-items:flex-start;margin-top:12px"><span style="flex:none;width:24px;height:24px;border-radius:50%;background:#E05A4F;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">3</span><span><b>Ao abrir o card, a lista diz de quais gráficos ela é,</b><br>com o mapa da página e o gráfico marcado.</span></div></div>
+      <div class="src">
+        <div><div class="lb">ESTA LISTA É DOS GRÁFICOS</div><div class="lst" id="lst"></div></div>
+        <div class="maps" id="maps"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="leg">
+  <div class="li"><b>Cada gráfico aponta para um card só</b> (a Evolução é a exceção: Movimentações → Evolução; Agenda → Entrevistas). Vários gráficos podem apontar para o mesmo card: Entradas e aprovações, Aprovados por praça e Onde a esteira perde são todos a lista "Entradas por etapa".</div>
+  <div class="li"><b>Mesmo ícone dos dois lados.</b> É o ícone que já está no card do menu; no selo ele ajuda a achar o card sem ler.</div>
+  <div class="li"><b>Os 6 cards de KPI do Resumo</b> já têm o mesmo nome dos cards da Nominal (Aplicações, Contratadas, Em andamento, Entrevistas); ganham só o ícone no canto.</div>
+</div>
+</div>
+<script>
+const P={pessoas:"M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M20 19v-1.5a3.5 3.5 0 0 0-2.5-3.35M15 5.15a3 3 0 0 1 0 5.7",
+check:"M20 6 9 17l-5-5",relogio:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 7v5l3 2",funil:"M4 5h16l-6 7v6l-4 2v-8z",
+setas:"M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4",x:"M18 6 6 18M6 6l12 12",cronometro:"M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16M12 9v4l2 2M10 2h4",
+grafico:"M4 19h16M5 15l4-5 4 3 6-7",calendario:"M5 5h14v15H5zM5 9h14M9 3v4M15 3v4",alerta:"M12 4 2.5 20h19zM12 10v4M12 17v.5"};
+const ic=(n,s=16,c="currentColor")=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${P[n]}"/></svg>`;
+// Seção 1: cabeçalhos reais (títulos e subtítulos dos fundos)
+const charts=[
+ ["REPORT","Entradas e aprovações por etapa","Aplicações do período, em ordem de processo: participantes, aprovados, rejeitados, em andamento, conversão e SLA da etapa.","setas","Entradas por etapa"],
+ ["REPORT","Rejeitados por etapa","Aplicações do período encerradas em cada etapa. Na Offer, destaque para quem declinou.","x","Rejeitados e motivos"],
+ ["REPORT","Aprovados por praça em cada etapa","Aplicações do período: taxa de aprovação por praça, etapas na ordem do processo, comparadas à média da etapa.","setas","Entradas por etapa"],
+ ["RESUMO","Onde a esteira perde aplicações","Aplicações do período, por etapa. Conversão da etapa = aprovados ÷ (aprovados + rejeitados).","setas","Entradas por etapa"]];
+document.getElementById("charts").innerHTML=charts.map(([p,t,s,i,card])=>`<div class="ch"><div class="pgn">${p}</div><div class="t">${t}</div><div class="s">${s}</div>
+ <div class="chip">${ic(i,15,"#067D84")}<span><small>Lista na Nominal:</small> <b>${card}</b></span></div><div class="fake"></div></div>`).join("");
+// Seção 2: menu
+const M=[["RESUMO",[["Aplicações","pessoas","4.870","criadas no período"],["Funil","funil","12.963","existiam em 25/10 · até onde chegaram"],["Em andamento","relogio","3.147","etapa em 25/10 e dias parada"],["Contratadas","check","51","origem e SLA"]]],
+ ["REPORT",[["Entradas por etapa","setas","5.106","passaram pelas etapas no período",1],["Rejeitados e motivos","x","2.040","etapa e motivo"],["SLA por etapa","cronometro","2.862","etapas concluídas no período"],["Evolução","grafico","2.813","aprovou ou rejeitou"],["Entrevistas","calendario","297","entrevistas marcadas"]]],
+ ["DATA QUALITY",[["Alertas","alerta","98","criadas no período com alerta"]]]];
+document.getElementById("menu").innerHTML=M.map(([g,cs])=>`<div class="ms"><div class="grp">${g}</div><div class="cards">${cs.map(([n,i,v,d,on])=>
+ `<div class="c${on?" on":""}"><div class="nm"><span class="ic">${ic(i,14,"#067D84")}</span>${n}</div><div class="v">${v}</div><div class="ds">${d}</div></div>`).join("")}</div></div>`).join("");
+// Seção 3: mapas com as posições reais dos painéis (fundos SVG, área de conteúdo)
+const RES={y0:135,h:1969,p:[[292,135,1588,203,"f"],[292,362,248,190],[560,362,248,190],[828,362,248,190],[1096,362,248,190],[1364,362,248,190],[1632,362,248,190],[292,576,1588,460],[292,1060,968,540,3],[1280,1060,600,540],[292,1624,784,480],[1096,1624,784,480]]};
+const REP={y0:135,h:4251,p:[[292,135,1588,203,"f"],[292,362,1588,440],[292,826,1588,640,1],[292,1490,784,460],[1096,1490,784,460],[292,1974,784,640],[1096,1974,784,640],[292,2638,1588,640,2],[292,3302,1588,500],[292,3826,1588,560]]};
+const S=.03;
+function map(L,name){const w=1588*S,h=L.h*S;let s=`<svg width="${w+2}" height="${h+2}" viewBox="-1 -1 ${w+2} ${h+2}"><rect x="-1" y="-1" width="${w+2}" height="${h+2}" rx="4" fill="#EEF0F0"/>`;
+ for(const [x,y,ww,hh,k] of L.p){const X=(x-292)*S,Y=(y-L.y0)*S,W=ww*S-1.2,H=hh*S-1.2;
+  s+=`<rect x="${X}" y="${Y}" width="${W}" height="${H}" rx="1.5" fill="${typeof k==="number"?"#067D84":k==="f"?"#DCE2E3":"#fff"}"/>`;
+  if(typeof k==="number")s+=`<text x="${X+W/2}" y="${Y+H/2+3.5}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" font-family="Segoe UI,Arial">${k}</text>`;}
+ return `<div class="map">${s}</svg>${name}</div>`;}
+document.getElementById("maps").innerHTML=map(RES,"Resumo")+map(REP,"Report");
+document.getElementById("lst").innerHTML=[["Report","Entradas e aprovações por etapa"],["Report","Aprovados por praça em cada etapa"],["Resumo","Onde a esteira perde aplicações"]]
+ .map(([p,t],i)=>`<div><span class="num">${i+1}</span><span><small>${p} ›</small> ${t}</span></div>`).join("");
+</script></body></html>
