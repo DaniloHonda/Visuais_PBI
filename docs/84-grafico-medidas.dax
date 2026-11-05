@@ -1,0 +1,111 @@
+// 84 · Parte 2 · medidas por gráfico (05/11/2026) · plano em docs/82-escolher-grafico.md
+// Regra: a aplicação entra no gráfico quando as MEDIDAS DO PRÓPRIO GRÁFICO dão algo para ela.
+// Lista = (lista do card) E (regra do gráfico). Sem gráfico escolhido (menu atual), nada muda.
+
+// =========================== PARTE 2A · medidas (Executar → "Atualizar o modelo com alterações") ===========================
+DEFINE
+    MEASURE '_Medidas'[Esteira | Gráfico Regra] =
+        VAR G = SELECTEDVALUE( dVisao[grafico] )
+        RETURN
+        SWITCH( G,
+            "Card Aplicações", [Esteira | Card Aplicações] > 0,
+            "Card Conversão da esteira", [Esteira | Card Aplicações] > 0,
+            "Aprovados por recrutador", [Esteira | Card Aplicações] > 0,
+            "Quantas aplicações precisamos para contratar", [Esteira | Funil Base] > 0,
+            "Card Em andamento", [Esteira | Card Em Andamento] > 0,
+            "Onde estão as aplicações em andamento", [Esteira | Card Em Andamento] > 0,
+            "Aplicações em andamento por etapa", [Esteira | Card Em Andamento] > 0,
+            "Aplicações em Pré Offer e Offer",
+                NOT ISBLANK( CALCULATE( [Esteira | Reta Final Dias na Etapa], KEEPFILTERS( dEtapa[stage_name] IN { "Pré Offer", "Offer" } ) ) ),
+            "Card Contratadas", [Esteira | Card Contratados] > 0,
+            "Card SLA mediano", [Esteira | Card Contratados] > 0,
+            "Consumo do SLA por etapa", [Esteira | Card Contratados] > 0,
+            "Entradas e aprovações por etapa",
+                [Esteira | Etapa Entradas] + [Esteira | Etapa Aprovados] + [Esteira | Etapa Rejeitados] + [Esteira | Etapa Em Andamento] > 0,
+            "Aprovados por praça em cada etapa", [Esteira | Etapa Aprovados] + [Esteira | Etapa Rejeitados] > 0,
+            "Onde a esteira perde aplicações",
+                [Esteira | Etapa Aprovados] + [Esteira | Etapa Rejeitados] + [Esteira | Etapa Em Andamento] > 0,
+            "SLA por etapa: típico e 90%", [Esteira | Etapa Base SLA] > 0,
+            "Evolução da esteira · Movimentações", [Esteira | Aprovados por Data] + [Esteira | Rejeitados por Data] > 0,
+            "Rejeitados por etapa", [Esteira | Etapa Rejeitados (Empresa)] + [Esteira | Etapa Declinados (Offer)] > 0,
+            "Motivos de saída por etapa", [Esteira | Etapa Rejeitados] > 0,
+            "Card Entrevistas marcadas", [Esteira | Entrevistas Marcadas] > 0,
+            "Evolução da esteira · Agenda", [Esteira | Entrevistas na Agenda] > 0,
+            "Tipos de alerta", [Esteira | Aplicações com Alerta] > 0,
+            TRUE() )
+
+    MEASURE '_Medidas'[Esteira | Gráfico Na Lista] =
+        IF( [Esteira | Visão Na Lista Modo] = 1 && [Esteira | Gráfico Regra], 1 )
+
+    MEASURE '_Medidas'[Esteira | Gráfico Contagem] =
+        VAR G = SELECTEDVALUE( dVisao[grafico] )
+        RETURN
+        SWITCH( TRUE(),
+            G IN { "Card Aplicações", "Card Conversão da esteira", "Aprovados por recrutador" }, [Esteira | Card Aplicações],
+            G IN { "Aplicações em Pré Offer e Offer", "Aprovados por praça em cada etapa", "Onde a esteira perde aplicações" },
+                COUNTROWS( FILTER(
+                    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() ),
+                    [Esteira | Gráfico Na Lista] = 1 ) ),
+            [Esteira | Visão Contagem Modo] )
+
+    MEASURE '_Medidas'[Esteira | Gráfico Dados] =
+        IF( [Esteira | Gráfico Na Lista] = 1, [Esteira | Visão Dados Modo] )
+
+    MEASURE '_Medidas'[Esteira | Gráfico Contexto] =
+        VAR G = SELECTEDVALUE( dVisao[grafico] )
+        VAR Pag = SELECTEDVALUE( dVisao[pagina] )
+        VAR Foto = [Esteira | Modo] = "Fotografia"
+        VAR Dt = FORMAT( [Esteira | Data da Fotografia], "dd/mm" )
+        VAR Per = IF( Foto, " de " & FORMAT( MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) ), "dd/mm" ) & " a " & Dt, " (aplicações do período)" )
+        VAR Frase =
+            SWITCH( TRUE(),
+                Foto && G IN { "Card Aplicações", "Card Conversão da esteira", "Aprovados por recrutador" },
+                    "aplicações com candidatura" & Per & " (situação em " & Dt & ")",
+                G = "Aplicações em Pré Offer e Offer", "aplicações em Pré Offer ou Offer " & IF( Foto, "em " & Dt, "hoje" ),
+                G = "Aprovados por praça em cada etapa", "aplicações aprovadas ou rejeitadas em alguma etapa" & Per,
+                G = "Onde a esteira perde aplicações", "aplicações aprovadas, rejeitadas ou em andamento em alguma etapa" & Per,
+                "" )
+        RETURN
+        [Esteira | Visão Contexto Leve]
+            & IF( NOT ISBLANK( G ), "||origem=" & G & "||pagina=" & Pag )
+            & IF( Frase <> "", "||frase=" & Frase )
+            & IF( G = "Aplicações em Pré Offer e Offer" && Foto, "||etapas=Pré Offer;Offer" )
+
+EVALUATE ROW( "medidas", 5 )
+// fim da parte 2A
+
+// =========================== PARTE 2B · conferência dos cards do Resumo (só leitura; pode levar alguns minutos) ===========================
+// graf = aplicações que o gráfico considera · lista = aplicações na lista · menu = número do botão. Esperado: os três iguais.
+// Para conferir na Candidatura: trocar "Fotografia" por "Candidatura".
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+VAR Apps = CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS(
+        FILTER( SUMMARIZE( dVisao, dVisao[card], dVisao[ordem_grafico], dVisao[grafico] ),
+            dVisao[card] IN { "Aplicações", "Funil", "Em andamento", "Contratadas" } ),
+        "graf", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Regra] ) ) ),
+        "lista", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Na Lista] = 1 ) ) ),
+        "menu", CALCULATE( [Esteira | Gráfico Contagem] ) ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ) )
+ORDER BY [card], [ordem_grafico]
+// fim da parte 2B
+
+// =========================== PARTE 2C · conferência dos gráficos do Report (só leitura) ===========================
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+VAR Apps = CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS(
+        FILTER( SUMMARIZE( dVisao, dVisao[card], dVisao[ordem_grafico], dVisao[grafico] ),
+            NOT ( dVisao[card] IN { "Aplicações", "Funil", "Em andamento", "Contratadas" } ) ),
+        "graf", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Regra] ) ) ),
+        "lista", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Na Lista] = 1 ) ) ),
+        "menu", CALCULATE( [Esteira | Gráfico Contagem] ) ),
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ) )
+ORDER BY [card], [ordem_grafico]
+// fim da parte 2C

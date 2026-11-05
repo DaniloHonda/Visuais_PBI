@@ -34,8 +34,8 @@ Sem etapa filtrada: lista = aplicações distintas do gráfico; soma das linhas 
 ## Decisão (05/11): card mostra o número do 1º gráfico (opção 1). Danilo aprovou seguir.
 
 ## Partes (cada uma com conferência)
-1. `dVisao` com a coluna `grafico` (uma linha por gráfico) e a ordem: `docs/83-dvisao-graficos.dax` (enviada 05/11, aguardando foto).
-2. Medidas: contagem, lista e dados leem o gráfico escolhido (mudam só os gráficos com regra diferente da do card).
+1. `dVisao` com a coluna `grafico` (uma linha por gráfico) e a ordem: `docs/83-dvisao-graficos.dax` (conferida 05/11 pela foto: 21 linhas; mesmo visao = mesmo n, ex.: Em andamento 10.501 nas 4 linhas, Candidatura 01–25/10).
+2. Medidas `Gráfico Regra / Na Lista / Contagem / Dados / Contexto`: `docs/84-grafico-medidas.dax` (2A medidas, 2B e 2C conferências). A regra de cada gráfico usa as medidas do próprio gráfico.
 3. **Conferência gráfico a gráfico, etapa a etapa** (consulta DAX: número do gráfico × número da lista). Só depois disso dizemos que bate.
 4. Menu de visões 1.3.0: linha "De qual gráfico?" com os números. Prévia antes do arquivo.
 5. Tabela nominal 2.3.0: abas que se sobrepõem, aplicações e passagens, mais o que estava na proposta 80. Prévia antes do arquivo.
