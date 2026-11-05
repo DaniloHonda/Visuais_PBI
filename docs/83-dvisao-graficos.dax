@@ -1,0 +1,47 @@
+// 83 · Parte 1 · dVisao com uma linha por gráfico (05/11/2026) · plano em docs/82-escolher-grafico.md
+// Exibição de tabela → dVisao → barra de fórmulas → substituir → Enter → Página Inicial → Atualizar.
+// "visao" continua com os 12 nomes de hoje (as medidas leem essa coluna); o menu atual não muda.
+// card = nome no menu novo (10 cards) · grafico/pagina = botões "De qual gráfico?" · ordem = ordem de hoje (foto de 05/11).
+// Card do menu novo: ordem = MIN(ordem) das linhas do card; número = o do ordem_grafico 1.
+dVisao =
+DATATABLE(
+    "card", STRING, "grafico", STRING, "pagina", STRING, "visao", STRING, "grupo", STRING,
+    "ordem", INTEGER, "ordem_grafico", INTEGER, "descricao", STRING, "icone", STRING, "grao", STRING,
+    {
+        { "Aplicações", "Card Aplicações", "Resumo", "Aplicações", "Resumo", 1, 1, "todas do período", "pessoas", "aplicacao" },
+        { "Aplicações", "Card Conversão da esteira", "Resumo", "Aplicações", "Resumo", 1, 2, "todas do período", "pessoas", "aplicacao" },
+        { "Aplicações", "Aprovados por recrutador", "Report", "Por recrutador", "Report", 5, 3, "situação", "pessoa", "aplicacao" },
+        { "Funil", "Quantas aplicações precisamos para contratar", "Resumo", "Funil", "Resumo", 2, 1, "até onde chegou", "funil", "aplicacao" },
+        { "Em andamento", "Card Em andamento", "Resumo", "Em andamento", "Resumo", 3, 1, "etapa atual e dias", "relogio", "aplicacao" },
+        { "Em andamento", "Onde estão as aplicações em andamento", "Resumo", "Em andamento", "Resumo", 3, 2, "etapa atual e dias", "relogio", "aplicacao" },
+        { "Em andamento", "Aplicações em andamento por etapa", "Report", "Andamento por faixa", "Report", 7, 3, "dias parado", "grade", "aplicacao" },
+        { "Em andamento", "Aplicações em Pré Offer e Offer", "Report", "Em andamento", "Resumo", 3, 4, "etapa atual e dias", "relogio", "aplicacao" },
+        { "Contratadas", "Card Contratadas", "Resumo", "Contratadas", "Resumo", 4, 1, "origem e SLA", "check", "aplicacao" },
+        { "Contratadas", "Card SLA mediano", "Resumo", "Contratadas", "Resumo", 4, 2, "origem e SLA", "check", "aplicacao" },
+        { "Contratadas", "Consumo do SLA por etapa", "Resumo", "Contratadas", "Resumo", 4, 3, "origem e SLA", "check", "aplicacao" },
+        { "Entradas por etapa", "Entradas e aprovações por etapa", "Report", "Entradas por etapa", "Report", 6, 1, "aprovou, rejeitou, voltou", "setas", "aplicacao" },
+        { "Entradas por etapa", "Aprovados por praça em cada etapa", "Report", "Entradas por etapa", "Report", 6, 2, "aprovou, rejeitou, voltou", "setas", "aplicacao" },
+        { "Entradas por etapa", "Onde a esteira perde aplicações", "Resumo", "Entradas por etapa", "Report", 6, 3, "aprovou, rejeitou, voltou", "setas", "aplicacao" },
+        { "SLA por etapa", "SLA por etapa: típico e 90%", "Report", "SLA por etapa", "Report", 8, 1, "entrada → saída", "cronometro", "aplicacao" },
+        { "Evolução", "Evolução da esteira · Movimentações", "Report", "Evolução", "Report", 9, 1, "aprovou ou rejeitou no período", "grafico", "aplicacao" },
+        { "Rejeitados e motivos", "Rejeitados por etapa", "Report", "Rejeitados e motivos", "Report", 10, 1, "etapa e motivo", "x", "aplicacao" },
+        { "Rejeitados e motivos", "Motivos de saída por etapa", "Report", "Rejeitados e motivos", "Report", 10, 2, "etapa e motivo", "x", "aplicacao" },
+        { "Entrevistas", "Card Entrevistas marcadas", "Resumo", "Entrevistas", "Report", 11, 1, "entrevistas marcadas", "calendario", "aplicacao" },
+        { "Entrevistas", "Evolução da esteira · Agenda", "Report", "Entrevistas", "Report", 11, 2, "entrevistas marcadas", "calendario", "aplicacao" },
+        { "Alertas", "Tipos de alerta", "Data Quality", "Alertas", "Data Quality", 12, 1, "aplicações com alerta", "x", "aplicacao" }
+    }
+)
+
+// Conferência (Exibição de consulta DAX → Executar; só leitura)
+// Esperado: 21 linhas; no mesmo card, linhas com o mesmo visao têm o mesmo n (as regras por gráfico vêm na parte 2).
+EVALUATE
+VAR Cal = FILTER( ALL( '_dCALENDARIO'[Data] ),
+    '_dCALENDARIO'[Data] >= DATE( 2026, 10, 1 ) && '_dCALENDARIO'[Data] <= DATE( 2026, 10, 25 ) )
+VAR T = SUMMARIZE( dVisao, dVisao[card], dVisao[ordem_grafico], dVisao[grafico], dVisao[visao] )
+RETURN
+CALCULATETABLE(
+    ADDCOLUMNS( T,
+        "oc", CALCULATE( MIN( dVisao[ordem] ), ALLEXCEPT( dVisao, dVisao[card] ) ),
+        "n", CALCULATE( [Esteira | Visão Contagem Modo] ) ),
+    Cal )
+ORDER BY [oc], [ordem_grafico]

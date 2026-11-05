@@ -31,8 +31,10 @@ Sem etapa filtrada: lista = aplicações distintas do gráfico; soma das linhas 
 | Alertas | Tipos de alerta (Data Quality) |
 "Por recrutador" e "Andamento por faixa" deixam de ser cards e viram botões (Aplicações e Em andamento): 12 → 10 cards.
 
+## Decisão (05/11): card mostra o número do 1º gráfico (opção 1). Danilo aprovou seguir.
+
 ## Partes (cada uma com conferência)
-1. `dVisao` com a coluna `grafico` (uma linha por gráfico) e a ordem.
+1. `dVisao` com a coluna `grafico` (uma linha por gráfico) e a ordem: `docs/83-dvisao-graficos.dax` (enviada 05/11, aguardando foto).
 2. Medidas: contagem, lista e dados leem o gráfico escolhido (mudam só os gráficos com regra diferente da do card).
 3. **Conferência gráfico a gráfico, etapa a etapa** (consulta DAX: número do gráfico × número da lista). Só depois disso dizemos que bate.
 4. Menu de visões 1.3.0: linha "De qual gráfico?" com os números. Prévia antes do arquivo.
