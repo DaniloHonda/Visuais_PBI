@@ -256,3 +256,85 @@ ORDER BY [card], [ordem_grafico]
 // Resultado 2H (05/11, Candidatura, 92 s): graf = lista = menu nos 20 gráficos. Aplicações = Funil = recrutador 17.642 · Contratadas 86 ·
 // Em andamento 10.501 (por etapa 10.363) · Pré Offer e Offer 22 · Entradas 17.488 · Praça 13.459 · Onde perde 17.480 · Entrevistas 1.057 ·
 // Evolução 25.737 · Rejeitados por etapa 6.269 · Motivos 7.031 · SLA 13.637 · Alertas 1.062. Parte 2 fechada.
+
+// =========================== PARTE 2I · primeira abertura sem clique = "Card Aplicações" (Executar → Atualizar o modelo) ===========================
+// Sem filtro nenhum na dVisao, o menu destaca Aplicações (1º gráfico = Card Aplicações) e a lista precisa ser a mesma.
+// Com o menu antigo (filtro em dVisao[visao]) o gráfico continua vazio e nada muda.
+// 2I-1: Gráfico Escolhido + Gráfico Regra · 2I-2: Gráfico Contagem + Gráfico Contexto (mesmas fórmulas, trocando o SELECTEDVALUE).
+// ---------- 2I-1 ----------
+DEFINE
+    MEASURE '_Medidas'[Esteira | Gráfico Escolhido] =
+        SELECTEDVALUE( dVisao[grafico], IF( NOT ISFILTERED( dVisao ), "Card Aplicações" ) )
+
+    MEASURE '_Medidas'[Esteira | Gráfico Regra] =
+        VAR G = [Esteira | Gráfico Escolhido]
+        VAR EmEt = IF( G IN { "Onde estão as aplicações em andamento", "Aplicações em andamento por etapa",
+                "Entradas e aprovações por etapa", "Onde a esteira perde aplicações" },
+            SUMX( VALUES( '13_ETAPA_RECRUTAMENTO'[stage_name] ), [Esteira | Etapa Em Andamento] ) )
+        RETURN
+        SWITCH( G,
+            "Card Aplicações", [Esteira | Card Aplicações] > 0,
+            "Card Conversão da esteira", [Esteira | Card Aplicações] > 0,
+            "Aprovados por recrutador", [Esteira | Card Aplicações] > 0,
+            "Quantas aplicações precisamos para contratar", [Esteira | Funil Base] > 0,
+            "Card Em andamento", [Esteira | Card Em Andamento] > 0,
+            "Onde estão as aplicações em andamento", EmEt > 0,
+            "Aplicações em andamento por etapa", EmEt > 0,
+            "Aplicações em Pré Offer e Offer",
+                NOT ISBLANK( CALCULATE( [Esteira | Reta Final Dias na Etapa], KEEPFILTERS( dEtapa[stage_name] IN { "Pré Offer", "Offer" } ) ) ),
+            "Card Contratadas", [Esteira | Card Contratados] > 0,
+            "Card SLA mediano", [Esteira | Card Contratados] > 0,
+            "Consumo do SLA por etapa", [Esteira | Card Contratados] > 0,
+            "Entradas e aprovações por etapa",
+                [Esteira | Etapa Entradas] + [Esteira | Etapa Aprovados] + [Esteira | Etapa Rejeitados] + EmEt > 0,
+            "Aprovados por praça em cada etapa", [Esteira | Etapa Aprovados] + [Esteira | Etapa Rejeitados] > 0,
+            "Onde a esteira perde aplicações", [Esteira | Etapa Aprovados] + [Esteira | Etapa Rejeitados] + EmEt > 0,
+            "SLA por etapa: típico e 90%", [Esteira | Etapa Base SLA] > 0,
+            "Evolução da esteira · Movimentações", [Esteira | Aprovados por Data] + [Esteira | Rejeitados por Data] > 0,
+            "Rejeitados por etapa", [Esteira | Etapa Rejeitados (Empresa)] + [Esteira | Etapa Declinados (Offer)] > 0,
+            "Motivos de saída por etapa", [Esteira | Etapa Rejeitados] > 0,
+            "Card Entrevistas marcadas", [Esteira | Entrevistas Marcadas] > 0,
+            "Evolução da esteira · Agenda", [Esteira | Entrevistas na Agenda] > 0,
+            "Tipos de alerta", [Esteira | Aplicações com Alerta] > 0,
+            TRUE() )
+
+EVALUATE ROW( "medidas", 2 )
+// fim da 2I-1
+
+// ---------- 2I-2 ----------
+DEFINE
+    MEASURE '_Medidas'[Esteira | Gráfico Contagem] =
+        VAR G = [Esteira | Gráfico Escolhido]
+        RETURN
+        SWITCH( TRUE(),
+            G IN { "Card Aplicações", "Card Conversão da esteira", "Aprovados por recrutador" }, [Esteira | Card Aplicações],
+            G IN { "Aplicações em Pré Offer e Offer", "Aprovados por praça em cada etapa", "Onde a esteira perde aplicações",
+                   "Rejeitados por etapa", "Onde estão as aplicações em andamento", "Aplicações em andamento por etapa",
+                   "Entradas e aprovações por etapa" },
+                COUNTROWS( FILTER(
+                    CALCULATETABLE( VALUES( '13_ETAPA_RECRUTAMENTO'[application_id] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() ),
+                    [Esteira | Gráfico Na Lista] = 1 ) ),
+            [Esteira | Visão Contagem Modo] )
+
+    MEASURE '_Medidas'[Esteira | Gráfico Contexto] =
+        VAR G = [Esteira | Gráfico Escolhido]
+        VAR Pag = COALESCE( SELECTEDVALUE( dVisao[pagina] ), IF( G = "Card Aplicações", "Resumo" ) )
+        VAR Foto = [Esteira | Modo] = "Fotografia"
+        VAR Dt = FORMAT( [Esteira | Data da Fotografia], "dd/mm" )
+        VAR Per = IF( Foto, " de " & FORMAT( MAX( MIN( '_dCALENDARIO'[Data] ), DATE( 2026, 7, 1 ) ), "dd/mm" ) & " a " & Dt, " (aplicações do período)" )
+        VAR Frase =
+            SWITCH( TRUE(),
+                Foto && G IN { "Card Aplicações", "Card Conversão da esteira", "Aprovados por recrutador" },
+                    "aplicações com candidatura" & Per & " (situação em " & Dt & ")",
+                G = "Aplicações em Pré Offer e Offer", "aplicações em Pré Offer ou Offer " & IF( Foto, "em " & Dt, "hoje" ),
+                G = "Aprovados por praça em cada etapa", "aplicações aprovadas ou rejeitadas em alguma etapa" & Per,
+                G = "Onde a esteira perde aplicações", "aplicações aprovadas, rejeitadas ou em andamento em alguma etapa" & Per,
+                "" )
+        RETURN
+        [Esteira | Visão Contexto Leve]
+            & IF( NOT ISBLANK( G ), "||origem=" & G & "||pagina=" & Pag )
+            & IF( Frase <> "", "||frase=" & Frase )
+            & IF( G = "Aplicações em Pré Offer e Offer" && Foto, "||etapas=Pré Offer;Offer" )
+
+EVALUATE ROW( "medidas", 2 )
+// fim da 2I-2

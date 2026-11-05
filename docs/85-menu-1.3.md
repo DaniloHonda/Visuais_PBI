@@ -15,3 +15,11 @@ Pacote (depois da aprovação): `dist/XP - Menu de visoes 1.3.0.pbiviz`.
 
 ## Conferências da parte 2 (docs/84) · todas por foto, 05/11
 Fotografia e Candidatura: graf = lista = menu nos 20 gráficos (Agenda fora até ter lista própria).
+
+## Instalação (aprovada em 05/11)
+1. DAX 2I-1 e 2I-2 (`docs/84`): primeira abertura sem clique = Card Aplicações.
+2. Importar `dist/XP - Menu de visoes 1.3.0.pbiviz` por cima da 1.2.1. Campos: Visão = `dVisao[card]` · Grupo · Descrição · Ícone ·
+   Ordem (iguais) · Gráfico = `dVisao[grafico]` · Página do gráfico = `dVisao[pagina]` · Ordem do gráfico = `dVisao[ordem_grafico]` ·
+   Contagem = `Esteira | Gráfico Contagem`. Filtros neste visual: `dVisao[grafico]` sem "Evolução da esteira · Agenda".
+3. Posições: menu X 310 · Y 372 · L 1552 · A 210; tabela X 310 · Y 594 · L 1552 · A 1086.
+4. Tabela nominal: Dados da visão → `Gráfico Dados` · Contexto → `Gráfico Contexto` · filtro do visual → `Gráfico Na Lista` é 1.
