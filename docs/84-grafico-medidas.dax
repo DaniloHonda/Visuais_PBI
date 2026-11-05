@@ -89,9 +89,12 @@ CALCULATETABLE(
         "graf", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Regra] ) ) ),
         "lista", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Na Lista] = 1 ) ) ),
         "menu", CALCULATE( [Esteira | Gráfico Contagem] ) ),
-    Cal, TREATAS( { "Fotografia" }, dModo[modo] ) )
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
 ORDER BY [card], [ordem_grafico]
 // fim da parte 2B
+// Resultado 05/11 (sem o filtro considerar, 1ª versão): graf = lista em todas as linhas (Aplicações 17.642 · Contratadas 208 ·
+// Em andamento 51.222 · Pré Offer e Offer 86 · Funil 117.161). menu maior só onde vem de medida de total (Card Aplicações 18.260,
+// Visão Contagem Modo 51.293 e 123.562): faltava o filtro considerar = TRUE que a página tem. 2B e 2C agora com o filtro.
 
 // =========================== PARTE 2C · conferência dos gráficos do Report (só leitura) ===========================
 EVALUATE
@@ -106,6 +109,6 @@ CALCULATETABLE(
         "graf", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Regra] ) ) ),
         "lista", CALCULATE( COUNTROWS( FILTER( Apps, [Esteira | Gráfico Na Lista] = 1 ) ) ),
         "menu", CALCULATE( [Esteira | Gráfico Contagem] ) ),
-    Cal, TREATAS( { "Fotografia" }, dModo[modo] ) )
+    Cal, TREATAS( { "Fotografia" }, dModo[modo] ), '13_ETAPA_RECRUTAMENTO'[considerar] = TRUE() )
 ORDER BY [card], [ordem_grafico]
 // fim da parte 2C
