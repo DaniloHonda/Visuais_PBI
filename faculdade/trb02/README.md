@@ -3,7 +3,7 @@
 Integração entre Serviços em Nuvem e Tópicos em Banco de Dados. Tema: **processo seletivo** (dados fictícios).
 Prazo: **14/11/2026, 23:59**.
 
-Arquitetura: AWS Academy Learner Lab → EC2 Ubuntu 24.04 (t3.micro) → PostgreSQL 16 → Power BI Desktop e Python (Streamlit).
+Arquitetura: AWS Academy Learner Lab → EC2 Ubuntu 24.04 (t3.micro) → PostgreSQL 16 → 2 dashboards em Python (Streamlit) e, opcionalmente, Power BI Desktop.
 
 ## Arquivos
 
@@ -13,11 +13,12 @@ Arquitetura: AWS Academy Learner Lab → EC2 Ubuntu 24.04 (t3.micro) → Postgre
 | `sql/02_insert.sql` | INSERTs: 6 recrutadores, 20 vagas, 180 candidatos, 320 candidaturas |
 | `sql/03_selects.sql` | Selects: exibição, JOIN 2 tabelas, JOIN + GROUP BY + HAVING, JOIN + sub select |
 | `sql/04_views.sql` | Views que alimentam os dashboards |
-| `python/dashboard.py` | Dashboard Python (Streamlit + Plotly) |
+| `python/dashboard.py` | Dashboard 1 · Visão geral (Streamlit + Plotly) |
+| `python/dashboard_recrutadores.py` | Dashboard 2 · Recrutadores e funil (Streamlit + Plotly) |
 | `python/gerar_inserts.py` | Gerador do `02_insert.sql` (semente fixa) |
 | `docs/01_GUIA_AWS_ACADEMY.md` | Passo a passo: Learner Lab, EC2, PostgreSQL, execução dos scripts e prints |
 | `docs/02_GUIA_POWER_BI.md` | Passo a passo do dashboard no Power BI |
-| `docs/03_GUIA_PYTHON.md` | Como rodar o dashboard Python |
+| `docs/03_GUIA_PYTHON.md` | Como rodar os dois dashboards Python |
 
 ## Modelo
 
@@ -39,9 +40,10 @@ candidato (id_candidato PK, nome, cidade, origem)
 - [ ] Consulta com JOIN de 2 tabelas (1.1 e 1.2)
 - [ ] Consulta com JOIN de 2 ou mais tabelas, GROUP BY e HAVING (2.1 e 2.2)
 - [ ] Consulta com JOIN e sub select (3.1, 3.2 e 3.3)
-- [ ] Dashboard Power BI (2 ou mais tipos de gráfico) lendo as views do banco
-- [ ] Dashboard Python (2 ou mais tipos de gráfico) e o código `dashboard.py`
+- [ ] Dashboard 1 Python (2 ou mais tipos de gráfico) e o código `dashboard.py`
+- [ ] Dashboard 2 Python (2 ou mais tipos de gráfico) e o código `dashboard_recrutadores.py`
+- [ ] (Opcional) Dashboard Power BI lendo as views do banco (Guia 2)
 - [ ] Relatório Word ou PDF com todos os scripts e prints
-- [ ] Arquivos anexados **sem compactar**: relatório, `.pbix`, `dashboard.py`
+- [ ] Arquivos anexados **sem compactar**: relatório, `dashboard.py`, `dashboard_recrutadores.py` (e o `.pbix`, se fizer)
 - [ ] Nenhuma tabela da aula usada (Peca, Fornecedor, Projeto, Fornece_para)
 - [ ] Senha do banco fora dos prints e do código

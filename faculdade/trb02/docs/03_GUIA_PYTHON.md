@@ -1,6 +1,11 @@
-# Guia 3 · Dashboard em Python (Streamlit)
+# Guia 3 · Dashboards em Python (Streamlit)
 
-O código está em `python/dashboard.py`. Ele lê as views `vw_candidaturas` e `vw_vagas_acima_media` do PostgreSQL da EC2.
+São **dois dashboards**, um em cada arquivo da pasta `python/`, os dois lendo as views do PostgreSQL da EC2:
+
+| Arquivo | Dashboard | Views |
+|---|---|---|
+| `dashboard.py` | **1 · Visão geral**: volume, origem, vagas, situação e pretensão | `vw_candidaturas`, `vw_vagas_acima_media` |
+| `dashboard_recrutadores.py` | **2 · Recrutadores e funil**: etapas, evolução por situação, consulta 2.1, dispersão e resumo | `vw_candidaturas`, `vw_vagas_mais_15` |
 
 ## 1. Instalar (uma vez, no seu computador)
 
@@ -26,9 +31,15 @@ Linux ou macOS:
 DB_HOST=IP_PUBLICO_DA_EC2 DB_PASSWORD=SUA_SENHA streamlit run dashboard.py
 ```
 
-O navegador abre em `http://localhost:8501`.
+O navegador abre em `http://localhost:8501`. Para o dashboard 2, troque o nome do arquivo:
 
-## 3. O que o dashboard mostra
+```powershell
+$env:DB_HOST="IP_PUBLICO_DA_EC2"; $env:DB_PASSWORD="SUA_SENHA"; streamlit run dashboard_recrutadores.py
+```
+
+Para rodar os dois ao mesmo tempo, abra um segundo terminal e acrescente `--server.port 8502` no fim do comando.
+
+## 3. Dashboard 1 · Visão geral
 
 | Gráfico | Categoria no Abela |
 |---|---|
@@ -42,10 +53,23 @@ O navegador abre em `http://localhost:8501`.
 
 Os filtros de Área, Recrutador e Senioridade ficam no topo e atualizam todos os gráficos.
 
-📸 Print do dashboard inteiro (role a página ou use a captura de página inteira do navegador).
+## 3b. Dashboard 2 · Recrutadores e funil
+
+| Gráfico | Categoria no Abela |
+|---|---|
+| 4 KPIs (recrutadores, candidaturas por vaga, taxa de contratação, em andamento) | Número único |
+| **Funil**: candidaturas que chegaram a cada etapa | Composição: acumulação ou subtração do total |
+| **Colunas empilhadas**: candidaturas por mês e situação | Composição ao longo do tempo, poucos períodos |
+| **Barras horizontais**: resultado da consulta 2.1 (JOIN + GROUP BY + HAVING) | Comparação entre muitos itens |
+| **Dispersão**: candidaturas × pretensão média por vaga | Relação entre duas variáveis |
+| Tabela: resumo por recrutador | Resultado consolidado |
+
+Filtros no topo: Recrutador e Status da vaga.
+
+📸 Para **cada** dashboard: print da página inteira (role a página ou use a captura de página inteira do navegador).
 📸 Print com um filtro aplicado.
 📸 Print do terminal com o comando `streamlit run`, para provar a execução.
 
 ## 4. Na entrega
 
-Anexe `dashboard.py` (o enunciado pede o código Python na entrega) e cole o código também no relatório.
+Anexe `dashboard.py` e `dashboard_recrutadores.py` (o enunciado pede o código Python na entrega) e cole os dois códigos também no relatório.
