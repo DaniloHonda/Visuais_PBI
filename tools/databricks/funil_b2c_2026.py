@@ -12,7 +12,7 @@
 # MAGIC 4. A célula 6 grava o Excel e mostra onde ele ficou. Baixe pelo menu **Workspace** (botão ⋮ do arquivo → Download).
 # MAGIC
 # MAGIC **Regras** (as mesmas do dash de Esteiras)
-# MAGIC - Aplicações com candidatura de 01/01/2026 a 31/10/2026, persona B2C **sem** B2C Expansão.
+# MAGIC - Aplicações com candidatura de 01/01/2026 a 31/10/2026, persona B2C **sem** B2C - Ataque a concorrência.
 # MAGIC - Varejo = níveis Assistente e Auxiliar · Future = Analista Júnior para cima · B2C geral = todos os níveis (inclusive sem nível).
 # MAGIC - Fora: rejeitadas como Duplicate, Movimentação entre vagas, Posição cancelada ou sem motivo (desconsideradas no dash).
 # MAGIC - Uma passagem por aplicação + etapa + data de entrada (cópias da origem saem).
@@ -69,8 +69,9 @@ NIVEIS_VAREJO = ["Assistente", "Auxiliar"]
 NIVEIS_FUTURE = ["Analista Junior", "Analista Pleno", "Analista Senior", "Coord/Espec", "Superv/Assoc",
                  "Gerente/Espec II", "Gerente Executivo/Expert", "Superintendente"]
 
-# Persona B2C: começa com "B2C" e não tem "expans" (tira B2C Expansão). Conferir na célula 2.
-PERSONA_B2C_SQL = "lower(trim(persona)) like 'b2c%' and lower(persona) not like '%expans%'"
+# Persona B2C: começa com "B2C", sem "B2C - Ataque a concorrência" (e sem expansão, se aparecer). Conferir na célula 2.
+PERSONA_B2C_SQL = ("lower(trim(persona)) like 'b2c%' and lower(persona) not like '%ataque%' "
+                   "and lower(persona) not like '%expans%'")
 
 # Onde gravar o Excel. Vazio = pasta do seu usuário no Workspace.
 SAIDA = ""
@@ -404,7 +405,7 @@ def gerar_excel(topo, macro, etapa, mot_m, mot_e, caminho, ini=DATA_INI, fim=DAT
                  "B2C geral": "todos os níveis"}[seg]
         ws["A1"] = f"Funil B2C · {seg} ({regra})"
         ws["A1"].font = Font(bold=True, size=14, color=ESC)
-        ws["A2"] = (f"Candidaturas de {dt(ini)} a {dt(fim)} · persona B2C sem B2C Expansão · "
+        ws["A2"] = (f"Candidaturas de {dt(ini)} a {dt(fim)} · persona B2C sem B2C - Ataque a concorrência · "
                     "clique no + à esquerda para abrir as etapas de cada macroetapa")
         ws["A2"].font = Font(size=10, color="6B6B6B")
         cab = ["Macroetapa / etapa", "Status", "Total", "% na etapa", "% após R&S", "% após qualificação",
@@ -529,7 +530,7 @@ def gerar_excel(topo, macro, etapa, mot_m, mot_e, caminho, ini=DATA_INI, fim=DAT
         nm.auto_filter.ref = f"A1:{get_column_letter(len(cab))}{nm.max_row}"
     rg = wb.create_sheet("Regras")
     for linha in [
-        "Período: candidatura de " + dt(ini) + " a " + dt(fim) + ". Persona B2C sem B2C Expansão.",
+        "Período: candidatura de " + dt(ini) + " a " + dt(fim) + ". Persona B2C sem B2C - Ataque a concorrência.",
         "Varejo = níveis Assistente e Auxiliar. Future = Analista Júnior, Pleno, Sênior, Coord/Espec, Superv/Assoc, Gerente/Espec II, "
         "Gerente Executivo/Expert, Superintendente. B2C geral = todos os níveis (inclusive sem nível).",
         "Fora: rejeitadas como Duplicate, Movimentação entre vagas, Posição cancelada ou sem motivo.",
