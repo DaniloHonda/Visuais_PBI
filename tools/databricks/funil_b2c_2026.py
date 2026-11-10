@@ -91,7 +91,19 @@ for k in list(COL):
 print("Colunas obrigatórias que faltam:", falta or "nenhuma")
 print("Opcionais ausentes (a regra correspondente fica desligada):", opc or "nenhuma")
 if falta:
-    raise ValueError("Ajuste os nomes na célula 1: " + ", ".join(falta))
+    # Ajuda a achar os nomes certos: colunas da tabela de vagas e onde existe coluna de nível/senioridade no hr.gold.
+    print(f"\nColunas de {TAB_JOBS}:", ", ".join(sorted(cols_j)))
+    cat, esq = TAB_JOBS.split(".")[0], TAB_JOBS.split(".")[1]
+    try:
+        display(spark.sql(f"""
+            select table_name, column_name from {cat}.information_schema.columns
+            where table_schema = '{esq}' and (lower(column_name) like '%level%' or lower(column_name) like '%senior%'
+                                              or lower(column_name) like '%nivel%')
+            order by table_name, column_name"""))
+    except Exception as erro:
+        print("Não consegui listar o information_schema:", str(erro)[:200])
+    raise ValueError("Ajuste os nomes na célula 1: " + ", ".join(falta)
+                     + " (veja acima as colunas da tabela de vagas e onde existe coluna de nível)")
 
 c = COL
 periodo = f"to_date({c['candidatura']}) between '{DATA_INI}' and '{DATA_FIM}'"
