@@ -82,6 +82,14 @@ from pyspark.sql import functions as F
 
 cols_e = set(spark.table(TAB_ETAPAS).columns)
 cols_j = set(spark.table(TAB_JOBS).columns)
+# Nome de coluna sem diferença de maiúscula/minúscula (ex.: JOB_ID na jobs_v3): usa o nome como está na tabela.
+def _real(nome, cols):
+    achou = [x for x in cols if nome and x.lower() == nome.lower()]
+    return achou[0] if achou else nome
+for k in COL:
+    COL[k] = _real(COL[k], cols_e)
+for k in JOB:
+    JOB[k] = _real(JOB[k], cols_j)
 falta = [f"{TAB_ETAPAS}.{v}" for k, v in COL.items() if v and v not in cols_e and k not in OPCIONAIS]
 falta += [f"{TAB_JOBS}.{v}" for v in JOB.values() if v not in cols_j]
 opc = [f"{k} ({v})" for k, v in COL.items() if k in OPCIONAIS and (not v or v not in cols_e)]
