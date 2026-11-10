@@ -13,7 +13,7 @@
 # MAGIC
 # MAGIC **Regras** (as mesmas do dash de Esteiras)
 # MAGIC - Aplicações com candidatura de 01/01/2026 a 31/10/2026, persona B2C **sem** B2C Expansão.
-# MAGIC - Varejo = nível Assistente · Future = Analista Júnior para cima · B2C geral = todos os níveis (inclusive sem nível).
+# MAGIC - Varejo = níveis Assistente e Auxiliar · Future = Analista Júnior para cima · B2C geral = todos os níveis (inclusive sem nível).
 # MAGIC - Fora: rejeitadas como Duplicate, Movimentação entre vagas, Posição cancelada ou sem motivo (desconsideradas no dash).
 # MAGIC - Uma passagem por aplicação + etapa + data de entrada (cópias da origem saem).
 # MAGIC - Macroetapa = mesma regra da coluna `ordem_macro` do dash.
@@ -23,6 +23,7 @@
 # MAGIC - Declinado = motivo de declínio do candidato (lista do dash). Pool rejeitado com contratação da pessoa em outra vaga = Aprovado.
 # MAGIC - % após R&S = aprovados ÷ aprovados de Avaliação R&S · % após qualificação = aprovados ÷ aprovados de Qualificação ·
 # MAGIC   % do topo = aprovados ÷ todas as aplicações do segmento.
+# MAGIC - Aba **Nominal**: uma linha por aplicação B2C do período (inclusive as que ficam fora), com o porquê de cada uma.
 
 # COMMAND ----------
 
@@ -57,13 +58,14 @@ COL = {
     "persona": "persona",
     "vaga": "job_name",                  # opcional (identifica vaga de pool pelo nome)
     "ordem_vaga": "sort_order",          # opcional (desempate da etapa atual e ordem das etapas)
+    "link": "link_application",          # opcional (link do Greenhouse na aba Nominal)
 }
-OPCIONAIS = {"cand", "rejeicao", "vaga", "ordem_vaga"}
+OPCIONAIS = {"cand", "rejeicao", "vaga", "ordem_vaga", "link"}
 
 # Colunas da tabela de vagas
 JOB = {"job": "job_id", "nivel": "job_level_final"}
 
-NIVEIS_VAREJO = ["Assistente"]
+NIVEIS_VAREJO = ["Assistente", "Auxiliar"]
 NIVEIS_FUTURE = ["Analista Junior", "Analista Pleno", "Analista Senior", "Coord/Espec", "Superv/Assoc",
                  "Gerente/Espec II", "Gerente Executivo/Expert", "Superintendente"]
 
@@ -122,7 +124,7 @@ select cast(e.{COL['app']} as string) as app, {col('cand', 'cand')}, cast(e.{COL
        e.{COL['entrada']} as ent, e.{COL['saida']} as sai, lower(trim(e.{COL['status']})) as st,
        nullif(trim(replace(replace(replace(e.{COL['motivo']}, '{NBSP}', ' '), '\\n', ''), '\\r', '')), '') as motivo,
        to_date(e.{COL['candidatura']}) as dt_app, {col('rejeicao', 'rej')}, e.{COL['persona']} as persona,
-       {col('vaga', 'vaga')}, {col('ordem_vaga', 'ordv')}
+       {col('vaga', 'vaga')}, {col('ordem_vaga', 'ordv')}, {col('link', 'link')}
 from {TAB_ETAPAS} e
 """)
 
@@ -187,7 +189,7 @@ spark.sql(f"""
 create or replace temporary view fb_app_all as
 select *, {TIPO_SQL} as tipo from (
   select app, max(cand) as cand, max(job) as job, max(st) as st, max(motivo) as motivo, min(dt_app) as dt_app,
-         max(rej) as rej, max(persona) as persona, max(vaga) as vaga
+         max(rej) as rej, max(persona) as persona, max(vaga) as vaga, max(link) as link
   from fb_raw group by app
 ) x
 """)
@@ -254,6 +256,53 @@ select distinct s.seg, p.app, p.om,
        case when p.om = t.om_atual then a.final else 'Aprovado' end as res, a.motivo
 from fb_seg s join fb_app a on s.app = a.app join fb_pass p on p.app = a.app join fb_atual t on t.app = a.app
 """)
+# Aba Nominal: todas as aplicações B2C do período (as que entram e as desconsideradas), com o porquê.
+spark.sql(f"""
+create or replace temporary view fb_jornada as
+select app, concat_ws(' → ', transform(sort_array(collect_list(struct(ent, txt))), x -> x.txt)) as jornada
+from (select p.app, p.ent, coalesce(p.etapa, '(etapa sem nome)') || ' [' || {NOME_MACRO} || ']' as txt from fb_pass p) y
+group by app
+""")
+spark.sql(f"""
+create or replace temporary view fb_resmacro as
+select app, concat_ws(' · ', transform(sort_array(collect_list(struct(om, txt))), x -> x.txt)) as por_macro
+from (select app, om, {NOME_MACRO} || ': ' || res as txt from fb_macro where seg = 'B2C geral') y
+group by app
+""")
+spark.sql(f"""
+create or replace temporary view fb_nominal as
+select a.app, a.link, a.cand, a.job, a.vaga, a.persona, j.nivel,
+       case when a.st = 'rejected' and s.app is null and a.tipo = 'Desconsiderada' then 'Fora do funil'
+            when j.nivel in ({niv(NIVEIS_VAREJO)}) then 'Varejo · B2C geral'
+            when j.nivel in ({niv(NIVEIS_FUTURE)}) then 'Future · B2C geral'
+            else 'B2C geral' end as segmentos,
+       a.dt_app, a.st, a.motivo, case when a.st = 'rejected' then a.tipo end as tipo,
+       case when a.st = 'rejected' and s.app is null and a.tipo = 'Desconsiderada' then 'Não' else 'Sim' end as entra,
+       f.final, t.etapa_atual, t.om_atual,
+       case
+         when a.st = 'rejected' and s.app is null and a.tipo = 'Desconsiderada'
+           then 'Fora do funil: rejeitada como "' || coalesce(a.motivo, 'sem motivo') || '" (desconsiderada no dash).'
+         when a.st = 'hired' then 'Contratada: conta como aprovada em todas as macroetapas por onde passou.'
+         when s.app is not null then 'Pool rejeitado, mas a pessoa foi contratada em outra vaga: conta como aprovada.'
+         else (case f.final
+                 when 'Declinado' then 'Rejeitada por declínio do candidato ("' || a.motivo || '")'
+                 when 'Reprovado' then 'Rejeitada pela XP ("' || a.motivo || '", tipo ' || a.tipo || ')'
+                 else 'Aberta' end)
+              || ' com a etapa atual em ' || coalesce(t.etapa_atual, '(etapa sem nome)') || ': '
+              || case f.final when 'Reprovado' then 'reprovada' when 'Declinado' then 'declinada' else 'em andamento' end
+              || ' nessa macroetapa (nas macroetapas anteriores, aprovada).'
+       end as porque,
+       rm.por_macro, jo.jornada
+from fb_app_all a
+left join ({jobs_sql}) j on a.job = j.job
+left join fb_saiu s on a.app = s.app
+left join fb_app f on a.app = f.app
+left join fb_atual t on a.app = t.app
+left join fb_resmacro rm on a.app = rm.app
+left join fb_jornada jo on a.app = jo.app
+where a.dt_app between '{DATA_INI}' and '{DATA_FIM}'
+  and {PERSONA_B2C_SQL.replace('persona', 'a.persona')}
+""")
 print("Base pronta.")
 
 # COMMAND ----------
@@ -292,6 +341,9 @@ mot_e = spark.sql(f"""
 select seg, om, etapa, res, coalesce(motivo, '(sem motivo)') as motivo, count(distinct app) as n
 from fb_etapa where res in ('Reprovado', 'Declinado') group by seg, om, etapa, res, coalesce(motivo, '(sem motivo)')
 """).toPandas()
+NOME_ATUAL = NOME_MACRO.replace("case om", "case om_atual")
+nominal = spark.sql(f"select *, {NOME_ATUAL} as macro_atual from fb_nominal order by dt_app, app").toPandas()
+print(f"nominal: {len(nominal)} aplicações")
 print(f"macro: {len(macro)} linhas · etapa: {len(etapa)} linhas · motivos: {len(mot_m)} + {len(mot_e)}")
 
 # COMMAND ----------
@@ -307,7 +359,7 @@ except ImportError:
     raise ImportError("Falta o openpyxl: rode a célula '(opcional) instalar o openpyxl' e depois Run all.")
 
 
-def gerar_excel(topo, macro, etapa, mot_m, mot_e, caminho, ini=DATA_INI, fim=DATA_FIM):
+def gerar_excel(topo, macro, etapa, mot_m, mot_e, caminho, ini=DATA_INI, fim=DATA_FIM, nominal=None):
     TEAL, ESC, CLARO, LINHA = "067D84", "03474C", "E3F1F0", "DDE2E3"
     thin = Side(style="thin", color=LINHA)
     borda = Border(top=thin, bottom=thin, left=thin, right=thin)
@@ -328,7 +380,7 @@ def gerar_excel(topo, macro, etapa, mot_m, mot_e, caminho, ini=DATA_INI, fim=DAT
     for seg in ["Varejo", "Future", "B2C geral"]:
         ws = wb.create_sheet(seg)
         ws.sheet_properties.outlinePr = Outline(summaryBelow=False, summaryRight=False)
-        regra = {"Varejo": "nível Assistente", "Future": "Analista Júnior para cima",
+        regra = {"Varejo": "níveis Assistente e Auxiliar", "Future": "Analista Júnior para cima",
                  "B2C geral": "todos os níveis"}[seg]
         ws["A1"] = f"Funil B2C · {seg} ({regra})"
         ws["A1"].font = Font(bold=True, size=14, color=ESC)
@@ -425,10 +477,40 @@ def gerar_excel(topo, macro, etapa, mot_m, mot_e, caminho, ini=DATA_INI, fim=DAT
     mo.append(["segmento", "ordem_macro", "etapa", "status", "motivo", "aplicacoes"])
     for x in mot_e.sort_values(["seg", "om", "etapa", "res", "n"], ascending=[True, True, True, True, False]).itertuples():
         mo.append([x.seg, int(x.om), x.etapa, ROTULO[x.res], x.motivo, int(x.n)])
+    if nominal is not None:
+        nm = wb.create_sheet("Nominal", 3)
+        cab = [("Aplicação", "app", 14), ("Greenhouse", "link", 14), ("Candidato (id)", "cand", 14), ("Vaga", "vaga", 40),
+               ("Persona", "persona", 12), ("Nível", "nivel", 18), ("Segmentos", "segmentos", 20),
+               ("Candidatura", "dt_app", 12), ("Status no Greenhouse", "st", 12), ("Motivo", "motivo", 40),
+               ("Tipo do motivo", "tipo", 20), ("Entra no funil", "entra", 10), ("Status no funil", "final", 14),
+               ("Etapa atual", "etapa_atual", 28), ("Macroetapa atual", "macro_atual", 20), ("Por quê", "porque", 80),
+               ("Resultado por macroetapa", "por_macro", 70), ("Jornada (etapa [macroetapa], em ordem)", "jornada", 90)]
+        for j, (t, _, w) in enumerate(cab, 1):
+            cel = nm.cell(row=1, column=j, value=t)
+            cel.font = Font(bold=True, color="FFFFFF")
+            cel.fill = PatternFill("solid", fgColor=TEAL)
+            cel.alignment = Alignment(vertical="center", wrap_text=True)
+            nm.column_dimensions[get_column_letter(j)].width = w
+        for x in nominal.itertuples(index=False):
+            linha = []
+            for _, k, _ in cab:
+                v = getattr(x, k)
+                if v is None or (isinstance(v, float) and v != v):
+                    v = None
+                elif k == "dt_app":
+                    v = v if isinstance(v, datetime.date) else datetime.date.fromisoformat(str(v)[:10])
+                elif not isinstance(v, (int, float)):
+                    v = str(v)
+                linha.append(v)
+            nm.append(linha)
+        for c in nm["H"][1:]:
+            c.number_format = "dd/mm/yyyy"
+        nm.freeze_panes = "B2"
+        nm.auto_filter.ref = f"A1:{get_column_letter(len(cab))}{nm.max_row}"
     rg = wb.create_sheet("Regras")
     for linha in [
         "Período: candidatura de " + dt(ini) + " a " + dt(fim) + ". Persona B2C sem B2C Expansão.",
-        "Varejo = nível Assistente. Future = Analista Júnior, Pleno, Sênior, Coord/Espec, Superv/Assoc, Gerente/Espec II, "
+        "Varejo = níveis Assistente e Auxiliar. Future = Analista Júnior, Pleno, Sênior, Coord/Espec, Superv/Assoc, Gerente/Espec II, "
         "Gerente Executivo/Expert, Superintendente. B2C geral = todos os níveis (inclusive sem nível).",
         "Fora: rejeitadas como Duplicate, Movimentação entre vagas, Posição cancelada ou sem motivo.",
         "Entraram = aplicações com passagem na macroetapa (ou na etapa).",
@@ -438,6 +520,8 @@ def gerar_excel(topo, macro, etapa, mot_m, mot_e, caminho, ini=DATA_INI, fim=DAT
         "% após qualificação = aprovados ÷ aprovados de Qualificação (de Pool em diante).",
         "% do topo de funil = aprovados ÷ todas as aplicações do segmento.",
         "Motivos: os 3 mais frequentes, com % sobre os reprovados (ou declinados) daquela linha.",
+        "Nominal: uma linha por aplicação B2C do período, inclusive as que ficam fora do funil (coluna Entra no funil), "
+        "com o porquê, o resultado em cada macroetapa e a jornada.",
     ]:
         rg.append([linha])
     rg.column_dimensions["A"].width = 140
@@ -449,10 +533,10 @@ if not SAIDA:
     user = spark.sql("select current_user() as u").collect()[0]["u"]
     SAIDA = f"/Workspace/Users/{user}/funil_b2c_2026.xlsx"
 try:
-    gerar_excel(topo, macro, etapa, mot_m, mot_e, SAIDA)
+    gerar_excel(topo, macro, etapa, mot_m, mot_e, SAIDA, nominal=nominal)
 except OSError:
     tmp = "/tmp/funil_b2c_2026.xlsx"
-    gerar_excel(topo, macro, etapa, mot_m, mot_e, tmp)
+    gerar_excel(topo, macro, etapa, mot_m, mot_e, tmp, nominal=nominal)
     raise OSError(f"Não consegui gravar em {SAIDA}. O arquivo ficou em {tmp}: mude SAIDA (célula 1) para um Volume, "
                   "ex.: /Volumes/<catálogo>/<schema>/<volume>/funil_b2c_2026.xlsx")
 print("Excel gravado em:", SAIDA)
