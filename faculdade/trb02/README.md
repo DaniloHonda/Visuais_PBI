@@ -3,7 +3,11 @@
 Integração entre Serviços em Nuvem e Tópicos em Banco de Dados. Tema: **processo seletivo** (dados fictícios).
 Prazo: **14/11/2026, 23:59**.
 
-Arquitetura: AWS Academy Learner Lab → EC2 Ubuntu 24.04 (t3.micro) → PostgreSQL 16 → 2 dashboards em Python (Streamlit) e, opcionalmente, Power BI Desktop.
+Arquitetura (escolha um caminho):
+- **A · RDS PostgreSQL** (mesmo caminho do material do professor, mais rápido): Guia 1B
+- **B · EC2 Ubuntu 24.04 + PostgreSQL 16** (máquina virtual própria): Guia 1
+
+Nos dois casos: AWS Academy Learner Lab → 2 dashboards em Python (Streamlit) e, opcionalmente, Power BI Desktop.
 
 ## Arquivos
 
@@ -16,7 +20,8 @@ Arquitetura: AWS Academy Learner Lab → EC2 Ubuntu 24.04 (t3.micro) → Postgre
 | `python/dashboard.py` | Dashboard 1 · Visão geral (Streamlit + Plotly) |
 | `python/dashboard_recrutadores.py` | Dashboard 2 · Recrutadores e funil (Streamlit + Plotly) |
 | `python/gerar_inserts.py` | Gerador do `02_insert.sql` (semente fixa) |
-| `docs/01_GUIA_AWS_ACADEMY.md` | Passo a passo: Learner Lab, EC2, PostgreSQL, execução dos scripts e prints |
+| `docs/01_GUIA_AWS_ACADEMY.md` | Caminho B: Learner Lab, EC2, PostgreSQL, execução dos scripts e prints |
+| `docs/01b_GUIA_AWS_RDS.md` | Caminho A: Learner Lab, RDS PostgreSQL, pgAdmin, execução dos scripts e prints |
 | `docs/02_GUIA_POWER_BI.md` | Passo a passo do dashboard no Power BI |
 | `docs/03_GUIA_PYTHON.md` | Como rodar os dois dashboards Python |
 
@@ -34,8 +39,8 @@ candidato (id_candidato PK, nome, cidade, origem)
 
 ## Checklist da entrega
 
-- [ ] Prints da EC2 (lista, detalhes, Security Group) e do terminal conectado
-- [ ] Print do PostgreSQL instalado (serviço e versão)
+- [ ] Prints da instância (RDS ou EC2: lista, detalhes, Security Group)
+- [ ] Print do ambiente de banco conectado (pgAdmin ou terminal `psql`)
 - [ ] Prints da execução de CREATE, INSERT e de cada SELECT, com resultado
 - [ ] Consulta com JOIN de 2 tabelas (1.1 e 1.2)
 - [ ] Consulta com JOIN de 2 ou mais tabelas, GROUP BY e HAVING (2.1 e 2.2)
