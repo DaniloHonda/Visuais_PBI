@@ -1,13 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#FFFFFF"/>
-  <g transform="rotate(-30 50 50)" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round">
-    <!-- arco superior -->
-    <path d="M 27.5 36.3 A 25 25 0 0 1 72.5 36.3"/>
-    <!-- bojo da taça -->
-    <path d="M 34 46 A 16 16 0 0 0 66 46"/>
-    <!-- líquido -->
-    <path d="M 41 47 A 9 9 0 0 0 59 47 Z" fill="#111111" stroke="none"/>
-    <!-- haste e pé -->
-    <path d="M 50 62 V 78 M 40 80 H 60"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720">
+  <rect width="720" height="720" rx="160" fill="#FFFFFF"/>
+  <path d="M 367.3 265.3 A 78 78 0 0 1 264.3 368.3 Z" fill="#7E2236"/>
+  <g fill="none" stroke="#16110F" stroke-width="62" stroke-linecap="round">
+    <path d="M 181.8 317.1 A 116 116 0 0 1 320.1 183.5"/>
+    <path d="M 393.3 233.8 A 116 116 0 0 1 234.5 395.4"/>
+    <path d="M 378.0 379.0 L 490 490 M 440.5 539.5 L 539.5 440.5"/>
   </g>
 </svg>
